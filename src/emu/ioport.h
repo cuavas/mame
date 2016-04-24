@@ -19,6 +19,9 @@
 
 #include <cstdint>
 #include <cstring>
+#include <utility>
+
+
 #include <time.h>
 
 
@@ -1908,5 +1911,163 @@ inline running_machine &ioport_field::machine() const { return m_port.machine();
 inline device_t &ioport_setting::device() const { return m_field.device(); }
 inline running_machine &ioport_setting::machine() const { return m_field.machine(); }
 
+
+namespace emu { namespace ioport {
+namespace detail {
+class field_config_base
+{
+public:
+	void apply(::ioport_configurer &cfg) const
+	{
+		cfg.field_alloc(m_type, m_defval, m_mask, m_name);
+	}
+
+protected:
+	field_config_base(ioport_type type, ioport_value defval, ioport_value mask, char const *name)
+		: m_type(type)
+		, m_defval(defval)
+		, m_mask(mask)
+		, m_name(name)
+	{
+	}
+
+private:
+	ioport_type		m_type;
+	ioport_value	m_defval;
+	ioport_value	m_mask;
+	char const *	m_name;
+};
+
+
+class field_config_applicator
+{
+protected:
+	field_config_applicator(::ioport_configurer &configurer) : m_configurer(configurer) { }
+
+	void apply() const { }
+
+	template <typename FieldConfig, typename... Other>
+	void apply(FieldConfig &&field, Other &&... others) const
+	{
+		field.apply(m_configurer);
+		apply(std::forward<Other>(others)...);
+	}
+
+	::ioport_configurer &m_configurer;
+};
+
+
+class port_creator : protected field_config_applicator
+{
+public:
+	port_creator(::ioport_configurer &configurer, char const *tag)
+		: field_config_applicator(configurer)
+		, m_tag(tag)
+	{
+	}
+
+	template <typename... FieldConfig>
+	void apply(FieldConfig &&... fields) const
+	{
+		m_configurer.port_alloc(m_tag);
+		field_config_applicator::apply(std::forward<FieldConfig>(fields)...);
+	}
+
+private:
+	char const *m_tag;
+};
+
+
+class port_modifier : protected field_config_applicator
+{
+public:
+	port_modifier(::ioport_configurer &configurer, char const *tag)
+		: field_config_applicator(configurer)
+		, m_tag(tag)
+	{
+	}
+
+	template <typename... FieldConfig>
+	void apply(FieldConfig &&... fields) const
+	{
+		m_configurer.port_modify(m_tag);
+		field_config_applicator::apply(std::forward<FieldConfig>(fields)...);
+	}
+
+private:
+	char const *m_tag;
+};
+
+} // namespace detail
+
+
+class unused : public detail::field_config_base
+{
+public:
+	unused(ioport_value mask, ioport_value defval)
+	: field_config_base(IPT_UNUSED, defval, mask, nullptr)
+	{
+	}
+};
+
+
+class digital : protected detail::field_config_base
+{
+public:
+	digital(ioport_value mask, ioport_value defval, ioport_type type)
+	: field_config_base(type, defval, mask, nullptr)
+	{
+	}
+
+	digital &player(int value)	{ m_player	= value;	return *this; }
+
+	void apply(::ioport_configurer &cfg) const
+	{
+		field_config_base::apply(cfg);
+		cfg.field_set_player(m_player);
+	}
+
+private:
+	int	m_player	= 1;
+};
+
+
+class analog : protected detail::field_config_base
+{
+public:
+	analog(ioport_value mask, ioport_value defval, ioport_type type)
+	: field_config_base(type, defval, mask, nullptr)
+	{
+	}
+
+	analog &player(int value)				{ m_player					= value;	return *this; }
+	analog &reverse()						{ m_reverse					= true;		return *this; }
+	analog &sensitivity(std::int32_t value)	{ m_sensitivity				= value;	return *this; }
+	analog &delta(std::int32_t value)		{ m_delta = m_centerdelta	= value;	return *this; }
+	analog &centerdelta(std::int32_t value)	{ m_centerdelta				= value;	return *this; } // must call after delta
+
+	void apply(::ioport_configurer &cfg) const
+	{
+		field_config_base::apply(cfg);
+		cfg.field_set_player(m_player);
+		if (m_reverse) cfg.field_set_analog_reverse();
+		cfg.field_set_sensitivity(m_sensitivity);
+		cfg.field_set_delta(m_delta);
+		cfg.field_set_centerdelta(m_centerdelta);
+	}
+
+private:
+	int				m_player		= 1;
+	bool			m_reverse		= false;
+	std::int32_t 	m_sensitivity	= 0;
+	std::int32_t	m_delta			= 0;
+	std::int32_t	m_centerdelta	= 0;
+};
+
+
+#define PORT_CREATEX(tag_, ...) ::emu::ioport::detail::port_creator(configurer, (tag_)).apply(__VA_ARGS__)
+#define PORT_MODIFYX(tag_, ...) ::emu::ioport::detail::port_modifier(configurer, (tag_)).apply(__VA_ARGS__)
+
+} } // namespace emu::ioport
 
 #endif  // __INPTPORT_H__ */

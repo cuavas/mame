@@ -65,12 +65,12 @@ ADDRESS_MAP_END
  *************************************/
 
 static INPUT_PORTS_START( carpolo )
-	PORT_START("IN0")       /* IN0 */
-	PORT_BIT (0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
-	PORT_BIT (0x02, IP_ACTIVE_HIGH, IPT_COIN2 )
-	PORT_BIT (0x04, IP_ACTIVE_HIGH, IPT_COIN3 )
-	PORT_BIT (0x08, IP_ACTIVE_HIGH, IPT_COIN4 )
-	PORT_BIT (0xf0, IP_ACTIVE_HIGH, IPT_UNUSED )
+	PORT_CREATEX("IN0",     /* IN0 */
+		emu::ioport::digital(0x01, IP_ACTIVE_HIGH, IPT_COIN1),
+		emu::ioport::digital(0x02, IP_ACTIVE_HIGH, IPT_COIN2),
+		emu::ioport::digital(0x04, IP_ACTIVE_HIGH, IPT_COIN3),
+		emu::ioport::digital(0x08, IP_ACTIVE_HIGH, IPT_COIN4),
+		emu::ioport::digital(0xf0, IP_ACTIVE_HIGH, IPT_UNUSED));
 
 	/* the value read from here is used directly,
 	   the result is calculated by 60/value */
@@ -141,34 +141,34 @@ static INPUT_PORTS_START( carpolo )
 	PORT_DIPSETTING(    0x08, "7.50" )
 	PORT_DIPSETTING(    0x04, "15.00 (Shortest)" )
 
-	PORT_START("DIAL0")     /* IN2 */
-	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(1)
+	PORT_CREATEX("DIAL0",   /* IN2 */
+		emu::ioport::analog(0xff, 0x00, IPT_DIAL).sensitivity(50).delta(10).reverse().player(1));
 
-	PORT_START("DIAL1")     /* IN3 */
-	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(2)
+	PORT_CREATEX("DIAL1",   /* IN3 */
+		emu::ioport::analog(0xff, 0x00, IPT_DIAL).sensitivity(50).delta(10).reverse().player(2));
 
-	PORT_START("DIAL2")     /* IN4 */
-	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(3)
+	PORT_CREATEX("DIAL2",   /* IN4 */
+		emu::ioport::analog(0xff, 0x00, IPT_DIAL).sensitivity(50).delta(10).reverse().player(3));
 
-	PORT_START("DIAL3")     /* IN5 */
-	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(4)
+	PORT_CREATEX("DIAL3",   /* IN5 */
+		emu::ioport::analog(0xff, 0x00, IPT_DIAL).sensitivity(50).delta(10).reverse().player(4));
 
-	PORT_START("PEDALS")    /* IN6 - accelerator pedals */
-	PORT_BIT (0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1)
-	PORT_BIT (0x02, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(1)
-	PORT_BIT (0x04, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)
-	PORT_BIT (0x08, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(2)
-	PORT_BIT (0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(3)
-	PORT_BIT (0x20, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(3)
-	PORT_BIT (0x40, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(4)
-	PORT_BIT (0x80, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(4)
+	PORT_CREATEX("PEDALS",  /* IN6 - accelerator pedals */
+		emu::ioport::digital(0x01, IP_ACTIVE_HIGH, IPT_BUTTON1).player(1),
+		emu::ioport::digital(0x02, IP_ACTIVE_HIGH, IPT_BUTTON2).player(1),
+		emu::ioport::digital(0x04, IP_ACTIVE_HIGH, IPT_BUTTON1).player(2),
+		emu::ioport::digital(0x08, IP_ACTIVE_HIGH, IPT_BUTTON2).player(2),
+		emu::ioport::digital(0x10, IP_ACTIVE_HIGH, IPT_BUTTON1).player(3),
+		emu::ioport::digital(0x20, IP_ACTIVE_HIGH, IPT_BUTTON2).player(3),
+		emu::ioport::digital(0x40, IP_ACTIVE_HIGH, IPT_BUTTON1).player(4),
+		emu::ioport::digital(0x80, IP_ACTIVE_HIGH, IPT_BUTTON2).player(4));
 
-	PORT_START("IN2")       /* IN7 - forward/reverse */
-	PORT_BIT (0x0f, IP_ACTIVE_HIGH, IPT_UNUSED )
-	PORT_BIT (0x10, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(4)
-	PORT_BIT (0x20, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(3)
-	PORT_BIT (0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
-	PORT_BIT (0x80, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
+	PORT_CREATEX("IN2",     /* IN7 - forward/reverse */
+		emu::ioport::unused(0x0f, IP_ACTIVE_HIGH),
+		emu::ioport::digital(0x10, IP_ACTIVE_LOW, IPT_BUTTON3).player(4),
+		emu::ioport::digital(0x20, IP_ACTIVE_LOW, IPT_BUTTON3).player(3),
+		emu::ioport::digital(0x40, IP_ACTIVE_LOW, IPT_BUTTON3).player(2),
+		emu::ioport::digital(0x80, IP_ACTIVE_LOW, IPT_BUTTON3).player(1));
 INPUT_PORTS_END
 
 
