@@ -66,109 +66,109 @@ ADDRESS_MAP_END
 
 static INPUT_PORTS_START( carpolo )
 	PORT_CREATEX("IN0",     /* IN0 */
-		emu::ioport::digital(0x01, IP_ACTIVE_HIGH, IPT_COIN1),
-		emu::ioport::digital(0x02, IP_ACTIVE_HIGH, IPT_COIN2),
-		emu::ioport::digital(0x04, IP_ACTIVE_HIGH, IPT_COIN3),
-		emu::ioport::digital(0x08, IP_ACTIVE_HIGH, IPT_COIN4),
-		emu::ioport::digital(0xf0, IP_ACTIVE_HIGH, IPT_UNUSED));
+		digital(0x01, IP_ACTIVE_HIGH, IPT_COIN1),
+		digital(0x02, IP_ACTIVE_HIGH, IPT_COIN2),
+		digital(0x04, IP_ACTIVE_HIGH, IPT_COIN3),
+		digital(0x08, IP_ACTIVE_HIGH, IPT_COIN4),
+		unused (0xf0, IP_ACTIVE_HIGH));
 
 	/* the value read from here is used directly,
 	   the result is calculated by 60/value */
-	PORT_START("IN1")       /* IN1 */
-	PORT_BIT (0x03, IP_ACTIVE_HIGH, IPT_UNUSED )    /* the lowest 2 bits of the counter */
-	PORT_DIPNAME( 0xfc, 0x3c, "Game Sec/Real Sec" )
-	PORT_DIPSETTING(    0x00, "0.23 (Longest)" )
-	PORT_DIPSETTING(    0xfc, "0.24" )
-	PORT_DIPSETTING(    0xf8, "0.24" )
-	PORT_DIPSETTING(    0xf4, "0.25" )
-	PORT_DIPSETTING(    0xf0, "0.25" )
-	PORT_DIPSETTING(    0xec, "0.25" )
-	PORT_DIPSETTING(    0xe8, "0.26" )
-	PORT_DIPSETTING(    0xe4, "0.26" )
-	PORT_DIPSETTING(    0xe0, "0.27" )
-	PORT_DIPSETTING(    0xdc, "0.27" )
-	PORT_DIPSETTING(    0xd8, "0.28" )
-	PORT_DIPSETTING(    0xd4, "0.28" )
-	PORT_DIPSETTING(    0xd0, "0.29" )
-	PORT_DIPSETTING(    0xcc, "0.29" )
-	PORT_DIPSETTING(    0xc8, "0.30" )
-	PORT_DIPSETTING(    0xc4, "0.31" )
-	PORT_DIPSETTING(    0xc0, "0.31" )
-	PORT_DIPSETTING(    0xbc, "0.32" )
-	PORT_DIPSETTING(    0xb8, "0.33" )
-	PORT_DIPSETTING(    0xb4, "0.33" )
-	PORT_DIPSETTING(    0xb0, "0.34" )
-	PORT_DIPSETTING(    0xac, "0.35" )
-	PORT_DIPSETTING(    0xa8, "0.36" )
-	PORT_DIPSETTING(    0xa4, "0.37" )
-	PORT_DIPSETTING(    0xa0, "0.38" )
-	PORT_DIPSETTING(    0x9c, "0.38" )
-	PORT_DIPSETTING(    0x98, "0.39" )
-	PORT_DIPSETTING(    0x94, "0.41" )
-	PORT_DIPSETTING(    0x90, "0.42" )
-	PORT_DIPSETTING(    0x8c, "0.44" )
-	PORT_DIPSETTING(    0x84, "0.46" )
-	PORT_DIPSETTING(    0x80, "0.47" )
-	PORT_DIPSETTING(    0x7c, "0.48" )
-	PORT_DIPSETTING(    0x78, "0.50" )
-	PORT_DIPSETTING(    0x74, "0.52" )
-	PORT_DIPSETTING(    0x70, "0.54" )
-	PORT_DIPSETTING(    0x6c, "0.56" )
-	PORT_DIPSETTING(    0x68, "0.58" )
-	PORT_DIPSETTING(    0x64, "0.60" )
-	PORT_DIPSETTING(    0x60, "0.63" )
-	PORT_DIPSETTING(    0x5c, "0.65" )
-	PORT_DIPSETTING(    0x58, "0.68" )
-	PORT_DIPSETTING(    0x54, "0.71" )
-	PORT_DIPSETTING(    0x50, "0.75" )
-	PORT_DIPSETTING(    0x4c, "0.79" )
-	PORT_DIPSETTING(    0x48, "0.83" )
-	PORT_DIPSETTING(    0x44, "0.88" )
-	PORT_DIPSETTING(    0x40, "0.94" )
-	PORT_DIPSETTING(    0x3c, "1.00" )
-	PORT_DIPSETTING(    0x38, "1.07" )
-	PORT_DIPSETTING(    0x34, "1.15" )
-	PORT_DIPSETTING(    0x30, "1.25" )
-	PORT_DIPSETTING(    0x2c, "1.36" )
-	PORT_DIPSETTING(    0x28, "1.50" )
-	PORT_DIPSETTING(    0x24, "1.67" )
-	PORT_DIPSETTING(    0x20, "1.88" )
-	PORT_DIPSETTING(    0x1c, "2.14" )
-	PORT_DIPSETTING(    0x18, "2.50" )
-	PORT_DIPSETTING(    0x14, "3.00" )
-	PORT_DIPSETTING(    0x10, "3.75" )
-	PORT_DIPSETTING(    0x0c, "5.00" )
-	PORT_DIPSETTING(    0x08, "7.50" )
-	PORT_DIPSETTING(    0x04, "15.00 (Shortest)" )
+	PORT_CREATEX("IN1",     /* IN1 */
+		unused(0x03, IP_ACTIVE_HIGH),		/* the lowest 2 bits of the counter */
+		dips  (0xfc, 0x3c, "Game Sec/Real Sec")(
+			setting (0x00, "0.23 (Longest)"),
+			setting (0xfc, "0.24"),
+			setting (0xf8, "0.24"),
+			setting (0xf4, "0.25"),
+			setting (0xf0, "0.25"),
+			setting (0xec, "0.25"),
+			setting (0xe8, "0.26"),
+			setting (0xe4, "0.26"),
+			setting (0xe0, "0.27"),
+			setting (0xdc, "0.27"),
+			setting (0xd8, "0.28"),
+			setting (0xd4, "0.28"),
+			setting (0xd0, "0.29"),
+			setting (0xcc, "0.29"),
+			setting (0xc8, "0.30"),
+			setting (0xc4, "0.31"),
+			setting (0xc0, "0.31"),
+			setting (0xbc, "0.32"),
+			setting (0xb8, "0.33"),
+			setting (0xb4, "0.33"),
+			setting (0xb0, "0.34"),
+			setting (0xac, "0.35"),
+			setting (0xa8, "0.36"),
+			setting (0xa4, "0.37"),
+			setting (0xa0, "0.38"),
+			setting (0x9c, "0.38"),
+			setting (0x98, "0.39"),
+			setting (0x94, "0.41"),
+			setting (0x90, "0.42"),
+			setting (0x8c, "0.44"),
+			setting (0x84, "0.46"),
+			setting (0x80, "0.47"),
+			setting (0x7c, "0.48"),
+			setting (0x78, "0.50"),
+			setting (0x74, "0.52"),
+			setting (0x70, "0.54"),
+			setting (0x6c, "0.56"),
+			setting (0x68, "0.58"),
+			setting (0x64, "0.60"),
+			setting (0x60, "0.63"),
+			setting (0x5c, "0.65"),
+			setting (0x58, "0.68"),
+			setting (0x54, "0.71"),
+			setting (0x50, "0.75"),
+			setting (0x4c, "0.79"),
+			setting (0x48, "0.83"),
+			setting (0x44, "0.88"),
+			setting (0x40, "0.94"),
+			setting (0x3c, "1.00"),
+			setting (0x38, "1.07"),
+			setting (0x34, "1.15"),
+			setting (0x30, "1.25"),
+			setting (0x2c, "1.36"),
+			setting (0x28, "1.50"),
+			setting (0x24, "1.67"),
+			setting (0x20, "1.88"),
+			setting (0x1c, "2.14"),
+			setting (0x18, "2.50"),
+			setting (0x14, "3.00"),
+			setting (0x10, "3.75"),
+			setting (0x0c, "5.00"),
+			setting (0x08, "7.50"),
+			setting (0x04, "15.00 (Shortest)")));
 
 	PORT_CREATEX("DIAL0",   /* IN2 */
-		emu::ioport::analog(0xff, 0x00, IPT_DIAL).sensitivity(50).delta(10).reverse().player(1));
+		analog(0xff, 0x00, IPT_DIAL).sensitivity(50).delta(10).reverse().player(1));
 
 	PORT_CREATEX("DIAL1",   /* IN3 */
-		emu::ioport::analog(0xff, 0x00, IPT_DIAL).sensitivity(50).delta(10).reverse().player(2));
+		analog(0xff, 0x00, IPT_DIAL).sensitivity(50).delta(10).reverse().player(2));
 
 	PORT_CREATEX("DIAL2",   /* IN4 */
-		emu::ioport::analog(0xff, 0x00, IPT_DIAL).sensitivity(50).delta(10).reverse().player(3));
+		analog(0xff, 0x00, IPT_DIAL).sensitivity(50).delta(10).reverse().player(3));
 
 	PORT_CREATEX("DIAL3",   /* IN5 */
-		emu::ioport::analog(0xff, 0x00, IPT_DIAL).sensitivity(50).delta(10).reverse().player(4));
+		analog(0xff, 0x00, IPT_DIAL).sensitivity(50).delta(10).reverse().player(4));
 
 	PORT_CREATEX("PEDALS",  /* IN6 - accelerator pedals */
-		emu::ioport::digital(0x01, IP_ACTIVE_HIGH, IPT_BUTTON1).player(1),
-		emu::ioport::digital(0x02, IP_ACTIVE_HIGH, IPT_BUTTON2).player(1),
-		emu::ioport::digital(0x04, IP_ACTIVE_HIGH, IPT_BUTTON1).player(2),
-		emu::ioport::digital(0x08, IP_ACTIVE_HIGH, IPT_BUTTON2).player(2),
-		emu::ioport::digital(0x10, IP_ACTIVE_HIGH, IPT_BUTTON1).player(3),
-		emu::ioport::digital(0x20, IP_ACTIVE_HIGH, IPT_BUTTON2).player(3),
-		emu::ioport::digital(0x40, IP_ACTIVE_HIGH, IPT_BUTTON1).player(4),
-		emu::ioport::digital(0x80, IP_ACTIVE_HIGH, IPT_BUTTON2).player(4));
+		digital(0x01, IP_ACTIVE_HIGH, IPT_BUTTON1).player(1),
+		digital(0x02, IP_ACTIVE_HIGH, IPT_BUTTON2).player(1),
+		digital(0x04, IP_ACTIVE_HIGH, IPT_BUTTON1).player(2),
+		digital(0x08, IP_ACTIVE_HIGH, IPT_BUTTON2).player(2),
+		digital(0x10, IP_ACTIVE_HIGH, IPT_BUTTON1).player(3),
+		digital(0x20, IP_ACTIVE_HIGH, IPT_BUTTON2).player(3),
+		digital(0x40, IP_ACTIVE_HIGH, IPT_BUTTON1).player(4),
+		digital(0x80, IP_ACTIVE_HIGH, IPT_BUTTON2).player(4));
 
 	PORT_CREATEX("IN2",     /* IN7 - forward/reverse */
-		emu::ioport::unused(0x0f, IP_ACTIVE_HIGH),
-		emu::ioport::digital(0x10, IP_ACTIVE_LOW, IPT_BUTTON3).player(4),
-		emu::ioport::digital(0x20, IP_ACTIVE_LOW, IPT_BUTTON3).player(3),
-		emu::ioport::digital(0x40, IP_ACTIVE_LOW, IPT_BUTTON3).player(2),
-		emu::ioport::digital(0x80, IP_ACTIVE_LOW, IPT_BUTTON3).player(1));
+		unused (0x0f, IP_ACTIVE_HIGH),
+		digital(0x10, IP_ACTIVE_LOW, IPT_BUTTON3).player(4),
+		digital(0x20, IP_ACTIVE_LOW, IPT_BUTTON3).player(3),
+		digital(0x40, IP_ACTIVE_LOW, IPT_BUTTON3).player(2),
+		digital(0x80, IP_ACTIVE_LOW, IPT_BUTTON3).player(1));
 INPUT_PORTS_END
 
 

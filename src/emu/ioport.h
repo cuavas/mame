@@ -17,6 +17,7 @@
 #ifndef __INPTPORT_H__
 #define __INPTPORT_H__
 
+#include <array>
 #include <cstdint>
 #include <cstring>
 #include <utility>
@@ -1914,16 +1915,42 @@ inline running_machine &ioport_setting::machine() const { return m_field.machine
 
 namespace emu { namespace ioport {
 namespace detail {
+class setting_config
+{
+public:
+	constexpr setting_config()
+		: m_value(0)
+		, m_name(nullptr)
+	{
+	}
+
+	constexpr setting_config(ioport_value value, char const *name)
+		: m_value(value)
+		, m_name(name)
+	{
+	}
+
+	void apply(::ioport_configurer &configurer) const
+	{
+		configurer.setting_alloc(m_value, m_name);
+	}
+
+private:
+	ioport_value	m_value;
+	char const *	m_name;
+};
+
+
 class field_config_base
 {
 public:
-	void apply(::ioport_configurer &cfg) const
+	void apply(::ioport_configurer &configurer) const
 	{
-		cfg.field_alloc(m_type, m_defval, m_mask, m_name);
+		configurer.field_alloc(m_type, m_defval, m_mask, m_name);
 	}
 
 protected:
-	field_config_base(ioport_type type, ioport_value defval, ioport_value mask, char const *name)
+	constexpr field_config_base(ioport_type type, ioport_value defval, ioport_value mask, char const *name)
 		: m_type(type)
 		, m_defval(defval)
 		, m_mask(mask)
@@ -1931,7 +1958,6 @@ protected:
 	{
 	}
 
-private:
 	ioport_type		m_type;
 	ioport_value	m_defval;
 	ioport_value	m_mask;
@@ -1939,10 +1965,75 @@ private:
 };
 
 
+template <std::size_t N>
+class dip_field_config : protected field_config_base
+{
+public:
+	template <typename... Params>
+	constexpr dip_field_config(ioport_value mask, ioport_value defval, char const *name, char const *location, Params &&... args)
+		: field_config_base(IPT_DIPSWITCH, defval, mask, name)
+		, m_location(location)
+		, m_settings({ { std::forward<Params>(args)... } })
+	{
+	}
+
+	dip_field_config &location(char const *value)
+	{
+		m_location = value;
+		return *this;
+	}
+
+	template <typename... Params>
+	constexpr dip_field_config<sizeof...(Params)> operator()(Params &&... args)
+	{
+		return dip_field_config<sizeof...(Params)>(m_mask, m_defval, m_name, m_location, std::forward<Params>(args)...);
+	}
+
+	void apply(::ioport_configurer &configurer) const
+	{
+		field_config_base::apply(configurer);
+		if (m_location) configurer.field_set_diplocation(m_location);
+		for (auto const &setting : m_settings) setting.apply(configurer);
+	}
+
+protected:
+	char const *					m_location;
+	std::array<setting_config, N>	m_settings;
+};
+
+
+template <std::size_t N>
+class conf_field_config : protected field_config_base
+{
+public:
+	template <typename... Params>
+	constexpr conf_field_config(ioport_value mask, ioport_value defval, char const *name, Params &&... args)
+		: field_config_base(IPT_CONFIG, defval, mask, name)
+		, m_settings({ { std::forward<Params>(args)... } })
+	{
+	}
+
+	template <typename... Params>
+	constexpr conf_field_config<sizeof...(Params)> operator()(Params &&... args)
+	{
+		return conf_field_config<sizeof...(Params)>(m_mask, m_defval, m_name, std::forward<Params>(args)...);
+	}
+
+	void apply(::ioport_configurer &configurer) const
+	{
+		field_config_base::apply(configurer);
+		for (auto const &setting : m_settings) setting.apply(configurer);
+	}
+
+protected:
+	std::array<setting_config, N> m_settings;
+};
+
+
 class field_config_applicator
 {
 protected:
-	field_config_applicator(::ioport_configurer &configurer) : m_configurer(configurer) { }
+	constexpr field_config_applicator(::ioport_configurer &configurer) : m_configurer(configurer) { }
 
 	void apply() const { }
 
@@ -1960,7 +2051,7 @@ protected:
 class port_creator : protected field_config_applicator
 {
 public:
-	port_creator(::ioport_configurer &configurer, char const *tag)
+	constexpr port_creator(::ioport_configurer &configurer, char const *tag)
 		: field_config_applicator(configurer)
 		, m_tag(tag)
 	{
@@ -1981,7 +2072,7 @@ private:
 class port_modifier : protected field_config_applicator
 {
 public:
-	port_modifier(::ioport_configurer &configurer, char const *tag)
+	constexpr port_modifier(::ioport_configurer &configurer, char const *tag)
 		: field_config_applicator(configurer)
 		, m_tag(tag)
 	{
@@ -2001,10 +2092,11 @@ private:
 } // namespace detail
 
 
+namespace fields {
 class unused : public detail::field_config_base
 {
 public:
-	unused(ioport_value mask, ioport_value defval)
+	constexpr unused(ioport_value mask, ioport_value defval)
 	: field_config_base(IPT_UNUSED, defval, mask, nullptr)
 	{
 	}
@@ -2014,17 +2106,17 @@ public:
 class digital : protected detail::field_config_base
 {
 public:
-	digital(ioport_value mask, ioport_value defval, ioport_type type)
+	constexpr digital(ioport_value mask, ioport_value defval, ioport_type type)
 	: field_config_base(type, defval, mask, nullptr)
 	{
 	}
 
 	digital &player(int value)	{ m_player	= value;	return *this; }
 
-	void apply(::ioport_configurer &cfg) const
+	void apply(::ioport_configurer &configurer) const
 	{
-		field_config_base::apply(cfg);
-		cfg.field_set_player(m_player);
+		field_config_base::apply(configurer);
+		configurer.field_set_player(m_player);
 	}
 
 private:
@@ -2035,7 +2127,7 @@ private:
 class analog : protected detail::field_config_base
 {
 public:
-	analog(ioport_value mask, ioport_value defval, ioport_type type)
+	constexpr analog(ioport_value mask, ioport_value defval, ioport_type type)
 	: field_config_base(type, defval, mask, nullptr)
 	{
 	}
@@ -2046,14 +2138,14 @@ public:
 	analog &delta(std::int32_t value)		{ m_delta = m_centerdelta	= value;	return *this; }
 	analog &centerdelta(std::int32_t value)	{ m_centerdelta				= value;	return *this; } // must call after delta
 
-	void apply(::ioport_configurer &cfg) const
+	void apply(::ioport_configurer &configurer) const
 	{
-		field_config_base::apply(cfg);
-		cfg.field_set_player(m_player);
-		if (m_reverse) cfg.field_set_analog_reverse();
-		cfg.field_set_sensitivity(m_sensitivity);
-		cfg.field_set_delta(m_delta);
-		cfg.field_set_centerdelta(m_centerdelta);
+		field_config_base::apply(configurer);
+		configurer.field_set_player(m_player);
+		if (m_reverse) configurer.field_set_analog_reverse();
+		configurer.field_set_sensitivity(m_sensitivity);
+		configurer.field_set_delta(m_delta);
+		configurer.field_set_centerdelta(m_centerdelta);
 	}
 
 private:
@@ -2064,9 +2156,23 @@ private:
 	std::int32_t	m_centerdelta	= 0;
 };
 
+constexpr detail::dip_field_config<0> dips(ioport_value mask, ioport_value defval, char const *name) { return detail::dip_field_config<0>(mask, defval, name, nullptr); }
+constexpr detail::conf_field_config<0> config(ioport_value mask, ioport_value defval, char const *name) { return detail::conf_field_config<0>(mask, defval, name); }
+constexpr detail::setting_config setting(ioport_value value, char const *name) { return detail::setting_config(value, name); }
 
-#define PORT_CREATEX(tag_, ...) ::emu::ioport::detail::port_creator(configurer, (tag_)).apply(__VA_ARGS__)
-#define PORT_MODIFYX(tag_, ...) ::emu::ioport::detail::port_modifier(configurer, (tag_)).apply(__VA_ARGS__)
+} // namespace fields
+
+
+#define PORT_CREATEX(tag_, ...) \
+	do { \
+		using namespace ::emu::ioport::fields; \
+		::emu::ioport::detail::port_creator(configurer, (tag_)).apply(__VA_ARGS__); \
+	} while (false)
+#define PORT_MODIFYX(tag_, ...) \
+	do { \
+		using namespace ::emu::ioport::fields; \
+		::emu::ioport::detail::port_modifier(configurer, (tag_)).apply(__VA_ARGS__); \
+	} while (false)
 
 } } // namespace emu::ioport
 

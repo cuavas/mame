@@ -198,86 +198,86 @@ ADDRESS_MAP_END
 
 
 static INPUT_PORTS_START( laserbat_base )
-	PORT_START("ROW0")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN3 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(1)
+	PORT_CREATEX("ROW0",
+		digital(0x01, IP_ACTIVE_LOW, IPT_START1),
+		digital(0x02, IP_ACTIVE_LOW, IPT_START2),
+		digital(0x04, IP_ACTIVE_LOW, IPT_COIN2),
+		digital(0x08, IP_ACTIVE_LOW, IPT_COIN3),
+		digital(0x10, IP_ACTIVE_LOW, IPT_BUTTON1).player(1),
+		digital(0x20, IP_ACTIVE_LOW, IPT_BUTTON2).player(1),
+		digital(0x40, IP_ACTIVE_LOW, IPT_BUTTON3).player(1),
+		digital(0x80, IP_ACTIVE_LOW, IPT_BUTTON4).player(1));
 
-	PORT_START("ROW1")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(2)
-	PORT_CONFNAME( 0x10, 0x10, DEF_STR(Cabinet) ) // sense line on wiring harness
-	PORT_DIPSETTING(     0x10, DEF_STR(Upright) )
-	PORT_DIPSETTING(     0x00, DEF_STR(Cocktail) )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN1 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_TILT )
+	PORT_CREATEX("ROW1",
+		digital(0x01, IP_ACTIVE_LOW, IPT_BUTTON1).player(2),
+		digital(0x02, IP_ACTIVE_LOW, IPT_BUTTON2).player(2),
+		digital(0x04, IP_ACTIVE_LOW, IPT_BUTTON3).player(2),
+		digital(0x08, IP_ACTIVE_LOW, IPT_BUTTON4).player(2),
+		config (0x10, 0x10, DEF_STR(Cabinet))( // sense line on wiring harness
+			setting(  0x10, DEF_STR(Upright)),
+			setting(  0x00, DEF_STR(Cocktail))),
+		digital(0x20, IP_ACTIVE_LOW, IPT_SERVICE1),
+		digital(0x40, IP_ACTIVE_LOW, IPT_COIN1),
+		digital(0x80, IP_ACTIVE_LOW, IPT_TILT));
 
-	PORT_START("ROW2")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1)
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1)
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
+	PORT_CREATEX("ROW2",
+		digital(0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT)	.player(2),
+		digital(0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT).player(2),
+		digital(0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP)	.player(2),
+		digital(0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN)	.player(2),
+		digital(0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT)	.player(1),
+		digital(0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT).player(1),
+		digital(0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_UP)	.player(1),
+		digital(0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN)	.player(1));
 
-	PORT_START("SW1")
-	PORT_DIPNAME( 0x03, 0x00, DEF_STR(Coin_A) )         PORT_DIPLOCATION("SW-1:1,2")
-	PORT_DIPSETTING(    0x00, DEF_STR(1C_1C) )
-	PORT_DIPSETTING(    0x01, DEF_STR(1C_2C) )
-	PORT_DIPSETTING(    0x02, DEF_STR(1C_3C) )
-	PORT_DIPSETTING(    0x03, DEF_STR(1C_5C) )
-	PORT_DIPNAME( 0x0c, 0x00, DEF_STR(Coin_B) )         PORT_DIPLOCATION("SW-1:3,4")
-	PORT_DIPSETTING(    0x00, DEF_STR(1C_2C) )
-	PORT_DIPSETTING(    0x04, DEF_STR(1C_3C) )
-	PORT_DIPSETTING(    0x08, DEF_STR(1C_5C) )
-	PORT_DIPSETTING(    0x0c, DEF_STR(1C_7C) )
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR(Unknown) )        PORT_DIPLOCATION("SW-1:5")
-	PORT_DIPSETTING(    0x10, DEF_STR(Off) )
-	PORT_DIPSETTING(    0x00, DEF_STR(On) )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR(Unknown) )        PORT_DIPLOCATION("SW-1:6")
-	PORT_DIPSETTING(    0x20, DEF_STR(Off) )
-	PORT_DIPSETTING(    0x00, DEF_STR(On) )
-	PORT_DIPNAME( 0x40, 0x00, "Infinite Lives" )        PORT_DIPLOCATION("SW-1:7")
-	PORT_DIPSETTING(    0x00, DEF_STR(Off) )
-	PORT_DIPSETTING(    0x40, DEF_STR(On) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR(Unknown) )        PORT_DIPLOCATION("SW-1:8")
-	PORT_DIPSETTING(    0x80, DEF_STR(Off) )
-	PORT_DIPSETTING(    0x00, DEF_STR(On) )
+	PORT_CREATEX("SW1",
+		dips(0x03,  0x00, DEF_STR(Coin_A))		.location("SW-1:1,2")(
+			setting(0x00, DEF_STR(1C_1C)),
+			setting(0x01, DEF_STR(1C_2C)),
+			setting(0x02, DEF_STR(1C_3C)),
+			setting(0x03, DEF_STR(1C_5C))),
+		dips(0x0c,  0x00, DEF_STR(Coin_B))		.location("SW-1:3,4")(
+			setting(0x00, DEF_STR(1C_2C)),
+			setting(0x04, DEF_STR(1C_3C)),
+			setting(0x08, DEF_STR(1C_5C)),
+			setting(0x0c, DEF_STR(1C_7C))),
+		dips(0x10,  0x10, DEF_STR(Unknown))		.location("SW-1:5")(
+			setting(0x10, DEF_STR(Off)),
+			setting(0x00, DEF_STR(On))),
+		dips(0x20,  0x20, DEF_STR(Unknown))		.location("SW-1:6")(
+			setting(0x20, DEF_STR(Off)),
+			setting(0x00, DEF_STR(On))),
+		dips(0x40,  0x00, "Infinite Lives")		.location("SW-1:7")(
+			setting(0x00, DEF_STR(Off)),
+			setting(0x40, DEF_STR(On))),
+		dips(0x80,  0x80, DEF_STR(Unknown))		.location("SW-1:8")(
+			setting(0x80, DEF_STR(Off)),
+			setting(0x00, DEF_STR(On))));
 
-	PORT_START("SW2")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR(Unknown) )        PORT_DIPLOCATION("SW-2:1")
-	PORT_DIPSETTING(    0x01, DEF_STR(Off) )
-	PORT_DIPSETTING(    0x00, DEF_STR(On) )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR(Unknown) )        PORT_DIPLOCATION("SW-2:2")
-	PORT_DIPSETTING(    0x02, DEF_STR(Off) )
-	PORT_DIPSETTING(    0x00, DEF_STR(On) )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR(Unknown) )        PORT_DIPLOCATION("SW-2:3")
-	PORT_DIPSETTING(    0x04, DEF_STR(Off) )
-	PORT_DIPSETTING(    0x00, DEF_STR(On) )
-	PORT_DIPNAME( 0x18, 0x08, DEF_STR(Difficulty) )     PORT_DIPLOCATION("SW-2:4,5")
-	PORT_DIPSETTING(    0x00, DEF_STR(Easy) )
-	PORT_DIPSETTING(    0x08, DEF_STR(Medium) )
-	PORT_DIPSETTING(    0x10, DEF_STR(Difficult) )
-	PORT_DIPSETTING(    0x18, DEF_STR(Very_Difficult) )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR(Unknown) )        PORT_DIPLOCATION("SW-2:6")
-	PORT_DIPSETTING(    0x20, DEF_STR(Off) )
-	PORT_DIPSETTING(    0x00, DEF_STR(On) )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR(Unknown) )        PORT_DIPLOCATION("SW-2:7")
-	PORT_DIPSETTING(    0x40, DEF_STR(Off) )
-	PORT_DIPSETTING(    0x00, DEF_STR(On) )
-	PORT_DIPNAME( 0x80, 0x80, "Coin C" )                PORT_DIPLOCATION("SW-2:8")
-	PORT_DIPSETTING(    0x00, DEF_STR(2C_1C) )
-	PORT_DIPSETTING(    0x80, DEF_STR(1C_1C) )
+	PORT_CREATEX("SW2",
+		dips(0x01,  0x01, DEF_STR(Unknown))		.location("SW-2:1")(
+			setting(0x01, DEF_STR(Off)),
+			setting(0x00, DEF_STR(On))),
+		dips(0x02,  0x02, DEF_STR(Unknown))		.location("SW-2:2")(
+			setting(0x02, DEF_STR(Off)),
+			setting(0x00, DEF_STR(On))),
+		dips(0x04,  0x04, DEF_STR(Unknown))		.location("SW-2:3")(
+			setting(0x04, DEF_STR(Off)),
+			setting(0x00, DEF_STR(On))),
+		dips(0x18,  0x08, DEF_STR(Difficulty))	.location("SW-2:4,5")(
+			setting(0x00, DEF_STR(Easy)),
+			setting(0x08, DEF_STR(Medium)),
+			setting(0x10, DEF_STR(Difficult)),
+			setting(0x18, DEF_STR(Very_Difficult))),
+		dips(0x20,  0x20, DEF_STR(Unknown))		.location("SW-2:6")(
+			setting(0x20, DEF_STR(Off)),
+			setting(0x00, DEF_STR(On))),
+		dips(0x40,  0x40, DEF_STR(Unknown))		.location("SW-2:7")(
+			setting(0x40, DEF_STR(Off)),
+			setting(0x00, DEF_STR(On))),
+		dips(0x80,  0x80, "Coin C")				.location("SW-2:8")(
+			setting(0x00, DEF_STR(2C_1C)),
+			setting(0x80, DEF_STR(1C_1C))));
 
 	PORT_START("SENSE")
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
@@ -287,94 +287,94 @@ INPUT_PORTS_END
 static INPUT_PORTS_START( laserbat )
 	PORT_INCLUDE(laserbat_base)
 
-	PORT_MODIFY("SW1")
-	PORT_DIPNAME( 0x30, 0x10, DEF_STR(Lives) )          PORT_DIPLOCATION("SW-1:5,6")
-	PORT_DIPSETTING(    0x00, "2" )
-	PORT_DIPSETTING(    0x10, "3" )
-	PORT_DIPSETTING(    0x20, "5" )
-	PORT_DIPSETTING(    0x30, "6" )
-	PORT_DIPNAME( 0x80, 0x80, "Collision Detection" )   PORT_DIPLOCATION("SW-1:8")
-	PORT_DIPSETTING(    0x00, DEF_STR(Off) )
-	PORT_DIPSETTING(    0x80, DEF_STR(On) )
+	PORT_MODIFYX("SW1",
+		dips(0x30,  0x10, DEF_STR(Lives))			.location("SW-1:5,6")(
+			setting(0x00, "2"),
+			setting(0x10, "3"),
+			setting(0x20, "5"),
+			setting(0x30, "6")),
+		dips(0x80,  0x80, "Collision Detection")	.location("SW-1:8")(
+			setting(0x00, DEF_STR(Off)),
+			setting(0x80, DEF_STR(On))));
 
-	PORT_MODIFY("SW2")
-	PORT_DIPNAME( 0x60, 0x40, DEF_STR(Bonus_Life) )     PORT_DIPLOCATION("SW-2:6,7")
-	PORT_DIPSETTING(    0x00, DEF_STR(Off) )
-	PORT_DIPSETTING(    0x20, "10,000" )
-	PORT_DIPSETTING(    0x40, "14,000" )
-	PORT_DIPSETTING(    0x60, "18,000" )
+	PORT_MODIFYX("SW2",
+		dips(0x60,  0x40, DEF_STR(Bonus_Life))		.location("SW-2:6,7")(
+			setting(0x00, DEF_STR(Off)),
+			setting(0x20, "10,000"),
+			setting(0x40, "14,000"),
+			setting(0x60, "18,000")));
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( lazarian )
 	PORT_INCLUDE(laserbat)
 
-	PORT_MODIFY("SW1")
-	PORT_DIPNAME( 0x03, 0x01, DEF_STR(Coin_A) )         PORT_DIPLOCATION("SW-1:1,2")
-	PORT_DIPSETTING(    0x00, DEF_STR(2C_1C) )
-	PORT_DIPSETTING(    0x01, DEF_STR(1C_1C) )
-	PORT_DIPSETTING(    0x02, DEF_STR(1C_2C) )
-	PORT_DIPSETTING(    0x03, DEF_STR(1C_3C) )
-	PORT_DIPNAME( 0x30, 0x10, DEF_STR(Lives) )          PORT_DIPLOCATION("SW-1:5,6")
-	PORT_DIPSETTING(    0x00, "2" )
-	PORT_DIPSETTING(    0x10, "3" )
-	PORT_DIPSETTING(    0x20, "4" )
-	PORT_DIPSETTING(    0x30, "5" )
-	PORT_DIPNAME( 0x40, 0x00, "Calibration Display" )   PORT_DIPLOCATION("SW-1:7")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
+	PORT_MODIFYX("SW1",
+		dips(0x03,  0x01, DEF_STR(Coin_A))			.location("SW-1:1,2")(
+			setting(0x00, DEF_STR(2C_1C)),
+			setting(0x01, DEF_STR(1C_1C)),
+			setting(0x02, DEF_STR(1C_2C)),
+			setting(0x03, DEF_STR(1C_3C))),
+		dips(0x30,  0x10, DEF_STR(Lives))			.location("SW-1:5,6")(
+			setting(0x00, "2"),
+			setting(0x10, "3"),
+			setting(0x20, "4"),
+			setting(0x30, "5")),
+		dips(0x40,  0x00, "Calibration Display")	.location("SW-1:7")(
+			setting(0x00, DEF_STR(Off)),
+			setting(0x40, DEF_STR(On))));
 
-	PORT_MODIFY("SW2")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR(Unused) )         PORT_DIPLOCATION("SW-2:1") // manual says not used
-	PORT_DIPSETTING(    0x01, DEF_STR(Off) )
-	PORT_DIPSETTING(    0x00, DEF_STR(On) )
-	PORT_DIPNAME( 0x02, 0x02, "Firing" )                PORT_DIPLOCATION("SW-2:2")
-	PORT_DIPSETTING(    0x02, "Rapid" )
-	PORT_DIPSETTING(    0x00, DEF_STR(Normal) )
-	PORT_DIPNAME( 0x04, 0x00, "Freeze" )                PORT_DIPLOCATION("SW-2:3")
-	PORT_DIPSETTING(    0x00, DEF_STR(Off) )
-	PORT_DIPSETTING(    0x04, DEF_STR(On) )
+	PORT_MODIFYX("SW2",
+		dips(0x01,  0x01, DEF_STR(Unused))			.location("SW-2:1")( // manual says not used
+			setting(0x01, DEF_STR(Off)),
+			setting(0x00, DEF_STR(On))),
+		dips(0x02,  0x02, "Firing")					.location("SW-2:2")(
+			setting(0x02, "Rapid"),
+			setting(0x00, DEF_STR(Normal))),
+		dips(0x04,  0x00, "Freeze")					.location("SW-2:3")(
+			setting(0x00, DEF_STR(Off)),
+			setting(0x04, DEF_STR(On))));
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( catnmous )
 	PORT_INCLUDE(laserbat_base)
 
-	PORT_MODIFY("ROW0")
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_MODIFYX("ROW0",
+		unused (0x10, IP_ACTIVE_LOW),
+		unused (0x20, IP_ACTIVE_LOW),
+		digital(0x40, IP_ACTIVE_LOW, IPT_BUTTON1).player(1),
+		unused (0x80, IP_ACTIVE_LOW));
 
-	PORT_MODIFY("ROW1")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_MODIFYX("ROW1",
+		unused (0x01, IP_ACTIVE_LOW),
+		unused (0x02, IP_ACTIVE_LOW),
+		digital(0x04, IP_ACTIVE_LOW, IPT_BUTTON1).player(2),
+		unused (0x08, IP_ACTIVE_LOW));
 
-	PORT_MODIFY("SW1")
-	PORT_DIPNAME( 0x30, 0x10, DEF_STR(Lives) )          PORT_DIPLOCATION("SW-1:5,6")
-	PORT_DIPSETTING(    0x00, "2" )
-	PORT_DIPSETTING(    0x10, "3" )
-	PORT_DIPSETTING(    0x20, "4" )
-	PORT_DIPSETTING(    0x30, "5" )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR(Demo_Sounds) )    PORT_DIPLOCATION("SW-1:8")
-	PORT_DIPSETTING(    0x00, DEF_STR(Off) )
-	PORT_DIPSETTING(    0x80, DEF_STR(On) )
+	PORT_MODIFYX("SW1",
+		dips(0x30,  0x10, DEF_STR(Lives))		.location("SW-1:5,6")(
+			setting(0x00, "2"),
+			setting(0x10, "3"),
+			setting(0x20, "4"),
+			setting(0x30, "5")),
+		dips(0x80,  0x80, DEF_STR(Demo_Sounds))	.location("SW-1:8")(
+			setting(0x00, DEF_STR(Off)),
+			setting(0x80, DEF_STR(On))));
 
-	PORT_MODIFY("SW2")
-	PORT_DIPNAME( 0x01, 0x01, "Free Play" )             PORT_DIPLOCATION("SW-2:1") // taken from manual, assuming poor translation
-	PORT_DIPSETTING(    0x01, "Win Play" )
-	PORT_DIPSETTING(    0x00, "No Win Play" )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR(Unused) )         PORT_DIPLOCATION("SW-2:2") // manual says not used
-	PORT_DIPSETTING(    0x02, DEF_STR(Off) )
-	PORT_DIPSETTING(    0x00, DEF_STR(On) )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR(Unused) )         PORT_DIPLOCATION("SW-2:3") // manual says not used
-	PORT_DIPSETTING(    0x04, DEF_STR(Off) )
-	PORT_DIPSETTING(    0x00, DEF_STR(On) )
-	PORT_DIPNAME( 0x60, 0x40, DEF_STR(Bonus_Life) )     PORT_DIPLOCATION("SW-2:6,7")
-	PORT_DIPSETTING(    0x00, DEF_STR(Off) )
-	PORT_DIPSETTING(    0x20, "20,000" )
-	PORT_DIPSETTING(    0x40, "24,000" )
-	PORT_DIPSETTING(    0x60, "28,000" )
+	PORT_MODIFYX("SW2",
+		dips(0x01,  0x01, "Free Play")			.location("SW-2:1")( // taken from manual, assuming poor translation
+			setting(0x01, "Win Play"),
+			setting(0x00, "No Win Play")),
+		dips(0x02, 0x02, DEF_STR(Unused))		.location("SW-2:2")( // manual says not used
+			setting(0x02, DEF_STR(Off)),
+			setting(0x00, DEF_STR(On))),
+		dips(0x04, 0x04, DEF_STR(Unused))		.location("SW-2:3")( // manual says not used
+			setting(0x04, DEF_STR(Off)),
+			setting(0x00, DEF_STR(On))),
+		dips(0x60, 0x40, DEF_STR(Bonus_Life))	.location("SW-2:6,7")(
+			setting(0x00, DEF_STR(Off)),
+			setting(0x20, "20,000"),
+			setting(0x40, "24,000"),
+			setting(0x60, "28,000")));
 INPUT_PORTS_END
 
 static const gfx_layout charlayout =
