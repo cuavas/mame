@@ -1915,7 +1915,49 @@ inline running_machine &ioport_setting::machine() const { return m_field.machine
 
 namespace emu { namespace ioport {
 namespace detail {
-class setting_config
+template <typename T> class condition_helper
+{
+public:
+	constexpr condition_helper(T &parent, ::ioport_condition::condition_t &predicate, ::ioport_value &value)
+		: m_parent(parent)
+		, m_predicate(predicate)
+		, m_value(value)
+	{
+	}
+
+	T &equals          (::ioport_value value) { m_predicate = ::ioport_condition::EQUALS;         m_value = value; return m_parent; }
+	T &not_equals      (::ioport_value value) { m_predicate = ::ioport_condition::NOTEQUALS;      m_value = value; return m_parent; }
+	T &greater_than    (::ioport_value value) { m_predicate = ::ioport_condition::GREATERTHAN;    m_value = value; return m_parent; }
+	T &not_greater_than(::ioport_value value) { m_predicate = ::ioport_condition::NOTGREATERTHAN; m_value = value; return m_parent; }
+	T &less_than       (::ioport_value value) { m_predicate = ::ioport_condition::LESSTHAN;       m_value = value; return m_parent; }
+	T &not_less_than   (::ioport_value value) { m_predicate = ::ioport_condition::NOTLESSTHAN;    m_value = value; return m_parent; }
+
+private:
+	T								&m_parent;
+	::ioport_condition::condition_t	&m_predicate;
+	::ioport_value					&m_value;
+};
+
+
+template <typename T> class condition_support
+{
+public:
+	condition_helper<T> when(char const *tag, ::ioport_value mask)
+	{
+		m_condition_tag = tag;
+		m_condition_mask = mask;
+		return condition_helper<T>(static_cast<T &>(*this), m_condition_predicate, m_condition_value);
+	}
+
+protected:
+	char const *					m_condition_tag			= nullptr;
+	::ioport_value					m_condition_mask		= 0;
+	::ioport_condition::condition_t	m_condition_predicate	= ::ioport_condition::ALWAYS;
+	::ioport_value					m_condition_value		= 0;
+};
+
+
+class setting_config : public condition_support<setting_config>
 {
 public:
 	constexpr setting_config()
@@ -1924,7 +1966,7 @@ public:
 	{
 	}
 
-	constexpr setting_config(ioport_value value, char const *name)
+	constexpr setting_config(::ioport_value value, char const *name)
 		: m_value(value)
 		, m_name(name)
 	{
@@ -1933,24 +1975,27 @@ public:
 	void apply(::ioport_configurer &configurer) const
 	{
 		configurer.setting_alloc(m_value, m_name);
+		if (m_condition_tag) configurer.set_condition(m_condition_predicate, m_condition_tag, m_condition_mask, m_condition_value);
 	}
 
 private:
-	ioport_value	m_value;
+	::ioport_value	m_value;
 	char const *	m_name;
 };
 
 
-class field_config_base
+template <typename T> class field_config_base : public condition_support<T>
 {
 public:
 	void apply(::ioport_configurer &configurer) const
 	{
 		configurer.field_alloc(m_type, m_defval, m_mask, m_name);
+		if (this->m_condition_tag)
+			configurer.set_condition(this->m_condition_predicate, this->m_condition_tag, this->m_condition_mask, this->m_condition_value);
 	}
 
 protected:
-	constexpr field_config_base(ioport_type type, ioport_value defval, ioport_value mask, char const *name)
+	constexpr field_config_base(::ioport_type type, ::ioport_value defval, ::ioport_value mask, char const *name)
 		: m_type(type)
 		, m_defval(defval)
 		, m_mask(mask)
@@ -1958,20 +2003,41 @@ protected:
 	{
 	}
 
-	ioport_type		m_type;
-	ioport_value	m_defval;
-	ioport_value	m_mask;
+	::ioport_type	m_type;
+	::ioport_value	m_defval;
+	::ioport_value	m_mask;
 	char const *	m_name;
 };
 
 
-template <std::size_t N>
-class dip_field_config : protected field_config_base
+template <typename T> class player_field_config_base : public field_config_base<T>
+{
+public:
+	T &player(int value) { m_player = value; return static_cast<T &>(*this); }
+
+	void apply(::ioport_configurer &configurer) const
+	{
+		field_config_base<T>::apply(configurer);
+		configurer.field_set_player(m_player);
+	}
+
+protected:
+	constexpr player_field_config_base(::ioport_type type, ::ioport_value defval, ::ioport_value mask, char const *name)
+		: field_config_base<T>(type, defval, mask, name)
+		, m_player(1)
+	{
+	}
+
+	int m_player;
+};
+
+
+template <std::size_t N> class dip_field_config : public field_config_base<dip_field_config<N> >
 {
 public:
 	template <typename... Params>
-	constexpr dip_field_config(ioport_value mask, ioport_value defval, char const *name, char const *location, Params &&... args)
-		: field_config_base(IPT_DIPSWITCH, defval, mask, name)
+	constexpr dip_field_config(::ioport_value mask, ::ioport_value defval, char const *name, char const *location, Params &&... args)
+		: field_config_base<dip_field_config<N> >(IPT_DIPSWITCH, defval, mask, name)
 		, m_location(location)
 		, m_settings({ { std::forward<Params>(args)... } })
 	{
@@ -1986,12 +2052,12 @@ public:
 	template <typename... Params>
 	constexpr dip_field_config<sizeof...(Params)> operator()(Params &&... args)
 	{
-		return dip_field_config<sizeof...(Params)>(m_mask, m_defval, m_name, m_location, std::forward<Params>(args)...);
+		return dip_field_config<sizeof...(Params)>(this->m_mask, this->m_defval, this->m_name, m_location, std::forward<Params>(args)...);
 	}
 
 	void apply(::ioport_configurer &configurer) const
 	{
-		field_config_base::apply(configurer);
+		field_config_base<dip_field_config<N> >::apply(configurer);
 		if (m_location) configurer.field_set_diplocation(m_location);
 		for (auto const &setting : m_settings) setting.apply(configurer);
 	}
@@ -2002,13 +2068,12 @@ protected:
 };
 
 
-template <std::size_t N>
-class conf_field_config : protected field_config_base
+template <std::size_t N> class conf_field_config : public field_config_base<conf_field_config<N> >
 {
 public:
 	template <typename... Params>
-	constexpr conf_field_config(ioport_value mask, ioport_value defval, char const *name, Params &&... args)
-		: field_config_base(IPT_CONFIG, defval, mask, name)
+	constexpr conf_field_config(::ioport_value mask, ::ioport_value defval, char const *name, Params &&... args)
+		: field_config_base<conf_field_config<N> >(IPT_CONFIG, defval, mask, name)
 		, m_settings({ { std::forward<Params>(args)... } })
 	{
 	}
@@ -2016,12 +2081,12 @@ public:
 	template <typename... Params>
 	constexpr conf_field_config<sizeof...(Params)> operator()(Params &&... args)
 	{
-		return conf_field_config<sizeof...(Params)>(m_mask, m_defval, m_name, std::forward<Params>(args)...);
+		return conf_field_config<sizeof...(Params)>(this->m_mask, this->m_defval, this->m_name, std::forward<Params>(args)...);
 	}
 
 	void apply(::ioport_configurer &configurer) const
 	{
-		field_config_base::apply(configurer);
+		field_config_base<conf_field_config<N> >::apply(configurer);
 		for (auto const &setting : m_settings) setting.apply(configurer);
 	}
 
@@ -2093,46 +2158,39 @@ private:
 
 
 namespace fields {
-class unused : public detail::field_config_base
+class unused : public detail::field_config_base<unused>
 {
 public:
 	constexpr unused(ioport_value mask, ioport_value defval)
-	: field_config_base(IPT_UNUSED, defval, mask, nullptr)
+	: field_config_base<unused>(IPT_UNUSED, defval, mask, nullptr)
 	{
 	}
 };
 
 
-class digital : protected detail::field_config_base
+class digital : public detail::player_field_config_base<digital>
 {
 public:
 	constexpr digital(ioport_value mask, ioport_value defval, ioport_type type)
-	: field_config_base(type, defval, mask, nullptr)
+	: player_field_config_base<digital>(type, defval, mask, nullptr)
 	{
 	}
-
-	digital &player(int value)	{ m_player	= value;	return *this; }
 
 	void apply(::ioport_configurer &configurer) const
 	{
-		field_config_base::apply(configurer);
-		configurer.field_set_player(m_player);
+		player_field_config_base<digital>::apply(configurer);
 	}
-
-private:
-	int	m_player	= 1;
 };
 
 
-class analog : protected detail::field_config_base
+class analog : public detail::player_field_config_base<analog>
 {
 public:
 	constexpr analog(ioport_value mask, ioport_value defval, ioport_type type)
-	: field_config_base(type, defval, mask, nullptr)
+	: player_field_config_base<analog>(type, defval, mask, nullptr)
 	{
 	}
 
-	analog &player(int value)				{ m_player					= value;	return *this; }
 	analog &reverse()						{ m_reverse					= true;		return *this; }
 	analog &sensitivity(std::int32_t value)	{ m_sensitivity				= value;	return *this; }
 	analog &delta(std::int32_t value)		{ m_delta = m_centerdelta	= value;	return *this; }
@@ -2140,8 +2198,7 @@ public:
 
 	void apply(::ioport_configurer &configurer) const
 	{
-		field_config_base::apply(configurer);
-		configurer.field_set_player(m_player);
+		player_field_config_base<analog>::apply(configurer);
 		if (m_reverse) configurer.field_set_analog_reverse();
 		configurer.field_set_sensitivity(m_sensitivity);
 		configurer.field_set_delta(m_delta);
@@ -2149,7 +2206,6 @@ public:
 	}
 
 private:
-	int				m_player		= 1;
 	bool			m_reverse		= false;
 	std::int32_t 	m_sensitivity	= 0;
 	std::int32_t	m_delta			= 0;

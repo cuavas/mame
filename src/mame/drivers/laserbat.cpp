@@ -209,10 +209,10 @@ static INPUT_PORTS_START( laserbat_base )
 		digital(0x80, IP_ACTIVE_LOW, IPT_BUTTON4).player(1));
 
 	PORT_CREATEX("ROW1",
-		digital(0x01, IP_ACTIVE_LOW, IPT_BUTTON1).player(2),
-		digital(0x02, IP_ACTIVE_LOW, IPT_BUTTON2).player(2),
-		digital(0x04, IP_ACTIVE_LOW, IPT_BUTTON3).player(2),
-		digital(0x08, IP_ACTIVE_LOW, IPT_BUTTON4).player(2),
+		digital(0x01, IP_ACTIVE_LOW, IPT_BUTTON1).player(2).when("ROW1", 0x10).equals(0x00),
+		digital(0x02, IP_ACTIVE_LOW, IPT_BUTTON2).player(2).when("ROW1", 0x10).equals(0x00),
+		digital(0x04, IP_ACTIVE_LOW, IPT_BUTTON3).player(2).when("ROW1", 0x10).equals(0x00),
+		digital(0x08, IP_ACTIVE_LOW, IPT_BUTTON4).player(2).when("ROW1", 0x10).equals(0x00),
 		config (0x10, 0x10, DEF_STR(Cabinet))( // sense line on wiring harness
 			setting(  0x10, DEF_STR(Upright)),
 			setting(  0x00, DEF_STR(Cocktail))),
@@ -221,10 +221,10 @@ static INPUT_PORTS_START( laserbat_base )
 		digital(0x80, IP_ACTIVE_LOW, IPT_TILT));
 
 	PORT_CREATEX("ROW2",
-		digital(0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT)	.player(2),
-		digital(0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT).player(2),
-		digital(0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP)	.player(2),
-		digital(0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN)	.player(2),
+		digital(0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT)	.player(2).when("ROW1", 0x10).equals(0x00),
+		digital(0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT).player(2).when("ROW1", 0x10).equals(0x00),
+		digital(0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP)	.player(2).when("ROW1", 0x10).equals(0x00),
+		digital(0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN)	.player(2).when("ROW1", 0x10).equals(0x00),
 		digital(0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT)	.player(1),
 		digital(0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT).player(1),
 		digital(0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_UP)	.player(1),
@@ -347,7 +347,7 @@ static INPUT_PORTS_START( catnmous )
 	PORT_MODIFYX("ROW1",
 		unused (0x01, IP_ACTIVE_LOW),
 		unused (0x02, IP_ACTIVE_LOW),
-		digital(0x04, IP_ACTIVE_LOW, IPT_BUTTON1).player(2),
+		digital(0x04, IP_ACTIVE_LOW, IPT_BUTTON1).player(2).when("ROW1", 0x10).equals(0x00),
 		unused (0x08, IP_ACTIVE_LOW));
 
 	PORT_MODIFYX("SW1",
