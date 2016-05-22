@@ -4604,3 +4604,33 @@ int validate_natural_keyboard_statics(void)
     return error;
 }
 */
+
+
+
+namespace emu { namespace ioport { namespace fields {
+
+detail::dynamic_read_field_config vblank(::ioport_value mask, ::ioport_value defval, char const *tag)
+{
+	return detail::dynamic_read_field_config(
+			mask,
+			defval,
+			nullptr,
+			[](screen_device &device, ::ioport_field &field, void *param) -> ::ioport_value { return (device.vblank() & 1) ? ~::ioport_value(0) : 0; },
+			"screen_device::vblank",
+			tag,
+			static_cast<screen_device *>(nullptr));
+}
+
+detail::dynamic_read_field_config hblank(::ioport_value mask, ::ioport_value defval, char const *tag)
+{
+	return detail::dynamic_read_field_config(
+			mask,
+			defval,
+			nullptr,
+			[](screen_device &device, ::ioport_field &field, void *param) -> ::ioport_value { return (device.hblank() & 1) ? ~::ioport_value(0) : 0; },
+			"screen_device::vblank",
+			tag,
+			static_cast<screen_device *>(nullptr));
+}
+
+} } } // namespace emu::ioport::fields

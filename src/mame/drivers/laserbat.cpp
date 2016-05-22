@@ -279,8 +279,8 @@ static INPUT_PORTS_START( laserbat_base )
 			setting(0x00, DEF_STR(2C_1C)),
 			setting(0x80, DEF_STR(1C_1C))));
 
-	PORT_START("SENSE")
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
+	PORT_CREATEX("SENSE",
+		vblank(0x80, IP_ACTIVE_HIGH, "screen"));
 INPUT_PORTS_END
 
 

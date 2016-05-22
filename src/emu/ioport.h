@@ -1913,6 +1913,13 @@ inline device_t &ioport_setting::device() const { return m_field.device(); }
 inline running_machine &ioport_setting::machine() const { return m_field.machine(); }
 
 
+
+//**************************************************************************
+//  MODERNISED IMPLEMENTATION
+//**************************************************************************
+
+class screen_device;
+
 namespace emu { namespace ioport {
 namespace detail {
 template <typename T> class condition_helper
@@ -2010,25 +2017,37 @@ protected:
 };
 
 
-template <typename T> class player_field_config_base : public field_config_base<T>
+template <typename T> class renamable_field_config_base : public field_config_base<T>
+{
+public:
+	T &name(char const *value) { this->m_name = value; return static_cast<T &>(*this); }
+
+protected:
+	constexpr renamable_field_config_base(::ioport_type type, ::ioport_value defval, ::ioport_value mask, char const *name)
+		: field_config_base<T>(type, defval, mask, name)
+	{
+	}
+};
+
+
+template <typename T> class player_field_config_base : public renamable_field_config_base<T>
 {
 public:
 	T &player(int value) { m_player = value; return static_cast<T &>(*this); }
 
 	void apply(::ioport_configurer &configurer) const
 	{
-		field_config_base<T>::apply(configurer);
+		renamable_field_config_base<T>::apply(configurer);
 		configurer.field_set_player(m_player);
 	}
 
 protected:
 	constexpr player_field_config_base(::ioport_type type, ::ioport_value defval, ::ioport_value mask, char const *name)
-		: field_config_base<T>(type, defval, mask, name)
-		, m_player(1)
+		: renamable_field_config_base<T>(type, defval, mask, name)
 	{
 	}
 
-	int m_player;
+	int m_player = 1;
 };
 
 
@@ -2095,6 +2114,31 @@ protected:
 };
 
 
+class dynamic_read_field_config : public field_config_base<dynamic_read_field_config>
+{
+public:
+	template <typename... Params>
+	dynamic_read_field_config(::ioport_value mask, ::ioport_value defval, char const *name, Params &&... args)
+		: field_config_base<dynamic_read_field_config>(IPT_CUSTOM, defval, mask, name)
+		, m_delegate(std::forward<Params>(args)...)
+		, m_param(nullptr)
+	{
+	}
+
+	dynamic_read_field_config &param(void *value) { m_param = value; return *this; }
+
+	void apply(::ioport_configurer &configurer) const
+	{
+		field_config_base<dynamic_read_field_config>::apply(configurer);
+		configurer.field_set_dynamic_read(m_delegate, m_param);
+	}
+
+protected:
+	ioport_field_read_delegate	m_delegate;
+	void						*m_param;
+};
+
+
 class field_config_applicator
 {
 protected:
@@ -2158,6 +2202,16 @@ private:
 
 
 namespace fields {
+class unknown : public detail::field_config_base<unknown>
+{
+public:
+	constexpr unknown(ioport_value mask, ioport_value defval)
+	: field_config_base<unknown>(IPT_UNKNOWN, defval, mask, nullptr)
+	{
+	}
+};
+
+
 class unused : public detail::field_config_base<unused>
 {
 public:
@@ -2176,10 +2230,16 @@ public:
 	{
 	}
 
+	digital &impulse(std::uint8_t value) { m_impulse = value; return *this; }
+
 	void apply(::ioport_configurer &configurer) const
 	{
 		player_field_config_base<digital>::apply(configurer);
+		configurer.field_set_impulse(m_impulse);
 	}
+
+private:
+	std::uint8_t m_impulse = 0;
 };
 
 
@@ -2212,9 +2272,12 @@ private:
 	std::int32_t	m_centerdelta	= 0;
 };
 
-constexpr detail::dip_field_config<0> dips(ioport_value mask, ioport_value defval, char const *name) { return detail::dip_field_config<0>(mask, defval, name, nullptr); }
-constexpr detail::conf_field_config<0> config(ioport_value mask, ioport_value defval, char const *name) { return detail::conf_field_config<0>(mask, defval, name); }
-constexpr detail::setting_config setting(ioport_value value, char const *name) { return detail::setting_config(value, name); }
+inline constexpr detail::dip_field_config<0> dips(ioport_value mask, ioport_value defval, char const *name) { return detail::dip_field_config<0>(mask, defval, name, nullptr); }
+inline constexpr detail::conf_field_config<0> config(ioport_value mask, ioport_value defval, char const *name) { return detail::conf_field_config<0>(mask, defval, name); }
+inline constexpr detail::setting_config setting(ioport_value value, char const *name) { return detail::setting_config(value, name); }
+
+detail::dynamic_read_field_config vblank(::ioport_value mask, ::ioport_value defval, char const *tag);
+detail::dynamic_read_field_config hblank(::ioport_value mask, ::ioport_value defval, char const *tag);
 
 } // namespace fields
 
