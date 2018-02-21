@@ -77,12 +77,12 @@ public:
 	{ }
 
 	DECLARE_DRIVER_INIT(virus);
-	void virus(machine_config &config);
 
 protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void virus_map(address_map &map);
 
 private:
@@ -105,7 +105,7 @@ ADDRESS_MAP_START(acvirus_state::virus_map)
 	AM_RANGE(0x8000, 0xffff) AM_ROMBANK("rombank")
 ADDRESS_MAP_END
 
-MACHINE_CONFIG_START(acvirus_state::virus)
+MACHINE_CONFIG_START(acvirus_state::device_add_mconfig)
 	MCFG_CPU_ADD("maincpu", I8052, XTAL(12'000'000))
 	MCFG_CPU_PROGRAM_MAP(virus_map)
 
@@ -145,9 +145,9 @@ ROM_START( viruscl )
 	ROM_LOAD( "virus_cl_061_release.bin", 0x000000, 0x080000, CRC(a202e443) SHA1(33d5f4ebbacc817ab1e5dd572e8dc755f6c5e253) )
 ROM_END
 
-CONS( 1997, virusa, 0, 0, virus, virus, acvirus_state, 0, "Access", "Virus A", MACHINE_NOT_WORKING|MACHINE_NO_SOUND )
-CONS( 1999, virusb, 0, 0, virus, virus, acvirus_state, 0, "Access", "Virus B (Ver. T)", MACHINE_NOT_WORKING|MACHINE_NO_SOUND )
-CONS( 2002, virusc, 0, 0, virus, virus, acvirus_state, 0, "Access", "Virus C", MACHINE_NOT_WORKING|MACHINE_NO_SOUND )
-CONS( 2001, virusrck, 0, 0, virus, virus, acvirus_state, 0, "Access", "Virus Rack (Ver. T)", MACHINE_NOT_WORKING|MACHINE_NO_SOUND )
-CONS( 2002, virusrckxl, 0, 0, virus, virus, acvirus_state, 0, "Access", "Virus Rack XL", MACHINE_NOT_WORKING|MACHINE_NO_SOUND )
-CONS( 2004, viruscl, 0, 0, virus, virus, acvirus_state, 0, "Access", "Virus Classic", MACHINE_NOT_WORKING|MACHINE_NO_SOUND )
+CONS( 1997, virusa,     0, 0, virus, acvirus_state, 0, "Access", "Virus A", MACHINE_NOT_WORKING|MACHINE_NO_SOUND )
+CONS( 1999, virusb,     0, 0, virus, acvirus_state, 0, "Access", "Virus B (Ver. T)", MACHINE_NOT_WORKING|MACHINE_NO_SOUND )
+CONS( 2002, virusc,     0, 0, virus, acvirus_state, 0, "Access", "Virus C", MACHINE_NOT_WORKING|MACHINE_NO_SOUND )
+CONS( 2001, virusrck,   0, 0, virus, acvirus_state, 0, "Access", "Virus Rack (Ver. T)", MACHINE_NOT_WORKING|MACHINE_NO_SOUND )
+CONS( 2002, virusrckxl, 0, 0, virus, acvirus_state, 0, "Access", "Virus Rack XL", MACHINE_NOT_WORKING|MACHINE_NO_SOUND )
+CONS( 2004, viruscl,    0, 0, virus, acvirus_state, 0, "Access", "Virus Classic", MACHINE_NOT_WORKING|MACHINE_NO_SOUND )

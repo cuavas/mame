@@ -58,8 +58,6 @@ public:
 		m_palette(*this, "palette")
 	{ }
 
-	void sbrkout(machine_config &config);
-
 protected:
 	DECLARE_WRITE8_MEMBER(irq_ack_w);
 	virtual DECLARE_READ8_MEMBER(switches_r);
@@ -82,6 +80,7 @@ protected:
 	TIMER_CALLBACK_MEMBER(scanline_callback);
 	TIMER_CALLBACK_MEMBER(pot_trigger_callback);
 	void update_nmi_state();
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_map(address_map &map);
 
 private:
@@ -103,12 +102,10 @@ private:
 
 class sbrkoutct_state : public sbrkout_state
 {
-public:
-	using sbrkout_state::sbrkout_state;
-	void sbrkoutct(machine_config &config);
-
 protected:
+	using sbrkout_state::sbrkout_state;
 	virtual DECLARE_READ8_MEMBER(switches_r) override;
+	virtual void device_add_mconfig(machine_config &config) override;
 };
 
 
@@ -577,7 +574,7 @@ GFXDECODE_END
  *
  *************************************/
 
-MACHINE_CONFIG_START(sbrkout_state::sbrkout)
+MACHINE_CONFIG_START(sbrkout_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502,MAIN_CLOCK/16)       /* 375 KHz? Should be 750KHz? */
@@ -612,8 +609,8 @@ MACHINE_CONFIG_START(sbrkout_state::sbrkout)
 MACHINE_CONFIG_END
 
 
-MACHINE_CONFIG_START(sbrkoutct_state::sbrkoutct)
-	sbrkout(config);
+MACHINE_CONFIG_START(sbrkoutct_state::device_add_mconfig)
+	sbrkout_state::device_add_mconfig(config);
 
 	MCFG_DEVICE_MODIFY("outlatch")
 	MCFG_ADDRESSABLE_LATCH_Q2_OUT_CB(WRITELINE(sbrkoutct_state, serve_2_led_w))
@@ -713,7 +710,7 @@ ROM_END
  *
  *************************************/
 
-GAMEL( 1978, sbrkout,   0,       sbrkout,   sbrkout,   sbrkout_state,   0, ROT270, "Atari", "Super Breakout (rev 04)", MACHINE_SUPPORTS_SAVE, layout_sbrkout )
-GAMEL( 1978, sbrkout3,  sbrkout, sbrkout,   sbrkout,   sbrkout_state,   0, ROT270, "Atari", "Super Breakout (rev 03)", MACHINE_SUPPORTS_SAVE, layout_sbrkout )
-GAMEL( 1978, sbrkoutc,  sbrkout, sbrkout,   sbrkoutc,  sbrkout_state,   0, ROT270, "Atari", "Super Breakout (Canyon and Vertical Breakout, prototype)", MACHINE_SUPPORTS_SAVE, layout_sbrkout )
-GAMEL( 1978, sbrkoutct, sbrkout, sbrkoutct, sbrkoutct, sbrkoutct_state, 0, ROT270, "Atari", "Super Breakout (Cocktail, prototype)", MACHINE_SUPPORTS_SAVE, layout_sbrkout )
+GAMEL( 1978, sbrkout,   0,       sbrkout,   sbrkout_state,   0, ROT270, "Atari", "Super Breakout (rev 04)", MACHINE_SUPPORTS_SAVE, layout_sbrkout )
+GAMEL( 1978, sbrkout3,  sbrkout, sbrkout,   sbrkout_state,   0, ROT270, "Atari", "Super Breakout (rev 03)", MACHINE_SUPPORTS_SAVE, layout_sbrkout )
+GAMEL( 1978, sbrkoutc,  sbrkout, sbrkoutc,  sbrkout_state,   0, ROT270, "Atari", "Super Breakout (Canyon and Vertical Breakout, prototype)", MACHINE_SUPPORTS_SAVE, layout_sbrkout )
+GAMEL( 1978, sbrkoutct, sbrkout, sbrkoutct, sbrkoutct_state, 0, ROT270, "Atari", "Super Breakout (Cocktail, prototype)", MACHINE_SUPPORTS_SAVE, layout_sbrkout )

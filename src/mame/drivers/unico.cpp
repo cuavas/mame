@@ -566,7 +566,7 @@ GFXDECODE_END
                                 Burglar X
 ***************************************************************************/
 
-MACHINE_CONFIG_START(unico_state::burglarx)
+MACHINE_CONFIG_START(unico_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, 32_MHz_XTAL/2) /* 16MHz */
@@ -603,7 +603,7 @@ MACHINE_CONFIG_END
                                 Zero Point
 ***************************************************************************/
 
-MACHINE_CONFIG_START(zeropnt_state::zeropnt)
+MACHINE_CONFIG_START(zeropnt_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, 32_MHz_XTAL/2) /* 16MHz */
@@ -640,7 +640,7 @@ MACHINE_CONFIG_END
                                 Zero Point 2
 ***************************************************************************/
 
-MACHINE_CONFIG_START(zeropnt2_state::zeropnt2)
+MACHINE_CONFIG_START(zeropnt2_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68EC020, 32_MHz_XTAL/2) /* 16MHz */
@@ -1029,8 +1029,8 @@ ROM_END
 
 ***************************************************************************/
 
-GAME( 1997, burglarx, 0,       burglarx, burglarx, unico_state,    0, ROT0, "Unico", "Burglar X" ,         0 )
-GAME( 1998, zeropnt,  0,       zeropnt,  zeropnt,  zeropnt_state,  0, ROT0, "Unico", "Zero Point (set 1)", 0 )
-GAME( 1998, zeropnta, zeropnt, zeropnt,  zeropnt,  zeropnt_state,  0, ROT0, "Unico", "Zero Point (set 2)", 0 )
-GAME( 1998, zeropntj, zeropnt, zeropnt,  zeropnt,  zeropnt_state,  0, ROT0, "Unico", "Zero Point (Japan)", 0 )
-GAME( 1999, zeropnt2, 0,       zeropnt2, zeropnt2, zeropnt2_state, 0, ROT0, "Unico", "Zero Point 2",       0 )
+GAME( 1997, burglarx, 0,       burglarx, unico_state,    0, ROT0, "Unico", "Burglar X" ,         0 )
+GAME( 1998, zeropnt,  0,       zeropnt,  zeropnt_state,  0, ROT0, "Unico", "Zero Point (set 1)", 0 )
+GAME( 1998, zeropnta, zeropnt, zeropnt,  zeropnt_state,  0, ROT0, "Unico", "Zero Point (set 2)", 0 )
+GAME( 1998, zeropntj, zeropnt, zeropnt,  zeropnt_state,  0, ROT0, "Unico", "Zero Point (Japan)", 0 )
+GAME( 1999, zeropnt2, 0,       zeropnt2, zeropnt2_state, 0, ROT0, "Unico", "Zero Point 2",       0 )

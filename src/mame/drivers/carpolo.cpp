@@ -231,7 +231,7 @@ GFXDECODE_END
  *
  *************************************/
 
-MACHINE_CONFIG_START(carpolo_state::carpolo)
+MACHINE_CONFIG_START(carpolo_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, XTAL(11'289'000)/12)       /* 940.75 kHz */
@@ -358,4 +358,4 @@ DRIVER_INIT_MEMBER(carpolo_state,carpolo)
 		ROM[i] ^= 0x0f;
 }
 
-GAME( 1977, carpolo, 0, carpolo, carpolo, carpolo_state, carpolo, ROT0, "Exidy", "Car Polo", MACHINE_SUPPORTS_SAVE | MACHINE_NO_SOUND )
+GAME( 1977, carpolo, 0, carpolo, carpolo_state, carpolo, ROT0, "Exidy", "Car Polo", MACHINE_SUPPORTS_SAVE | MACHINE_NO_SOUND )

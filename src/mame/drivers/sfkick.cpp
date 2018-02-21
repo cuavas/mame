@@ -190,7 +190,6 @@ public:
 	{ }
 
 	DECLARE_DRIVER_INIT(sfkick);
-	void sfkick(machine_config &config);
 
 protected:
 	DECLARE_WRITE8_MEMBER(page0_w);
@@ -204,6 +203,7 @@ protected:
 	void sfkick_remap_banks();
 	void sfkick_bank_set(int num, int data);
 	DECLARE_WRITE_LINE_MEMBER(irqhandler);
+	virtual void device_add_mconfig(machine_config &config) override;
 	void sfkick_io_map(address_map &map);
 	void sfkick_map(address_map &map);
 	void sfkick_sound_io_map(address_map &map);
@@ -589,7 +589,7 @@ WRITE_LINE_MEMBER(sfkick_state::irqhandler)
 	m_soundcpu->set_input_line_and_vector(0, state ? ASSERT_LINE : CLEAR_LINE, 0xff);
 }
 
-MACHINE_CONFIG_START(sfkick_state::sfkick)
+MACHINE_CONFIG_START(sfkick_state::device_add_mconfig)
 
 	MCFG_CPU_ADD("maincpu",Z80,MASTER_CLOCK/6)
 	MCFG_CPU_PROGRAM_MAP(sfkick_map)
@@ -701,6 +701,6 @@ ROM_START( spinkick )
 ROM_END
 
 
-GAME( 1988, sfkick,   0,      sfkick, sfkick, sfkick_state, sfkick, ROT90, "Haesung/HJ Corp", "Super Free Kick (set 1)", 0 )
-GAME( 198?, sfkicka,  sfkick, sfkick, sfkick, sfkick_state, sfkick, ROT90, "Haesung", "Super Free Kick (set 2)", 0 )
-GAME( 1988, spinkick, sfkick, sfkick, sfkick, sfkick_state, sfkick, ROT90, "Haesung/Seojin", "Hec's Spinkick", 0 )
+GAME( 1988, sfkick,   0,      sfkick, sfkick_state, sfkick, ROT90, "Haesung/HJ Corp", "Super Free Kick (set 1)", 0 )
+GAME( 198?, sfkicka,  sfkick, sfkick, sfkick_state, sfkick, ROT90, "Haesung",         "Super Free Kick (set 2)", 0 )
+GAME( 1988, spinkick, sfkick, sfkick, sfkick_state, sfkick, ROT90, "Haesung/Seojin",  "Hec's Spinkick", 0 )

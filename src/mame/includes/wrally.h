@@ -24,8 +24,6 @@ public:
 	{
 	}
 
-	void wrally(machine_config &config);
-
 protected:
 	DECLARE_READ8_MEMBER(shareram_r);
 	DECLARE_WRITE8_MEMBER(shareram_w);
@@ -42,8 +40,10 @@ protected:
 
 	uint32_t screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 
+protected:
 	virtual void machine_start() override;
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void mcu_hostmem_map(address_map &map);
 	void oki_map(address_map &map);
 	void wrally_map(address_map &map);

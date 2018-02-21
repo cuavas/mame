@@ -75,9 +75,8 @@ public:
 		, m_in(*this, "IN%u", 1)
 	{ }
 
-	void big10(machine_config &config);
-
 protected:
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_io(address_map &map);
 	void main_map(address_map &map);
 
@@ -225,7 +224,7 @@ INPUT_PORTS_END
 *           Machine Driver            *
 **************************************/
 
-MACHINE_CONFIG_START(big10_state::big10)
+MACHINE_CONFIG_START(big10_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80, MASTER_CLOCK/6)    /* guess */
@@ -267,5 +266,5 @@ ROM_END
 *           Game Driver(s)            *
 **************************************/
 
-/*    YEAR  NAME      PARENT    MACHINE   INPUT     STATE          INIT    ROT      COMPANY     FULLNAME   FLAGS  */
-GAME( 1985, big10,    0,        big10,    big10,    big10_state,   0,      ROT0,   "Success",  "Big 10",   0 )
+//    YEAR  NAME      PARENT    INPUT     STATE          INIT    ROT      COMPANY     FULLNAME   FLAGS
+GAME( 1985, big10,    0,        big10,    big10_state,   0,      ROT0,   "Success",  "Big 10",   0 )

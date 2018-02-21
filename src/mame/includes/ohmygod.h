@@ -24,7 +24,6 @@ public:
 
 	DECLARE_DRIVER_INIT(ohmygod);
 	DECLARE_DRIVER_INIT(naname);
-	void ohmygod(machine_config &config);
 
 protected:
 	DECLARE_WRITE16_MEMBER(ohmygod_ctrl_w);
@@ -38,6 +37,7 @@ protected:
 	virtual void video_start() override;
 	uint32_t screen_update_ohmygod(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 	void draw_sprites( bitmap_ind16 &bitmap, const rectangle &cliprect );
+	virtual void device_add_mconfig(machine_config &config) override;
 	void ohmygod_map(address_map &map);
 	void oki_map(address_map &map);
 

@@ -5,6 +5,10 @@
     Star Fire/Fire One system
 
 ***************************************************************************/
+#ifndef MAME_INCLUDES_STARFIRE_H
+#define MAME_INCLUDES_STARFIRE_H
+
+#pragma once
 
 #include "sound/samples.h"
 #include "screen.h"
@@ -22,24 +26,22 @@
 #define STARFIRE_NUM_PENS       (0x40)
 
 
-class starfire_state : public driver_device
+class fireone_state : public driver_device
 {
 public:
-	starfire_state(const machine_config &mconfig, device_type type, const char *tag)
+	fireone_state(const machine_config &mconfig, device_type type, const char *tag)
 		: driver_device(mconfig, type, tag),
 		m_starfire_colorram(*this, "colorram"),
 		m_starfire_videoram(*this, "videoram"),
-		m_samples(*this, "samples"),
 		m_nmi(*this, "NMI"),
 		m_maincpu(*this, "maincpu"),
-		m_screen(*this, "screen") { }
+		m_screen(*this, "screen")
+	{ }
 
 	required_shared_ptr<uint8_t> m_starfire_colorram;
 	required_shared_ptr<uint8_t> m_starfire_videoram;
-	optional_device<samples_device> m_samples;
 	optional_ioport m_nmi;
 
-	uint8_t m_prev_sound;
 	uint8_t m_fireone_select;
 
 	uint8_t m_starfire_vidctrl;
@@ -54,15 +56,12 @@ public:
 	bitmap_rgb32 m_starfire_screen;
 	DECLARE_WRITE8_MEMBER(starfire_scratch_w);
 	DECLARE_READ8_MEMBER(starfire_scratch_r);
-	DECLARE_READ8_MEMBER(starfire_input_r);
 	DECLARE_READ8_MEMBER(fireone_input_r);
-	DECLARE_WRITE8_MEMBER(starfire_sound_w);
 	DECLARE_WRITE8_MEMBER(fireone_sound_w);
 	DECLARE_WRITE8_MEMBER(starfire_colorram_w);
 	DECLARE_READ8_MEMBER(starfire_colorram_r);
 	DECLARE_WRITE8_MEMBER(starfire_videoram_w);
 	DECLARE_READ8_MEMBER(starfire_videoram_r);
-	DECLARE_DRIVER_INIT(starfire);
 	DECLARE_DRIVER_INIT(fireone);
 	virtual void video_start() override;
 	uint32_t screen_update_starfire(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
@@ -71,7 +70,30 @@ public:
 	void get_pens(pen_t *pens);
 	required_device<cpu_device> m_maincpu;
 	required_device<screen_device> m_screen;
-	void fireone(machine_config &config);
-	void starfire(machine_config &config);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_map(address_map &map);
 };
+
+
+class starfire_state : public fireone_state
+{
+public:
+	starfire_state(const machine_config &mconfig, device_type type, const char *tag)
+		: fireone_state(mconfig, type, tag),
+		m_samples(*this, "samples")
+	{ }
+
+	DECLARE_DRIVER_INIT(starfire);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	DECLARE_READ8_MEMBER(starfire_input_r);
+	DECLARE_WRITE8_MEMBER(starfire_sound_w);
+
+	required_device<samples_device> m_samples;
+	uint8_t m_prev_sound;
+};
+
+#endif // MAME_INCLUDES_STARFIRE_H

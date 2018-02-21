@@ -32,7 +32,6 @@ public:
 	{ }
 
 	DECLARE_DRIVER_INIT(blstroid);
-	void blstroid(machine_config &config);
 
 protected:
 	virtual void machine_reset() override;
@@ -43,6 +42,7 @@ protected:
 	DECLARE_VIDEO_START(blstroid);
 	uint32_t screen_update_blstroid(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_map(address_map &map);
 
 	virtual void device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr) override;

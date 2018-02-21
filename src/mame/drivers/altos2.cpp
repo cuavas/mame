@@ -36,14 +36,13 @@ public:
 		, m_p_videoram(*this, "videoram")
 	{ }
 
-	void altos2(machine_config &config);
-
 protected:
 	DECLARE_WRITE8_MEMBER(video_mode_w);
 
 	u32 screen_update(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
 
 	virtual void machine_reset() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void io_map(address_map &map);
 	void mem_map(address_map &map);
 
@@ -99,7 +98,7 @@ static const z80_daisy_config daisy_chain[] =
 	{ nullptr }
 };
 
-MACHINE_CONFIG_START(altos2_state::altos2)
+MACHINE_CONFIG_START(altos2_state::device_add_mconfig)
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu",Z80, XTAL(4'000'000)) // unknown clock
 	MCFG_CPU_PROGRAM_MAP(mem_map)
@@ -145,4 +144,4 @@ ROM_START( altos2 )
 	ROM_LOAD( "us_v1.1_14410.u34", 0x0000, 0x2000, CRC(0ebb78bf) SHA1(96a1f7d34ff35037cbbc93049c0e2b9c9f11f1db) )
 ROM_END
 
-COMP( 1983, altos2, 0, 0, altos2, altos2, altos2_state, 0, "Altos", "Altos II Terminal", MACHINE_IS_SKELETON )
+COMP( 1983, altos2, 0, 0, altos2, altos2_state, 0, "Altos", "Altos II Terminal", MACHINE_IS_SKELETON )

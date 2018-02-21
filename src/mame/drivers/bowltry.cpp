@@ -42,9 +42,8 @@ public:
 		, m_maincpu(*this, "maincpu")
 	{ }
 
-	void bowltry(machine_config &config);
-
 protected:
+	virtual void device_add_mconfig(machine_config &config) override;
 	void bowltry_map(address_map &map);
 
 	uint32_t screen_update_bowltry(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
@@ -98,7 +97,7 @@ uint32_t bowltry_state::screen_update_bowltry(screen_device &screen, bitmap_rgb3
 
 
 
-MACHINE_CONFIG_START(bowltry_state::bowltry)
+MACHINE_CONFIG_START(bowltry_state::device_add_mconfig)
 	MCFG_CPU_ADD("maincpu", H83008, 16000000 )
 	MCFG_CPU_PROGRAM_MAP( bowltry_map )
 //  MCFG_CPU_VBLANK_INT_DRIVER("screen", bowltry_state,  irq0_line_hold) // uses vector $64, IMIAB according to the manual (timer/compare B, internal to the CPU)
@@ -130,4 +129,4 @@ ROM_START( bowltry )
 ROM_END
 
 
-GAME( 200?, bowltry,    0,          bowltry,  bowltry, bowltry_state,  0, ROT0, "Atlus",        "Bowling Try",MACHINE_IS_SKELETON )
+GAME( 200?, bowltry,    0,          bowltry, bowltry_state,  0, ROT0, "Atlus",        "Bowling Try", MACHINE_IS_SKELETON )

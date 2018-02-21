@@ -74,8 +74,6 @@ public:
 		, m_crtc(*this, "mc6845")
 	{ }
 
-	void a6809(machine_config &config);
-
 protected:
 	void kbd_put(u8 data);
 	DECLARE_READ8_MEMBER(videoram_r);
@@ -86,6 +84,7 @@ protected:
 	TIMER_DEVICE_CALLBACK_MEMBER(a6809_c);
 	TIMER_DEVICE_CALLBACK_MEMBER(a6809_p);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void a6809_io(address_map &map);
 	void a6809_mem(address_map &map);
 
@@ -227,7 +226,7 @@ void a6809_state::kbd_put(u8 data)
 	m_via->write_cb1(0);
 }
 
-MACHINE_CONFIG_START(a6809_state::a6809)
+MACHINE_CONFIG_START(a6809_state::device_add_mconfig)
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", MC6809, XTAL(4'000'000))
 	MCFG_CPU_PROGRAM_MAP(a6809_mem)
@@ -279,5 +278,5 @@ ROM_END
 
 /* Driver */
 
-/*    YEAR   NAME   PARENT  COMPAT   MACHINE    INPUT  CLASS           INIT    COMPANY   FULLNAME       FLAGS */
-COMP( 1980, a6809,  0,      0,       a6809,     a6809, a6809_state,     0,     "Acorn",  "System 3 (6809 CPU)", 0 )
+//    YEAR   NAME   PARENT  COMPAT   INPUT  CLASS           INIT    COMPANY   FULLNAME               FLAGS
+COMP( 1980, a6809,  0,      0,       a6809, a6809_state,     0,     "Acorn",  "System 3 (6809 CPU)", 0 )

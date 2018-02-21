@@ -298,7 +298,7 @@ static GFXDECODE_START( ultratnk )
 GFXDECODE_END
 
 
-MACHINE_CONFIG_START(ultratnk_state::ultratnk)
+MACHINE_CONFIG_START(ultratnk_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, PIXEL_CLOCK / 8)
@@ -361,4 +361,4 @@ ROM_START( ultratnk )
 ROM_END
 
 
-GAME( 1978, ultratnk, 0, ultratnk, ultratnk, ultratnk_state, 0, 0, "Atari (Kee Games)", "Ultra Tank", MACHINE_SUPPORTS_SAVE )
+GAME( 1978, ultratnk, 0, ultratnk, ultratnk_state, 0, 0, "Atari (Kee Games)", "Ultra Tank", MACHINE_SUPPORTS_SAVE )

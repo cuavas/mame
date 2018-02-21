@@ -27,7 +27,6 @@ public:
 	{ }
 
 	DECLARE_DRIVER_INIT(rampart);
-	void rampart(machine_config &config);
 
 protected:
 	virtual void machine_reset() override;
@@ -38,6 +37,7 @@ protected:
 	uint32_t screen_update_rampart(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 	void rampart_bitmap_render(bitmap_ind16 &bitmap, const rectangle &cliprect);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_map(address_map &map);
 
 private:

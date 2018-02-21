@@ -156,7 +156,7 @@ Fax                  1982  6502   FXL, FLA
  *
  *************************************/
 
-CUSTOM_INPUT_MEMBER(exidy_state::teetert_input_r)
+CUSTOM_INPUT_MEMBER(teetert_state::teetert_input_r)
 {
 	uint8_t dial = ioport("DIAL")->read();
 	int result = 0;
@@ -184,7 +184,7 @@ CUSTOM_INPUT_MEMBER(exidy_state::teetert_input_r)
  *
  *************************************/
 
-WRITE8_MEMBER(exidy_state::fax_bank_select_w)
+WRITE8_MEMBER(fax_state::fax_bank_select_w)
 {
 	membank("bank1")->set_entry(data & 0x1f);
 
@@ -217,7 +217,7 @@ ADDRESS_MAP_START(exidy_state::exidy_map)
 ADDRESS_MAP_END
 
 
-ADDRESS_MAP_START(exidy_state::sidetrac_map)
+ADDRESS_MAP_START(sidetrac_state::sidetrac_map)
 	AM_IMPORT_FROM(exidy_map)
 	AM_RANGE(0x0800, 0x3fff) AM_ROM
 	AM_RANGE(0x4800, 0x4fff) AM_ROM AM_SHARE("characterram")
@@ -227,7 +227,7 @@ ADDRESS_MAP_START(exidy_state::sidetrac_map)
 ADDRESS_MAP_END
 
 
-ADDRESS_MAP_START(exidy_state::targ_map)
+ADDRESS_MAP_START(targ_state::targ_map)
 	AM_IMPORT_FROM(exidy_map)
 	AM_RANGE(0x0800, 0x3fff) AM_ROM
 	AM_RANGE(0x4800, 0x4fff) AM_RAM AM_SHARE("characterram")
@@ -237,7 +237,7 @@ ADDRESS_MAP_START(exidy_state::targ_map)
 ADDRESS_MAP_END
 
 
-ADDRESS_MAP_START(exidy_state::spectar_map)
+ADDRESS_MAP_START(spectar_state::spectar_map)
 	AM_IMPORT_FROM(exidy_map)
 	AM_RANGE(0x0800, 0x3fff) AM_ROM
 	AM_RANGE(0x4800, 0x4fff) AM_RAM AM_SHARE("characterram")
@@ -247,7 +247,7 @@ ADDRESS_MAP_START(exidy_state::spectar_map)
 ADDRESS_MAP_END
 
 
-ADDRESS_MAP_START(exidy_state::rallys_map)
+ADDRESS_MAP_START(rallys_state::rallys_map)
 	AM_RANGE(0x0000, 0x03ff) AM_RAM
 	AM_RANGE(0x0800, 0x3fff) AM_ROM
 	AM_RANGE(0x4000, 0x43ff) AM_MIRROR(0x0400) AM_RAM AM_SHARE("videoram")
@@ -269,7 +269,7 @@ ADDRESS_MAP_START(exidy_state::rallys_map)
 ADDRESS_MAP_END
 
 
-ADDRESS_MAP_START(exidy_state::venture_map)
+ADDRESS_MAP_START(venture_state::venture_map)
 	AM_IMPORT_FROM(exidy_map)
 	AM_RANGE(0x4800, 0x4fff) AM_RAM AM_SHARE("characterram")
 	AM_RANGE(0x5200, 0x520f) AM_DEVREADWRITE("pia0", pia6821_device, read, write)
@@ -277,7 +277,7 @@ ADDRESS_MAP_START(exidy_state::venture_map)
 ADDRESS_MAP_END
 
 
-ADDRESS_MAP_START(exidy_state::pepper2_map)
+ADDRESS_MAP_START(pepper2_state::pepper2_map)
 	AM_IMPORT_FROM(exidy_map)
 	AM_RANGE(0x4800, 0x4fff) AM_NOP
 	AM_RANGE(0x5200, 0x520f) AM_DEVREADWRITE("pia0", pia6821_device, read, write)
@@ -286,7 +286,7 @@ ADDRESS_MAP_START(exidy_state::pepper2_map)
 ADDRESS_MAP_END
 
 
-ADDRESS_MAP_START(exidy_state::fax_map)
+ADDRESS_MAP_START(fax_state::fax_map)
 	AM_IMPORT_FROM(exidy_map)
 	AM_RANGE(0x0400, 0x07ff) AM_RAM
 	AM_RANGE(0x1a00, 0x1a00) AM_READ_PORT("IN4")
@@ -613,7 +613,7 @@ static INPUT_PORTS_START( teetert )
 	PORT_START("IN0")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT( 0x44, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, exidy_state,teetert_input_r, nullptr)
+	PORT_BIT( 0x44, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, teetert_state, teetert_input_r, nullptr)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -802,7 +802,7 @@ GFXDECODE_END
  *
  *************************************/
 
-MACHINE_START_MEMBER(exidy_state,teetert)
+MACHINE_START_MEMBER(teetert_state,teetert)
 {
 	save_item(NAME(m_last_dial));
 }
@@ -813,7 +813,7 @@ MACHINE_START_MEMBER(exidy_state,teetert)
  *
  *************************************/
 
-MACHINE_CONFIG_START(exidy_state::base)
+MACHINE_CONFIG_START(exidy_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, EXIDY_CPU_CLOCK)
@@ -832,8 +832,8 @@ MACHINE_CONFIG_START(exidy_state::base)
 MACHINE_CONFIG_END
 
 
-MACHINE_CONFIG_START(exidy_state::sidetrac)
-	base(config);
+MACHINE_CONFIG_START(sidetrac_state::device_add_mconfig)
+	exidy_state::device_add_mconfig(config);
 
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
@@ -844,8 +844,8 @@ MACHINE_CONFIG_START(exidy_state::sidetrac)
 MACHINE_CONFIG_END
 
 
-MACHINE_CONFIG_START(exidy_state::targ)
-	base(config);
+MACHINE_CONFIG_START(targ_state::device_add_mconfig)
+	exidy_state::device_add_mconfig(config);
 
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
@@ -856,8 +856,8 @@ MACHINE_CONFIG_START(exidy_state::targ)
 MACHINE_CONFIG_END
 
 
-MACHINE_CONFIG_START(exidy_state::spectar)
-	base(config);
+MACHINE_CONFIG_START(spectar_state::device_add_mconfig)
+	exidy_state::device_add_mconfig(config);
 
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
@@ -868,8 +868,8 @@ MACHINE_CONFIG_START(exidy_state::spectar)
 MACHINE_CONFIG_END
 
 
-MACHINE_CONFIG_START(exidy_state::rallys)
-	spectar(config);
+MACHINE_CONFIG_START(rallys_state::device_add_mconfig)
+	spectar_state::device_add_mconfig(config);
 
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
@@ -877,8 +877,8 @@ MACHINE_CONFIG_START(exidy_state::rallys)
 MACHINE_CONFIG_END
 
 
-MACHINE_CONFIG_START(exidy_state::venture)
-	base(config);
+MACHINE_CONFIG_START(venture_state::device_add_mconfig)
+	exidy_state::device_add_mconfig(config);
 
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
@@ -891,20 +891,19 @@ MACHINE_CONFIG_START(exidy_state::venture)
 MACHINE_CONFIG_END
 
 
-MACHINE_CONFIG_START(exidy_state::teetert)
-	venture(config);
+MACHINE_CONFIG_START(teetert_state::device_add_mconfig)
+	venture_state::device_add_mconfig(config);
 
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PERIODIC_INT_DRIVER(exidy_state, nmi_line_pulse, 10*60)
 
-	MCFG_MACHINE_START_OVERRIDE(exidy_state, teetert )
-
+	MCFG_MACHINE_START_OVERRIDE(teetert_state, teetert)
 MACHINE_CONFIG_END
 
 
-MACHINE_CONFIG_START(exidy_state::mtrap)
-	venture(config);
+MACHINE_CONFIG_START(mtrap_state::device_add_mconfig)
+	venture_state::device_add_mconfig(config);
 
 	/* basic machine hardware */
 
@@ -915,8 +914,8 @@ MACHINE_CONFIG_START(exidy_state::mtrap)
 MACHINE_CONFIG_END
 
 
-MACHINE_CONFIG_START(exidy_state::pepper2)
-	venture(config);
+MACHINE_CONFIG_START(pepper2_state::device_add_mconfig)
+	venture_state::device_add_mconfig(config);
 
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
@@ -924,8 +923,8 @@ MACHINE_CONFIG_START(exidy_state::pepper2)
 MACHINE_CONFIG_END
 
 
-MACHINE_CONFIG_START(exidy_state::fax)
-	pepper2(config);
+MACHINE_CONFIG_START(fax_state::device_add_mconfig)
+	pepper2_state::device_add_mconfig(config);
 
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
@@ -1589,7 +1588,7 @@ ROM_END
  *
  *************************************/
 
-DRIVER_INIT_MEMBER(exidy_state,sidetrac)
+DRIVER_INIT_MEMBER(sidetrac_state,sidetrac)
 {
 	exidy_video_config(0x00, 0x00, false);
 
@@ -1600,7 +1599,7 @@ DRIVER_INIT_MEMBER(exidy_state,sidetrac)
 }
 
 
-DRIVER_INIT_MEMBER(exidy_state,targ)
+DRIVER_INIT_MEMBER(targ_state,targ)
 {
 	exidy_video_config(0x00, 0x00, false);
 
@@ -1611,7 +1610,7 @@ DRIVER_INIT_MEMBER(exidy_state,targ)
 }
 
 
-DRIVER_INIT_MEMBER(exidy_state,spectar)
+DRIVER_INIT_MEMBER(spectar_state,spectar)
 {
 	exidy_video_config(0x00, 0x00, false);
 
@@ -1621,7 +1620,7 @@ DRIVER_INIT_MEMBER(exidy_state,spectar)
 	m_color_latch[0] = 0x09;
 }
 
-DRIVER_INIT_MEMBER(exidy_state,rallys)
+DRIVER_INIT_MEMBER(rallys_state,rallys)
 {
 	exidy_video_config(0x00, 0x00, false);
 
@@ -1631,7 +1630,7 @@ DRIVER_INIT_MEMBER(exidy_state,rallys)
 	m_color_latch[0] = 0x09;
 }
 
-DRIVER_INIT_MEMBER(exidy_state,phantoma)
+DRIVER_INIT_MEMBER(rallys_state,phantoma)
 {
 	exidy_video_config(0x00, 0x00, false);
 
@@ -1646,34 +1645,32 @@ DRIVER_INIT_MEMBER(exidy_state,phantoma)
 }
 
 
-DRIVER_INIT_MEMBER(exidy_state,mtrap)
+DRIVER_INIT_MEMBER(mtrap_state,mtrap)
 {
 	exidy_video_config(0x14, 0x00, false);
 }
 
 
-DRIVER_INIT_MEMBER(exidy_state,venture)
+DRIVER_INIT_MEMBER(venture_state,venture)
 {
 	exidy_video_config(0x04, 0x04, false);
 }
 
 
-DRIVER_INIT_MEMBER(exidy_state,teetert)
+DRIVER_INIT_MEMBER(teetert_state,teetert)
 {
 	exidy_video_config(0x0c, 0x0c, false);
 }
 
 
-DRIVER_INIT_MEMBER(exidy_state,pepper2)
+DRIVER_INIT_MEMBER(pepper2_state,pepper2)
 {
 	exidy_video_config(0x14, 0x04, true);
 }
 
 
-DRIVER_INIT_MEMBER(exidy_state,fax)
+DRIVER_INIT_MEMBER(fax_state,fax)
 {
-	//address_space &space = m_maincpu->space(AS_PROGRAM);
-
 	exidy_video_config(0x04, 0x04, true);
 
 	membank("bank1")->configure_entries(0, 32, memregion("maincpu")->base() + 0x10000, 0x2000);
@@ -1687,37 +1684,37 @@ DRIVER_INIT_MEMBER(exidy_state,fax)
  *
  *************************************/
 
-GAME( 1979, sidetrac, 0,       sidetrac, sidetrac, exidy_state, sidetrac, ROT0, "Exidy",   "Side Trak", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE ) // "Side Track" on title screen, but cabinet/flyers/documentation clearly indicates otherwise, "Side Trak" it is
+GAME( 1979, sidetrac, 0,       sidetrac, sidetrac_state, sidetrac, ROT0, "Exidy",   "Side Trak", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE ) // "Side Track" on title screen, but cabinet/flyers/documentation clearly indicates otherwise, "Side Trak" it is
 
-GAME( 1980, targ,     0,       targ,     targ,     exidy_state, targ,     ROT0, "Exidy",   "Targ", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
-GAME( 1980, targc,    targ,    targ,     targ,     exidy_state, targ,     ROT0, "Exidy",   "Targ (cocktail?)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1980, targ,     0,       targ,     targ_state,     targ,     ROT0, "Exidy",   "Targ", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1980, targc,    targ,    targ,     targ_state,     targ,     ROT0, "Exidy",   "Targ (cocktail?)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
 
-GAME( 1980, spectar,  0,       spectar,  spectar,  exidy_state, spectar,  ROT0, "Exidy",   "Spectar (revision 3)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
-GAME( 1980, spectar1, spectar, spectar,  spectar,  exidy_state, spectar,  ROT0, "Exidy",   "Spectar (revision 1?)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
-GAME( 1984, spectarrf,spectar, spectar,  spectarrf,exidy_state, spectar,  ROT0, "bootleg (Recreativos Franco)", "Spectar (revision 2, bootleg)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
-GAME( 1980, rallys,   spectar, rallys,   rallys,   exidy_state, rallys,   ROT0, "bootleg (Novar)", "Rallys (bootleg of Spectar, set 1)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
-GAME( 1980, rallysa,  spectar, rallys,   rallys,   exidy_state, rallys,   ROT0, "bootleg (Musik Box Brescia)", "Rallys (bootleg of Spectar, set 2)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
-GAME( 1980, panzer,   spectar, rallys,   rallys,   exidy_state, rallys,   ROT0, "bootleg (Proel)", "Panzer (bootleg of Spectar)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
-GAME( 1980, phantoma, spectar, rallys,   phantoma, exidy_state, phantoma, ROT0, "bootleg (Jeutel)", "Phantomas (bootleg of Spectar)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
-GAME( 1980, phantom,  spectar, rallys,   phantoma, exidy_state, phantoma, ROT0, "bootleg (Proel)", "Phantom (bootleg of Spectar)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1980, spectar,  0,       spectar,  spectar_state,  spectar,  ROT0, "Exidy",   "Spectar (revision 3)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1980, spectar1, spectar, spectar,  spectar_state,  spectar,  ROT0, "Exidy",   "Spectar (revision 1?)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1984, spectarrf,spectar, spectarrf,spectar_state,  spectar,  ROT0, "bootleg (Recreativos Franco)", "Spectar (revision 2, bootleg)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1980, rallys,   spectar, rallys,   rallys_state,   rallys,   ROT0, "bootleg (Novar)", "Rallys (bootleg of Spectar, set 1)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1980, rallysa,  spectar, rallys,   rallys_state,   rallys,   ROT0, "bootleg (Musik Box Brescia)", "Rallys (bootleg of Spectar, set 2)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1980, panzer,   spectar, rallys,   rallys_state,   rallys,   ROT0, "bootleg (Proel)", "Panzer (bootleg of Spectar)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1980, phantoma, spectar, phantoma, rallys_state,   phantoma, ROT0, "bootleg (Jeutel)", "Phantomas (bootleg of Spectar)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1980, phantom,  spectar, phantoma, rallys_state,   phantoma, ROT0, "bootleg (Proel)", "Phantom (bootleg of Spectar)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
 
-GAME( 1981, mtrap,    0,       mtrap,    mtrap,    exidy_state, mtrap,    ROT0, "Exidy",   "Mouse Trap (version 5)", MACHINE_SUPPORTS_SAVE )
-GAME( 1981, mtrap2,   mtrap,   mtrap,    mtrap,    exidy_state, mtrap,    ROT0, "Exidy",   "Mouse Trap (version 2)", MACHINE_SUPPORTS_SAVE )
-GAME( 1981, mtrap3,   mtrap,   mtrap,    mtrap,    exidy_state, mtrap,    ROT0, "Exidy",   "Mouse Trap (version 3)", MACHINE_SUPPORTS_SAVE )
-GAME( 1981, mtrap4,   mtrap,   mtrap,    mtrap,    exidy_state, mtrap,    ROT0, "Exidy",   "Mouse Trap (version 4)", MACHINE_SUPPORTS_SAVE )
-GAME( 1981, mtrapb,   mtrap,   mtrap,    mtrap,    exidy_state, mtrap,    ROT0, "bootleg", "Mouse Trap (bootleg)", MACHINE_SUPPORTS_SAVE )
-GAME( 1981, mtrapb2,  mtrap,   mtrap,    mtrap,    exidy_state, mtrap,    ROT0, "bootleg", "Mouse Trap (version 4, bootleg)", MACHINE_SUPPORTS_SAVE )
+GAME( 1981, mtrap,    0,       mtrap,    mtrap_state,    mtrap,    ROT0, "Exidy",   "Mouse Trap (version 5)", MACHINE_SUPPORTS_SAVE )
+GAME( 1981, mtrap2,   mtrap,   mtrap,    mtrap_state,    mtrap,    ROT0, "Exidy",   "Mouse Trap (version 2)", MACHINE_SUPPORTS_SAVE )
+GAME( 1981, mtrap3,   mtrap,   mtrap,    mtrap_state,    mtrap,    ROT0, "Exidy",   "Mouse Trap (version 3)", MACHINE_SUPPORTS_SAVE )
+GAME( 1981, mtrap4,   mtrap,   mtrap,    mtrap_state,    mtrap,    ROT0, "Exidy",   "Mouse Trap (version 4)", MACHINE_SUPPORTS_SAVE )
+GAME( 1981, mtrapb,   mtrap,   mtrap,    mtrap_state,    mtrap,    ROT0, "bootleg", "Mouse Trap (bootleg)", MACHINE_SUPPORTS_SAVE )
+GAME( 1981, mtrapb2,  mtrap,   mtrap,    mtrap_state,    mtrap,    ROT0, "bootleg", "Mouse Trap (version 4, bootleg)", MACHINE_SUPPORTS_SAVE )
 
-GAME( 1981, venture,  0,       venture,  venture,  exidy_state, venture,  ROT0, "Exidy",   "Venture (version 5 set 1)", MACHINE_SUPPORTS_SAVE )
-GAME( 1981, venture2, venture, venture,  venture,  exidy_state, venture,  ROT0, "Exidy",   "Venture (version 5 set 2)", MACHINE_SUPPORTS_SAVE )
-GAME( 1981, venture4, venture, venture,  venture,  exidy_state, venture,  ROT0, "Exidy",   "Venture (version 4)", MACHINE_SUPPORTS_SAVE )
+GAME( 1981, venture,  0,       venture,  venture_state,  venture,  ROT0, "Exidy",   "Venture (version 5 set 1)", MACHINE_SUPPORTS_SAVE )
+GAME( 1981, venture2, venture, venture,  venture_state,  venture,  ROT0, "Exidy",   "Venture (version 5 set 2)", MACHINE_SUPPORTS_SAVE )
+GAME( 1981, venture4, venture, venture,  venture_state,  venture,  ROT0, "Exidy",   "Venture (version 4)", MACHINE_SUPPORTS_SAVE )
 
-GAME( 1982, teetert,  0,       teetert,  teetert,  exidy_state, teetert,  ROT0, "Exidy",   "Teeter Torture (prototype)", MACHINE_SUPPORTS_SAVE )
+GAME( 1982, teetert,  0,       teetert,  teetert_state,  teetert,  ROT0, "Exidy",   "Teeter Torture (prototype)", MACHINE_SUPPORTS_SAVE )
 
-GAME( 1982, pepper2,  0,       pepper2,  pepper2,  exidy_state, pepper2,  ROT0, "Exidy",   "Pepper II (version 8)", MACHINE_SUPPORTS_SAVE )
-GAME( 1982, pepper27, pepper2, pepper2,  pepper2,  exidy_state, pepper2,  ROT0, "Exidy",   "Pepper II (version 7)", MACHINE_SUPPORTS_SAVE )
+GAME( 1982, pepper2,  0,       pepper2,  pepper2_state,  pepper2,  ROT0, "Exidy",   "Pepper II (version 8)", MACHINE_SUPPORTS_SAVE )
+GAME( 1982, pepper27, pepper2, pepper2,  pepper2_state,  pepper2,  ROT0, "Exidy",   "Pepper II (version 7)", MACHINE_SUPPORTS_SAVE )
 
-GAME( 1982, hardhat,  0,       pepper2,  pepper2,  exidy_state, pepper2,  ROT0, "Exidy",   "Hard Hat", MACHINE_SUPPORTS_SAVE )
+GAME( 1982, hardhat,  0,       pepper2,  pepper2_state,  pepper2,  ROT0, "Exidy",   "Hard Hat", MACHINE_SUPPORTS_SAVE )
 
-GAME( 1983, fax,      0,       fax,      fax,      exidy_state, fax,      ROT0, "Exidy",   "FAX", MACHINE_SUPPORTS_SAVE )
-GAME( 1983, fax2,     fax,     fax,      fax,      exidy_state, fax,      ROT0, "Exidy",   "FAX 2", MACHINE_SUPPORTS_SAVE )
+GAME( 1983, fax,      0,       fax,      fax_state,      fax,      ROT0, "Exidy",   "FAX", MACHINE_SUPPORTS_SAVE )
+GAME( 1983, fax2,     fax,     fax,      fax_state,      fax,      ROT0, "Exidy",   "FAX 2", MACHINE_SUPPORTS_SAVE )

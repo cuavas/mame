@@ -41,8 +41,6 @@ public:
 		m_videoram(*this, "videoram")
 	{ }
 
-	void skydiver(machine_config &config);
-
 protected:
 	DECLARE_WRITE_LINE_MEMBER(nmion_w);
 	DECLARE_WRITE8_MEMBER(videoram_w);
@@ -72,6 +70,7 @@ protected:
 	void draw_sprites(bitmap_ind16 &bitmap, const rectangle &cliprect);
 
 	INTERRUPT_GEN_MEMBER(interrupt);
+	virtual void device_add_mconfig(machine_config &config) override;
 	void skydiver_map(address_map &map);
 
 private:

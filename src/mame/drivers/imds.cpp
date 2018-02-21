@@ -33,14 +33,13 @@ public:
 	{
 	}
 
-	void imds(machine_config &config);
-
 protected:
 	DECLARE_READ8_MEMBER(term_r);
 	DECLARE_READ8_MEMBER(term_status_r);
 	void kbd_put(u8 data);
 	uint8_t m_term_data;
 	virtual void machine_reset() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void imds_io(address_map &map);
 	void imds_mem(address_map &map);
 
@@ -95,7 +94,7 @@ void imds_state::machine_reset()
 //  nullptr
 //};
 
-MACHINE_CONFIG_START(imds_state::imds)
+MACHINE_CONFIG_START(imds_state::device_add_mconfig)
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", I8080, 4_MHz_XTAL) // no idea of clock.
 	MCFG_CPU_PROGRAM_MAP(imds_mem)
@@ -119,5 +118,5 @@ ROM_END
 
 /* Driver */
 
-/*    YEAR  NAME    PARENT  COMPAT   MACHINE    INPUT  STATE        INIT  COMPANY  FULLNAME        FLAGS */
-COMP( 1983, imds,     0,    0,       imds,      imds,  imds_state,  0,    "Intel", "Intellec MDS", MACHINE_NOT_WORKING | MACHINE_NO_SOUND)
+/*    YEAR  NAME    PARENT  COMPAT   INPUT  STATE        INIT  COMPANY  FULLNAME        FLAGS */
+COMP( 1983, imds,     0,    0,       imds,  imds_state,  0,    "Intel", "Intellec MDS", MACHINE_NOT_WORKING | MACHINE_NO_SOUND)

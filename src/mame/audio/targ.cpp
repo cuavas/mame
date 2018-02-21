@@ -165,7 +165,7 @@ SAMPLES_START_CB_MEMBER(exidy_state::spectar_audio_start)
 }
 
 
-SAMPLES_START_CB_MEMBER(exidy_state::targ_audio_start)
+SAMPLES_START_CB_MEMBER(targ_state::targ_audio_start)
 {
 	common_audio_start(TARG_MAXFREQ);
 
@@ -191,14 +191,14 @@ MACHINE_CONFIG_START(exidy_state::spectar_audio)
 MACHINE_CONFIG_END
 
 
-MACHINE_CONFIG_START(exidy_state::targ_audio)
+MACHINE_CONFIG_START(targ_state::targ_audio)
 
 	MCFG_SPEAKER_STANDARD_MONO("speaker")
 
 	MCFG_SOUND_ADD("samples", SAMPLES, 0)
 	MCFG_SAMPLES_CHANNELS(4)
 	MCFG_SAMPLES_NAMES(sample_names)
-	MCFG_SAMPLES_START_CB(exidy_state, targ_audio_start)
+	MCFG_SAMPLES_START_CB(targ_state, targ_audio_start)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "speaker", 0.25)
 
 	MCFG_SOUND_ADD("dac", DAC_1BIT, 0) MCFG_SOUND_ROUTE(ALL_OUTPUTS, "speaker", 0.99)

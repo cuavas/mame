@@ -139,7 +139,7 @@ GFXDECODE_END
 
 /* Machine Driver */
 
-MACHINE_CONFIG_START(nitedrvr_state::nitedrvr)
+MACHINE_CONFIG_START(nitedrvr_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, XTAL(12'096'000)/12) // 1 MHz
@@ -203,4 +203,4 @@ ROM_END
 
 /* Game Drivers */
 
-GAME( 1976, nitedrvr, 0, nitedrvr, nitedrvr, nitedrvr_state, 0, ROT0, "Atari", "Night Driver", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1976, nitedrvr, 0, nitedrvr, nitedrvr_state, 0, ROT0, "Atari", "Night Driver", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )

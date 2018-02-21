@@ -5,6 +5,10 @@
     Gaelco game hardware from 1991-1996
 
 ***************************************************************************/
+#ifndef MAME_INCLUDES_GAELCO_H
+#define MAME_INCLUDES_GAELCO_H
+
+#pragma once
 
 #include "machine/gen_latch.h"
 #include "machine/74259.h"
@@ -57,20 +61,46 @@ public:
 	TILE_GET_INFO_MEMBER(get_tile_info_gaelco_screen1);
 
 	virtual void machine_start() override;
-	DECLARE_VIDEO_START(bigkarnk);
 	DECLARE_VIDEO_START(maniacsq);
 
 	uint32_t screen_update_bigkarnk(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 	uint32_t screen_update_maniacsq(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 	void draw_sprites( screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect );
-	void bigkarnk(machine_config &config);
-	void thoop(machine_config &config);
-	void maniacsq(machine_config &config);
-	void squash(machine_config &config);
 	void bigkarnk_map(address_map &map);
 	void bigkarnk_snd_map(address_map &map);
 	void maniacsq_map(address_map &map);
 	void oki_map(address_map &map);
+};
+
+class bigkarnk_state : public gaelco_state
+{
+protected:
+	using gaelco_state::gaelco_state;
+	virtual void device_add_mconfig(machine_config &config) override;
+	DECLARE_VIDEO_START(bigkarnk);
+};
+
+class maniacsq_state : public gaelco_state
+{
+protected:
+	using gaelco_state::gaelco_state;
+	virtual void device_add_mconfig(machine_config &config) override;
+};
+
+class squash_state : public gaelco_state
+{
+protected:
+	using gaelco_state::gaelco_state;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void squash_map(address_map &map);
+};
+
+class thoop_state : public gaelco_state
+{
+protected:
+	using gaelco_state::gaelco_state;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void thoop_map(address_map &map);
 };
+
+#endif // MAME_INCLUDES_GAELCO_H

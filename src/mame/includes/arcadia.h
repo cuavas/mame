@@ -64,6 +64,7 @@ protected:
 	DECLARE_PALETTE_INIT(arcadia);
 	uint32_t screen_update_arcadia(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 	INTERRUPT_GEN_MEMBER(video_line);
+	virtual void device_add_mconfig(machine_config &config) override;
 	void arcadia_mem(address_map &map);
 
 	void draw_char(uint8_t *ch, int charcode, int y, int x);

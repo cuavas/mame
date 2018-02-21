@@ -26,8 +26,6 @@ public:
 		m_pos_d_ram(*this, "pos_d_ram")
 	{ }
 
-	void sprint8(machine_config &config);
-
 protected:
 	DECLARE_READ8_MEMBER(collision_r);
 	DECLARE_READ8_MEMBER(input_r);
@@ -51,6 +49,7 @@ protected:
 	void set_pens();
 	void draw_sprites(bitmap_ind16 &bitmap, const rectangle &cliprect);
 	void set_collision(int n);
+	void device_add_mconfig(machine_config &config) override;
 	void sprint8_audio(machine_config &config);
 	void sprint8_map(address_map &map);
 

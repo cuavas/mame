@@ -5,6 +5,10 @@
     Exidy 6502 hardware
 
 *************************************************************************/
+#ifndef MAME_INCLUDES_EXIDY_H
+#define MAME_INCLUDES_EXIDY_H
+
+#pragma once
 
 #include "sound/dac.h"
 #include "sound/samples.h"
@@ -79,24 +83,7 @@ public:
 	bitmap_ind16 m_motion_object_2_vid;
 	bitmap_ind16 m_motion_object_2_clip;
 
-	DECLARE_WRITE8_MEMBER(fax_bank_select_w);
 	DECLARE_READ8_MEMBER(exidy_interrupt_r);
-
-	DECLARE_CUSTOM_INPUT_MEMBER(teetert_input_r);
-
-	DECLARE_DRIVER_INIT(fax);
-	DECLARE_DRIVER_INIT(sidetrac);
-	DECLARE_DRIVER_INIT(pepper2);
-	DECLARE_DRIVER_INIT(targ);
-	DECLARE_DRIVER_INIT(rallys);
-	DECLARE_DRIVER_INIT(mtrap);
-	DECLARE_DRIVER_INIT(teetert);
-	DECLARE_DRIVER_INIT(venture);
-	DECLARE_DRIVER_INIT(spectar);
-	DECLARE_DRIVER_INIT(phantoma);
-
-	virtual void video_start() override;
-	DECLARE_MACHINE_START(teetert);
 
 	uint32_t screen_update_exidy(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 
@@ -118,39 +105,127 @@ public:
 	uint8_t m_tone_freq;
 	uint8_t m_tone_active;
 	uint8_t m_tone_pointer;
+	void adjust_sample(uint8_t freq);
+	void common_audio_start(int freq);
+
+protected:
+	virtual void video_start() override;
+	virtual void device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr) override;
+	virtual void device_add_mconfig(machine_config &config) override;
+	void spectar_audio(machine_config &config);
+	void exidy_map(address_map &map);
 	DECLARE_WRITE8_MEMBER(targ_audio_1_w);
 	DECLARE_WRITE8_MEMBER(targ_audio_2_w);
 	DECLARE_WRITE8_MEMBER(spectar_audio_2_w);
-	void adjust_sample(uint8_t freq);
-	void common_audio_start(int freq);
 	SAMPLES_START_CB_MEMBER(spectar_audio_start);
-	SAMPLES_START_CB_MEMBER(targ_audio_start);
+};
 
-	void base(machine_config &config);
-	void mtrap(machine_config &config);
-	void mtrap_cvsd_audio(machine_config &config);
-	void venture(machine_config &config);
-	void venture_audio(machine_config &config);
-	void fax(machine_config &config);
-	void teetert(machine_config &config);
-	void sidetrac(machine_config &config);
-	void spectar(machine_config &config);
-	void spectar_audio(machine_config &config);
-	void rallys(machine_config &config);
-	void pepper2(machine_config &config);
-	void targ(machine_config &config);
-	void targ_audio(machine_config &config);
-	void exidy_map(address_map &map);
-	void fax_map(address_map &map);
-	void pepper2_map(address_map &map);
-	void rallys_map(address_map &map);
+class sidetrac_state : public exidy_state
+{
+public:
+	using exidy_state::exidy_state;
+	DECLARE_DRIVER_INIT(sidetrac);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
 	void sidetrac_map(address_map &map);
-	void spectar_map(address_map &map);
+};
+
+class targ_state : public exidy_state
+{
+public:
+	using exidy_state::exidy_state;
+	DECLARE_DRIVER_INIT(targ);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	void targ_audio(machine_config &config);
 	void targ_map(address_map &map);
+	SAMPLES_START_CB_MEMBER(targ_audio_start);
+};
+
+class spectar_state : public exidy_state
+{
+public:
+	using exidy_state::exidy_state;
+	DECLARE_DRIVER_INIT(spectar);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	void spectar_map(address_map &map);
+};
+
+class rallys_state : public spectar_state
+{
+public:
+	using spectar_state::spectar_state;
+	DECLARE_DRIVER_INIT(rallys);
+	DECLARE_DRIVER_INIT(phantoma);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	void rallys_map(address_map &map);
+};
+
+class venture_state : public exidy_state
+{
+public:
+	using exidy_state::exidy_state;
+	DECLARE_DRIVER_INIT(venture);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	void venture_audio(machine_config &config);
 	void venture_map(address_map &map);
 	void venture_audio_map(address_map &map);
+};
+
+class teetert_state : public venture_state
+{
+public:
+	using venture_state::venture_state;
+	DECLARE_DRIVER_INIT(teetert);
+	DECLARE_CUSTOM_INPUT_MEMBER(teetert_input_r);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	DECLARE_MACHINE_START(teetert);
+};
+
+class mtrap_state : public venture_state
+{
+public:
+	using venture_state::venture_state;
+	DECLARE_DRIVER_INIT(mtrap);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	void mtrap_cvsd_audio(machine_config &config);
 	void cvsd_iomap(address_map &map);
 	void cvsd_map(address_map &map);
-protected:
-	virtual void device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr) override;
 };
+
+class pepper2_state : public venture_state
+{
+public:
+	using venture_state::venture_state;
+	DECLARE_DRIVER_INIT(pepper2);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	void pepper2_map(address_map &map);
+};
+
+class fax_state : public pepper2_state
+{
+public:
+	using pepper2_state::pepper2_state;
+	DECLARE_DRIVER_INIT(fax);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	void fax_map(address_map &map);
+	DECLARE_WRITE8_MEMBER(fax_bank_select_w);
+};
+
+#endif // MAME_INCLUDES_EXIDY_H

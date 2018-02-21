@@ -46,7 +46,6 @@ public:
 	{
 	}
 
-	void dragrace(machine_config &config);
 
 protected:
 	DECLARE_WRITE8_MEMBER(speed1_w);
@@ -65,6 +64,7 @@ protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void dragrace_map(address_map &map);
 
 private:

@@ -28,7 +28,6 @@ public:
 	{ }
 
 	DECLARE_INPUT_CHANGED_MEMBER(input_changed);
-	void tama(machine_config &config);
 
 protected:
 	DECLARE_WRITE8_MEMBER(speaker_w);
@@ -36,6 +35,7 @@ protected:
 	E0C6S46_PIXEL_UPDATE(pixel_update);
 
 	virtual void machine_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 
 private:
 	required_device<e0c6s46_device> m_maincpu;
@@ -134,7 +134,7 @@ INPUT_PORTS_END
 
 ***************************************************************************/
 
-MACHINE_CONFIG_START(tamag1_state::tama)
+MACHINE_CONFIG_START(tamag1_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", E0C6S46, 32.768_kHz_XTAL)
@@ -177,5 +177,5 @@ ROM_START( tama )
 ROM_END
 
 
-//    YEAR  NAME  PARENT CMP MACHINE INPUT STATE      INIT  COMPANY, FULLNAME, FLAGS
-CONS( 1997, tama, 0,      0, tama,   tama, tamag1_state, 0, "Bandai", "Tamagotchi (USA)", MACHINE_SUPPORTS_SAVE )
+//    YEAR  NAME  PARENT  CMP  INPUT  STATE         INIT  COMPANY   FULLNAME, FLAGS
+CONS( 1997, tama, 0,      0,   tama,  tamag1_state, 0,    "Bandai", "Tamagotchi (USA)", MACHINE_SUPPORTS_SAVE )

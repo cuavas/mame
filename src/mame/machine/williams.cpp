@@ -74,7 +74,7 @@ WRITE_LINE_MEMBER(williams_state::williams_snd_irq)
 	m_soundcpu->set_input_line(M6808_IRQ_LINE, combined_state ? ASSERT_LINE : CLEAR_LINE);
 }
 /* Same as above, but for second sound board */
-WRITE_LINE_MEMBER(blaster_state::williams_snd_irq_b)
+WRITE_LINE_MEMBER(blastkit_state::williams_snd_irq_b)
 {
 	int combined_state = m_pia_2b->irq_a_state() | m_pia_2b->irq_b_state();
 
@@ -90,7 +90,7 @@ WRITE_LINE_MEMBER(blaster_state::williams_snd_irq_b)
  *
  *************************************/
 
-WRITE_LINE_MEMBER(williams2_state::mysticm_main_irq)
+WRITE_LINE_MEMBER(mysticm_state::mysticm_main_irq)
 {
 	int combined_state = m_pia_0->irq_b_state() | m_pia_1->irq_a_state() | m_pia_1->irq_b_state();
 
@@ -99,7 +99,7 @@ WRITE_LINE_MEMBER(williams2_state::mysticm_main_irq)
 }
 
 
-WRITE_LINE_MEMBER(williams2_state::tshoot_main_irq)
+WRITE_LINE_MEMBER(tshoot_state::tshoot_main_irq)
 {
 	int combined_state = m_pia_0->irq_a_state() | m_pia_0->irq_b_state() | m_pia_1->irq_a_state() | m_pia_1->irq_b_state();
 
@@ -285,7 +285,7 @@ WRITE8_MEMBER(williams_state::williams_snd_cmd_w)
 	machine().scheduler().synchronize(timer_expired_delegate(FUNC(williams_state::williams_deferred_snd_cmd_w),this), data | 0xc0);
 }
 
-WRITE8_MEMBER(williams_state::playball_snd_cmd_w)
+WRITE8_MEMBER(playball_state::playball_snd_cmd_w)
 {
 	machine().scheduler().synchronize(timer_expired_delegate(FUNC(williams_state::williams_deferred_snd_cmd_w),this), data);
 }
@@ -426,12 +426,12 @@ WRITE8_MEMBER(williams2_state::williams2_7segment_w)
  *
  *************************************/
 
-MACHINE_START_MEMBER(williams_state,defender)
+MACHINE_START_MEMBER(defender_state,defender)
 {
 }
 
 
-MACHINE_RESET_MEMBER(williams_state,defender)
+MACHINE_RESET_MEMBER(defender_state,defender)
 {
 	address_space &space = m_maincpu->space(AS_PROGRAM);
 
@@ -447,7 +447,7 @@ WRITE8_MEMBER(williams_state::defender_video_control_w)
 }
 
 
-WRITE8_MEMBER(williams_state::defender_bank_select_w)
+WRITE8_MEMBER(defender_state::defender_bank_select_w)
 {
 	m_bankc000->set_bank(data & 0x0f);
 }
@@ -495,7 +495,7 @@ WRITE8_MEMBER(williams_state::sinistar_vram_select_w)
  *
  *************************************/
 
-MACHINE_START_MEMBER(blaster_state,blaster)
+MACHINE_START_MEMBER(blastkit_state,blaster)
 {
 	/* banking is different for blaster */
 	membank("bank1")->configure_entries(1, 16, memregion("maincpu")->base() + 0x18000, 0x4000);
@@ -510,20 +510,20 @@ MACHINE_START_MEMBER(blaster_state,blaster)
 }
 
 
-MACHINE_RESET_MEMBER(blaster_state,blaster)
+MACHINE_RESET_MEMBER(blastkit_state,blaster)
 {
 	MACHINE_RESET_CALL_MEMBER(williams_common);
 }
 
 
-inline void blaster_state::update_blaster_banking()
+inline void blastkit_state::update_blaster_banking()
 {
 	membank("bank1")->set_entry(m_vram_bank * (m_rom_bank + 1));
 	membank("bank2")->set_entry(m_vram_bank * (m_rom_bank + 1));
 }
 
 
-WRITE8_MEMBER(blaster_state::blaster_vram_select_w)
+WRITE8_MEMBER(blastkit_state::blaster_vram_select_w)
 {
 	/* VRAM/ROM banking from bit 0 */
 	m_vram_bank = data & 0x01;
@@ -537,14 +537,14 @@ WRITE8_MEMBER(blaster_state::blaster_vram_select_w)
 }
 
 
-WRITE8_MEMBER(blaster_state::blaster_bank_select_w)
+WRITE8_MEMBER(blastkit_state::blaster_bank_select_w)
 {
 	m_rom_bank = data & 0x0f;
 	update_blaster_banking();
 }
 
 
-TIMER_CALLBACK_MEMBER(blaster_state::blaster_deferred_snd_cmd_w)
+TIMER_CALLBACK_MEMBER(blastkit_state::blaster_deferred_snd_cmd_w)
 {
 	uint8_t l_data = param | 0x80;
 	uint8_t r_data = (param >> 1 & 0x40) | (param & 0x3f) | 0x80;
@@ -554,7 +554,7 @@ TIMER_CALLBACK_MEMBER(blaster_state::blaster_deferred_snd_cmd_w)
 }
 
 
-WRITE8_MEMBER(blaster_state::blaster_snd_cmd_w)
+WRITE8_MEMBER(blastkit_state::blaster_snd_cmd_w)
 {
 	machine().scheduler().synchronize(timer_expired_delegate(FUNC(blaster_state::blaster_deferred_snd_cmd_w),this), data);
 }
@@ -567,7 +567,7 @@ WRITE8_MEMBER(blaster_state::blaster_snd_cmd_w)
  *
  *************************************/
 
-WRITE_LINE_MEMBER(williams_state::lottofun_coin_lock_w)
+WRITE_LINE_MEMBER(lottofun_state::lottofun_coin_lock_w)
 {
 	machine().bookkeeping().coin_lockout_global_w(state & 1); /* bit 5 of PIC control port A */
 }

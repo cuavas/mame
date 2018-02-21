@@ -23,14 +23,13 @@ public:
 	{
 	}
 
-	void lb186(machine_config &config);
-
 protected:
 	DECLARE_WRITE8_MEMBER(sio_out_w);
 	DECLARE_WRITE8_MEMBER(drive_sel_w);
 	DECLARE_READ8_MEMBER(scsi_dack_r);
 	DECLARE_WRITE8_MEMBER(scsi_dack_w);
 	DECLARE_FLOPPY_FORMATS( floppy_formats );
+	virtual void device_add_mconfig(machine_config &config) override;
 	static void ncr5380(device_t *device);
 	void lb186_io(address_map &map);
 	void lb186_map(address_map &map);
@@ -129,7 +128,7 @@ FLOPPY_FORMATS_MEMBER( lb186_state::floppy_formats )
 	FLOPPY_NASLITE_FORMAT
 FLOPPY_FORMATS_END
 
-MACHINE_CONFIG_START(lb186_state::lb186)
+MACHINE_CONFIG_START(lb186_state::device_add_mconfig)
 	MCFG_CPU_ADD("maincpu", I80186, 16_MHz_XTAL / 2)
 	MCFG_CPU_PROGRAM_MAP(lb186_map)
 	MCFG_CPU_IO_MAP(lb186_io)
@@ -171,4 +170,4 @@ ROM_START( lb186 )
 	ROM_LOAD16_BYTE("a75516_v3.35.rom", 0x0001, 0x2000, CRC(9d9a5e22) SHA1(070be31c622f50508e8cbdb797c79978b6a4b8f6))
 ROM_END
 
-COMP( 1985, lb186, 0, 0, lb186, 0, lb186_state, 0, "Ampro Computers", "Little Board/186", MACHINE_NO_SOUND_HW )
+COMP( 1985, lb186, 0, 0, 0, lb186_state, 0, "Ampro Computers", "Little Board/186", MACHINE_NO_SOUND_HW )

@@ -169,7 +169,7 @@ public:
 	int m_kbackctl;
 
 	void update_kback();
-	void victor9k(machine_config &config);
+	virtual void device_add_mconfig(machine_config &config) override;
 	void victor9k_mem(address_map &map);
 };
 
@@ -676,7 +676,7 @@ void victor9k_state::machine_reset()
 //  MACHINE_CONFIG( victor9k )
 //-------------------------------------------------
 
-MACHINE_CONFIG_START(victor9k_state::victor9k)
+MACHINE_CONFIG_START(victor9k_state::device_add_mconfig)
 	// basic machine hardware
 	MCFG_CPU_ADD(I8088_TAG, I8088, XTAL(30'000'000)/6)
 	MCFG_CPU_PROGRAM_MAP(victor9k_mem)
@@ -819,5 +819,5 @@ ROM_END
 //  SYSTEM DRIVERS
 //**************************************************************************
 
-//    YEAR  NAME      PARENT  COMPAT  MACHINE   INPUT     STATE           INIT  COMPANY                     FULLNAME       FLAGS
-COMP( 1982, victor9k, 0,      0,      victor9k, victor9k, victor9k_state, 0,    "Victor Business Products", "Victor 9000", MACHINE_IMPERFECT_COLORS | MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+//    YEAR  NAME      PARENT  COMPAT  INPUT     STATE           INIT  COMPANY                     FULLNAME       FLAGS
+COMP( 1982, victor9k, 0,      0,      victor9k, victor9k_state, 0,    "Victor Business Products", "Victor 9000", MACHINE_IMPERFECT_COLORS | MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )

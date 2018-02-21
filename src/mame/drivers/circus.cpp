@@ -282,29 +282,34 @@ void circus_state::machine_reset()
 }
 
 
-MACHINE_CONFIG_START(circus_state::circus)
-
+MACHINE_CONFIG_START(circus_state::circus_base)
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M6502, XTAL(11'289'000) / 16) /* 705.562kHz */
+	MCFG_CPU_ADD("maincpu", M6502, 11.289_MHz_XTAL / 16) /* 705.562kHz */
 	MCFG_CPU_PROGRAM_MAP(circus_map)
-
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_VIDEO_ATTRIBUTES(VIDEO_ALWAYS_UPDATE)          /* needed for proper hardware collisions */
 	MCFG_SCREEN_REFRESH_RATE(57)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(3500)   /* frames per second, vblank duration (complete guess) */)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 31*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE_DRIVER(circus_state, screen_update_circus)
 	MCFG_SCREEN_PALETTE("palette")
-
-	MCFG_GFXDECODE_ADD("gfxdecode", "palette", circus)
 
 	MCFG_PALETTE_ADD_MONOCHROME("palette")
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
+MACHINE_CONFIG_END
+
+
+MACHINE_CONFIG_START(circus_state::device_add_mconfig)
+	circus_base(config);
+
+	MCFG_DEVICE_MODIFY("screen")
+	MCFG_SCREEN_VIDEO_ATTRIBUTES(VIDEO_ALWAYS_UPDATE)          /* needed for proper hardware collisions */
+	MCFG_SCREEN_UPDATE_DRIVER(circus_state, screen_update_circus)
+
+	MCFG_GFXDECODE_ADD("gfxdecode", "palette", circus)
 
 	MCFG_SOUND_ADD("samples", SAMPLES, 0)
 	MCFG_SAMPLES_CHANNELS(3)
@@ -317,29 +322,14 @@ MACHINE_CONFIG_START(circus_state::circus)
 MACHINE_CONFIG_END
 
 
-MACHINE_CONFIG_START(circus_state::robotbwl)
-
-	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M6502, XTAL(11'289'000) / 16) /* 705.562kHz */
-	MCFG_CPU_PROGRAM_MAP(circus_map)
+MACHINE_CONFIG_START(robotbwl_state::device_add_mconfig)
+	circus_base(config);
 	// does not generate irq!
 
-
-	/* video hardware */
-	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_REFRESH_RATE(57)
-	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(3500) /* frames per second, vblank duration (complete guess) */)
-	MCFG_SCREEN_SIZE(32*8, 32*8)
-	MCFG_SCREEN_VISIBLE_AREA(0*8, 31*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE_DRIVER(circus_state, screen_update_robotbwl)
-	MCFG_SCREEN_PALETTE("palette")
+	MCFG_DEVICE_MODIFY("screen")
+	MCFG_SCREEN_UPDATE_DRIVER(robotbwl_state, screen_update_robotbwl)
 
 	MCFG_GFXDECODE_ADD("gfxdecode", "palette", robotbwl)
-
-	MCFG_PALETTE_ADD_MONOCHROME("palette")
-
-	/* sound hardware */
-	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_ADD("samples", SAMPLES, 0)
 	MCFG_SAMPLES_CHANNELS(5)
@@ -351,7 +341,7 @@ MACHINE_CONFIG_START(circus_state::robotbwl)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
-TIMER_DEVICE_CALLBACK_MEMBER(circus_state::crash_scanline)
+TIMER_DEVICE_CALLBACK_MEMBER(crash_state::crash_scanline)
 {
 	int scanline = param;
 
@@ -359,29 +349,16 @@ TIMER_DEVICE_CALLBACK_MEMBER(circus_state::crash_scanline)
 		m_maincpu->set_input_line(0, ASSERT_LINE);
 }
 
-MACHINE_CONFIG_START(circus_state::crash)
+MACHINE_CONFIG_START(crash_state::device_add_mconfig)
+	circus_base(config);
 
-	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M6502, XTAL(11'289'000) / 16) /* 705.562kHz */
-	MCFG_CPU_PROGRAM_MAP(circus_map)
-	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", circus_state, crash_scanline, "screen", 0, 1)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", crash_state, crash_scanline, "screen", 0, 1)
 
-
-	/* video hardware */
-	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_REFRESH_RATE(57)
-	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(3500) /* frames per second, vblank duration (complete guess) */)
+	MCFG_DEVICE_MODIFY("screen")
 	MCFG_SCREEN_SIZE(40*8, 40*8) //TODO
-	MCFG_SCREEN_VISIBLE_AREA(0*8, 31*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE_DRIVER(circus_state, screen_update_crash)
-	MCFG_SCREEN_PALETTE("palette")
+	MCFG_SCREEN_UPDATE_DRIVER(crash_state, screen_update_crash)
 
 	MCFG_GFXDECODE_ADD("gfxdecode", "palette", circus)
-
-	MCFG_PALETTE_ADD_MONOCHROME("palette")
-
-	/* sound hardware */
-	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_ADD("samples", SAMPLES, 0)
 	MCFG_SAMPLES_CHANNELS(1)
@@ -393,29 +370,14 @@ MACHINE_CONFIG_START(circus_state::crash)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.80)
 MACHINE_CONFIG_END
 
-MACHINE_CONFIG_START(circus_state::ripcord)
+MACHINE_CONFIG_START(ripcord_state::device_add_mconfig)
+	circus_base(config);
 
-	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M6502, XTAL(11'289'000) / 16) /* 705.562kHz */
-	MCFG_CPU_PROGRAM_MAP(circus_map)
-
-
-	/* video hardware */
-	MCFG_SCREEN_ADD("screen", RASTER)
+	MCFG_DEVICE_MODIFY("screen")
 	MCFG_SCREEN_VIDEO_ATTRIBUTES(VIDEO_ALWAYS_UPDATE)          /* needed for proper hardware collisions */
-	MCFG_SCREEN_REFRESH_RATE(57)
-	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(3500)   /* frames per second, vblank duration (complete guess) */)
-	MCFG_SCREEN_SIZE(32*8, 32*8)
-	MCFG_SCREEN_VISIBLE_AREA(0*8, 31*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE_DRIVER(circus_state, screen_update_ripcord)
-	MCFG_SCREEN_PALETTE("palette")
+	MCFG_SCREEN_UPDATE_DRIVER(ripcord_state, screen_update_ripcord)
 
 	MCFG_GFXDECODE_ADD("gfxdecode", "palette", circus)
-
-	MCFG_PALETTE_ADD_MONOCHROME("palette")
-
-	/* sound hardware */
-	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_ADD("samples", SAMPLES, 0)
 	MCFG_SAMPLES_CHANNELS(4)
@@ -566,23 +528,23 @@ DRIVER_INIT_MEMBER(circus_state,circus)
 	m_game_id = 1;
 }
 
-DRIVER_INIT_MEMBER(circus_state,robotbwl)
+DRIVER_INIT_MEMBER(robotbwl_state,robotbwl)
 {
 	m_game_id = 2;
 }
-DRIVER_INIT_MEMBER(circus_state,crash)
+DRIVER_INIT_MEMBER(crash_state,crash)
 {
 	m_game_id = 3;
 }
-DRIVER_INIT_MEMBER(circus_state,ripcord)
+DRIVER_INIT_MEMBER(ripcord_state,ripcord)
 {
 	m_game_id = 4;
 }
 
 
-GAMEL(1977, circus,   0,      circus,   circus,   circus_state, circus,   ROT0, "Exidy / Taito", "Circus / Acrobat TV", MACHINE_SUPPORTS_SAVE | MACHINE_IMPERFECT_SOUND, layout_circus )
-GAMEL(1977, springbd, circus, circus,   circus,   circus_state, circus,   ROT0, "bootleg (Sub-Electro)", "Springboard (bootleg of Circus)", MACHINE_SUPPORTS_SAVE | MACHINE_IMPERFECT_SOUND, layout_circus ) // looks like a text hack, but we've seen 2 identical copies so it's worth supporting
-GAME( 1977, robotbwl, 0,      robotbwl, robotbwl, circus_state, robotbwl, ROT0, "Exidy", "Robot Bowl", MACHINE_SUPPORTS_SAVE | MACHINE_IMPERFECT_SOUND )
-GAMEL(1979, crash,    0,      crash,    crash,    circus_state, crash,    ROT0, "Exidy", "Crash", MACHINE_SUPPORTS_SAVE | MACHINE_IMPERFECT_SOUND, layout_crash )
-GAMEL(1979, smash,    crash,  crash,    crash,    circus_state, crash,    ROT0, "bootleg", "Smash (Crash bootleg)", MACHINE_SUPPORTS_SAVE | MACHINE_IMPERFECT_SOUND, layout_crash ) // looks like a text hack, but it also had a different bezel
-GAME( 1979, ripcord,  0,      ripcord,  ripcord,  circus_state, ripcord,  ROT0, "Exidy", "Rip Cord", MACHINE_SUPPORTS_SAVE | MACHINE_IMPERFECT_SOUND )
+GAMEL(1977, circus,   0,      circus,   circus_state,   circus,   ROT0, "Exidy / Taito",         "Circus / Acrobat TV", MACHINE_SUPPORTS_SAVE | MACHINE_IMPERFECT_SOUND, layout_circus )
+GAMEL(1977, springbd, circus, circus,   circus_state,   circus,   ROT0, "bootleg (Sub-Electro)", "Springboard (bootleg of Circus)", MACHINE_SUPPORTS_SAVE | MACHINE_IMPERFECT_SOUND, layout_circus ) // looks like a text hack, but we've seen 2 identical copies so it's worth supporting
+GAME( 1977, robotbwl, 0,      robotbwl, robotbwl_state, robotbwl, ROT0, "Exidy",                 "Robot Bowl", MACHINE_SUPPORTS_SAVE | MACHINE_IMPERFECT_SOUND )
+GAMEL(1979, crash,    0,      crash,    crash_state,    crash,    ROT0, "Exidy",                 "Crash", MACHINE_SUPPORTS_SAVE | MACHINE_IMPERFECT_SOUND, layout_crash )
+GAMEL(1979, smash,    crash,  crash,    crash_state,    crash,    ROT0, "bootleg",               "Smash (Crash bootleg)", MACHINE_SUPPORTS_SAVE | MACHINE_IMPERFECT_SOUND, layout_crash ) // looks like a text hack, but it also had a different bezel
+GAME( 1979, ripcord,  0,      ripcord,  ripcord_state,  ripcord,  ROT0, "Exidy",                 "Rip Cord", MACHINE_SUPPORTS_SAVE | MACHINE_IMPERFECT_SOUND )

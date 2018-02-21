@@ -137,7 +137,7 @@ protected:
 	void intellec4_ram_ports(address_map &map);
 	void intellec4_program_memory(address_map &map);
 
-	void intellec4(machine_config &config);
+	virtual void device_add_mconfig(machine_config &config) override;
 
 	required_device<mcs40_cpu_device_base>              m_cpu;
 	required_device<bus::intellec4::univ_bus_device>    m_bus;
@@ -809,7 +809,7 @@ DEVICE_INPUT_DEFAULTS_START(tty)
 	DEVICE_INPUT_DEFAULTS("FLOW_CONTROL",    0x0001, 0x0000)
 DEVICE_INPUT_DEFAULTS_END
 
-MACHINE_CONFIG_START(intellec4_state::intellec4)
+MACHINE_CONFIG_START(intellec4_state::device_add_mconfig)
 	MCFG_DEVICE_ADD("prgbank", ADDRESS_MAP_BANK, 0)
 	MCFG_DEVICE_PROGRAM_MAP(intellec4_program_banks)
 	MCFG_ADDRESS_MAP_BANK_ENDIANNESS(ENDIANNESS_LITTLE)
@@ -1019,9 +1019,8 @@ public:
 	DECLARE_INPUT_CHANGED_MEMBER(sw_hold);
 	DECLARE_INPUT_CHANGED_MEMBER(sw_one_shot);
 
-	void mod4(machine_config &config);
-
 protected:
+	virtual void device_add_mconfig(machine_config &config) override;
 	virtual void driver_start() override;
 	virtual void driver_reset() override;
 
@@ -1113,8 +1112,9 @@ INPUT_CHANGED_MEMBER(mod4_state::sw_one_shot)
   MOD 4-specific configuration
 ----------------------------------*/
 
-MACHINE_CONFIG_START(mod4_state::mod4)
-	intellec4(config);
+MACHINE_CONFIG_START(mod4_state::device_add_mconfig)
+	intellec4_state::device_add_mconfig(config);
+
 	MCFG_CPU_ADD("maincpu", I4004, 5.185_MHz_XTAL / 7)
 	MCFG_I4004_ROM_MAP(intellec4_rom)
 	MCFG_I4004_RAM_MEMORY_MAP(intellec4_ram_memory)
@@ -1210,9 +1210,8 @@ public:
 	DECLARE_INPUT_CHANGED_MEMBER(sw_stop);
 	DECLARE_INPUT_CHANGED_MEMBER(sw_single_step);
 
-	void mod40(machine_config &config);
-
 protected:
+	virtual void device_add_mconfig(machine_config &config) override;
 	virtual void driver_start() override;
 	virtual void driver_reset() override;
 
@@ -1338,8 +1337,9 @@ INPUT_CHANGED_MEMBER(mod40_state::sw_single_step)
   MOD 40-specific configuration
 ----------------------------------*/
 
-MACHINE_CONFIG_START(mod40_state::mod40)
-	intellec4(config);
+MACHINE_CONFIG_START(mod40_state::device_add_mconfig)
+	intellec4_state::device_add_mconfig(config);
+
 	MCFG_CPU_ADD("maincpu", I4040, 5.185_MHz_XTAL / 7)
 	MCFG_I4040_ROM_MAP(intellec4_rom)
 	MCFG_I4040_RAM_MEMORY_MAP(intellec4_ram_memory)
@@ -1454,6 +1454,6 @@ ROM_END
     Machine definitions
 ***********************************************************************/
 
-//    YEAR   NAME      PARENT  COMPAT  MACHINE   INPUT  STATE        INIT  COMPANY  FULLNAME             FLAGS
-COMP( 1973?, intlc44,  0,      0,      mod4,     mod4,  mod4_state,  0,    "Intel", "INTELLEC 4/MOD 4",  MACHINE_NO_SOUND_HW | MACHINE_CLICKABLE_ARTWORK | MACHINE_SUPPORTS_SAVE )
-COMP( 1974?, intlc440, 0,      0,      mod40,    mod40, mod40_state, 0,    "Intel", "INTELLEC 4/MOD 40", MACHINE_NO_SOUND_HW | MACHINE_CLICKABLE_ARTWORK | MACHINE_SUPPORTS_SAVE )
+//    YEAR   NAME      PARENT  COMPAT  INPUT  STATE        INIT  COMPANY  FULLNAME             FLAGS
+COMP( 1973?, intlc44,  0,      0,      mod4,  mod4_state,  0,    "Intel", "INTELLEC 4/MOD 4",  MACHINE_NO_SOUND_HW | MACHINE_CLICKABLE_ARTWORK | MACHINE_SUPPORTS_SAVE )
+COMP( 1974?, intlc440, 0,      0,      mod40, mod40_state, 0,    "Intel", "INTELLEC 4/MOD 40", MACHINE_NO_SOUND_HW | MACHINE_CLICKABLE_ARTWORK | MACHINE_SUPPORTS_SAVE )

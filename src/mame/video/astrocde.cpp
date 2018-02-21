@@ -23,9 +23,20 @@ void astrocde_state::machine_start()
 	save_item(NAME(m_port_1_last));
 	save_item(NAME(m_port_2_last));
 	save_item(NAME(m_ram_write_enable));
-	save_item(NAME(m_input_select));
 
 	m_port_1_last = m_port_2_last = 0xff;
+}
+
+void ebases_state::machine_start()
+{
+	astrocde_state::machine_start();
+	save_item(NAME(m_input_select));
+}
+
+void demndrgn_state::machine_start()
+{
+	astrocde_state::machine_start();
+	save_item(NAME(m_input_select));
 }
 
 
@@ -111,7 +122,7 @@ PALETTE_INIT_MEMBER(astrocde_state, astrocde)
 }
 
 
-PALETTE_INIT_MEMBER(astrocde_state,profpac)
+PALETTE_INIT_MEMBER(demndrgn_state,profpac)
 {
 	/* Professor Pac-Man uses a more standard 12-bit RGB palette layout */
 	static const int resistances[4] = { 6200, 3000, 1500, 750 };
@@ -179,7 +190,7 @@ void astrocde_state::video_start()
 }
 
 
-VIDEO_START_MEMBER(astrocde_state,profpac)
+VIDEO_START_MEMBER(demndrgn_state,profpac)
 {
 	/* allocate timers */
 	m_scanline_timer = timer_alloc(TIMER_SCANLINE);
@@ -332,7 +343,7 @@ uint32_t astrocde_state::screen_update_astrocde(screen_device &screen, bitmap_in
 }
 
 
-uint32_t astrocde_state::screen_update_profpac(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
+uint32_t demndrgn_state::screen_update_profpac(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	int y;
 
@@ -962,7 +973,7 @@ void astrocde_state::init_sparklestar()
  *
  *************************************/
 
-WRITE8_MEMBER(astrocde_state::profpac_page_select_w)
+WRITE8_MEMBER(demndrgn_state::profpac_page_select_w)
 {
 	m_profpac_readpage = data & 3;
 	m_profpac_writepage = (data >> 2) & 3;
@@ -970,13 +981,13 @@ WRITE8_MEMBER(astrocde_state::profpac_page_select_w)
 }
 
 
-READ8_MEMBER(astrocde_state::profpac_intercept_r)
+READ8_MEMBER(demndrgn_state::profpac_intercept_r)
 {
 	return m_profpac_intercept;
 }
 
 
-WRITE8_MEMBER(astrocde_state::profpac_screenram_ctrl_w)
+WRITE8_MEMBER(demndrgn_state::profpac_screenram_ctrl_w)
 {
 	switch (offset)
 	{
@@ -1017,7 +1028,7 @@ WRITE8_MEMBER(astrocde_state::profpac_screenram_ctrl_w)
  *
  *************************************/
 
-READ8_MEMBER(astrocde_state::profpac_videoram_r)
+READ8_MEMBER(demndrgn_state::profpac_videoram_r)
 {
 	uint16_t temp = m_profpac_videoram[m_profpac_readpage * 0x4000 + offset] >> m_profpac_readshift;
 	return ((temp >> 6) & 0xc0) | ((temp >> 4) & 0x30) | ((temp >> 2) & 0x0c) | ((temp >> 0) & 0x03);
@@ -1025,7 +1036,7 @@ READ8_MEMBER(astrocde_state::profpac_videoram_r)
 
 
 /* All this information comes from decoding the PLA at U39 on the screen ram board */
-WRITE8_MEMBER(astrocde_state::profpac_videoram_w)
+WRITE8_MEMBER(demndrgn_state::profpac_videoram_w)
 {
 	uint16_t oldbits = m_profpac_videoram[m_profpac_writepage * 0x4000 + offset];
 	uint16_t newbits, result = 0;

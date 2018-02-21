@@ -33,14 +33,13 @@ public:
 		, m_p_chargen(*this, "chargen")
 	{ }
 
-	void banctec(machine_config &config);
-
 protected:
 	MC6845_UPDATE_ROW(crtc_update_row);
 	MC6845_ON_UPDATE_ADDR_CHANGED(crtc_addr);
 	DECLARE_WRITE8_MEMBER(videoram_w);
 
 	virtual void machine_reset() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void banctec_mcu_mem(address_map &map);
 	void banctec_mem(address_map &map);
 
@@ -133,7 +132,7 @@ static GFXDECODE_START( banctec )
 	GFXDECODE_ENTRY( "chargen", 0x00000, banctec_gfx_layout, 0, 1 )
 GFXDECODE_END
 
-MACHINE_CONFIG_START(banctec_state::banctec)
+MACHINE_CONFIG_START(banctec_state::device_add_mconfig)
 	/* basic machine hardware */
 
 	MCFG_CPU_ADD("maincpu", I80C31, XTAL(11'059'200))
@@ -179,5 +178,5 @@ ROM_END
 
 ***************************************************************************/
 
-/*    YEAR  NAME     PARENT    COMPAT  MACHINE  INPUT  STATE           INIT   MONITOR COMPANY      FULLNAME */
-CONS( 1989, banctec, 0,        0,      banctec, 0,     banctec_state,  0,     "DALE Electronics",  "BancTec ESeries Panel", MACHINE_NOT_WORKING | MACHINE_NO_SOUND)
+/*    YEAR  NAME     PARENT    COMPAT  INPUT  STATE           INIT   MONITOR COMPANY      FULLNAME */
+CONS( 1989, banctec, 0,        0,      0,     banctec_state,  0,     "DALE Electronics",  "BancTec ESeries Panel", MACHINE_NOT_WORKING | MACHINE_NO_SOUND)

@@ -1,5 +1,9 @@
 // license:BSD-3-Clause
 // copyright-holders:Mike Coates
+#ifndef MAME_INCLUDES_CIRCUS_H
+#define MAME_INCLUDES_CIRCUS_H
+
+#pragma once
 
 #include "machine/timer.h"
 #include "sound/discrete.h"
@@ -40,33 +44,61 @@ public:
 	DECLARE_WRITE8_MEMBER(circus_clown_x_w);
 	DECLARE_WRITE8_MEMBER(circus_clown_y_w);
 	DECLARE_WRITE8_MEMBER(circus_clown_z_w);
-	DECLARE_DRIVER_INIT(ripcord);
 	DECLARE_DRIVER_INIT(circus);
-	DECLARE_DRIVER_INIT(robotbwl);
-	DECLARE_DRIVER_INIT(crash);
 	TILE_GET_INFO_MEMBER(get_bg_tile_info);
-	virtual void machine_start() override;
-	virtual void machine_reset() override;
-	virtual void video_start() override;
 	uint32_t screen_update_circus(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
-	uint32_t screen_update_robotbwl(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
-	uint32_t screen_update_crash(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
-	uint32_t screen_update_ripcord(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
-	TIMER_DEVICE_CALLBACK_MEMBER(crash_scanline);
 	void draw_line( bitmap_ind16 &bitmap, const rectangle &cliprect, int x1, int y1, int x2, int y2, int dotted );
 	void draw_sprite_collision( bitmap_ind16 &bitmap, const rectangle &cliprect );
 	void circus_draw_fg( bitmap_ind16 &bitmap, const rectangle &cliprect );
+
+protected:
+	virtual void machine_start() override;
+	virtual void machine_reset() override;
+	virtual void video_start() override;
+	void circus_base(machine_config &config);
+	virtual void device_add_mconfig(machine_config &config) override;
+	void circus_map(address_map &map);
+};
+
+class robotbwl_state : public circus_state
+{
+public:
+	using circus_state::circus_state;
+	DECLARE_DRIVER_INIT(robotbwl);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	uint32_t screen_update_robotbwl(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 	void robotbwl_draw_box( bitmap_ind16 &bitmap, const rectangle &cliprect, int x, int y );
 	void robotbwl_draw_scoreboard( bitmap_ind16 &bitmap, const rectangle &cliprect );
 	void robotbwl_draw_bowling_alley( bitmap_ind16 &bitmap, const rectangle &cliprect );
 	void robotbwl_draw_ball( bitmap_ind16 &bitmap, const rectangle &cliprect );
-	void crash_draw_car( bitmap_ind16 &bitmap, const rectangle &cliprect );
-	void robotbwl(machine_config &config);
-	void ripcord(machine_config &config);
-	void crash(machine_config &config);
-	void circus(machine_config &config);
-	void circus_map(address_map &map);
 };
+
+class crash_state : public circus_state
+{
+public:
+	using circus_state::circus_state;
+	DECLARE_DRIVER_INIT(crash);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	TIMER_DEVICE_CALLBACK_MEMBER(crash_scanline);
+	uint32_t screen_update_crash(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	void crash_draw_car( bitmap_ind16 &bitmap, const rectangle &cliprect );
+};
+
+class ripcord_state : public circus_state
+{
+public:
+	using circus_state::circus_state;
+	DECLARE_DRIVER_INIT(ripcord);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	uint32_t screen_update_ripcord(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+};
+
 /*----------- defined in audio/circus.c -----------*/
 
 DISCRETE_SOUND_EXTERN( circus );
@@ -76,3 +108,5 @@ extern const char *const circus_sample_names[];
 extern const char *const crash_sample_names[];
 extern const char *const ripcord_sample_names[];
 extern const char *const robotbwl_sample_names[];
+
+#endif // MAME_INCLUDES_CIRCUS_H

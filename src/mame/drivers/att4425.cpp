@@ -50,8 +50,6 @@ public:
 		, m_screen(*this, SCREEN_TAG)
 	{ }
 
-	void att4425(machine_config &config);
-
 protected:
 	DECLARE_WRITE8_MEMBER(port10_w);
 	DECLARE_WRITE8_MEMBER(port14_w);
@@ -65,6 +63,7 @@ protected:
 
 	virtual void machine_start() override;
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void att4425_io(address_map &map);
 	void att4425_mem(address_map &map);
 
@@ -236,7 +235,7 @@ static const z80_daisy_config att4425_daisy_chain[] =
 	{ nullptr }
 };
 
-MACHINE_CONFIG_START(att4425_state::att4425)
+MACHINE_CONFIG_START(att4425_state::device_add_mconfig)
 	/* basic machine hardware */
 	MCFG_CPU_ADD(Z80_TAG, Z80, XTAL(32'000'000)/8) // XXX
 	MCFG_CPU_PROGRAM_MAP(att4425_mem)
@@ -318,5 +317,5 @@ ROM_END
 
 /* System Drivers */
 
-//    YEAR  NAME      PARENT  COMPAT  MACHINE    INPUT    STATE          INIT  COMPANY      FULLNAME           FLAGS
-COMP( 1983, att4425,  0,      0,      att4425,   att4425, att4425_state, 0,    "AT&T", "AT&T Teletype 4425", MACHINE_IS_SKELETON )
+//    YEAR  NAME      PARENT  COMPAT  INPUT    STATE          INIT  COMPANY  FULLNAME              FLAGS
+COMP( 1983, att4425,  0,      0,      att4425, att4425_state, 0,    "AT&T",  "AT&T Teletype 4425", MACHINE_IS_SKELETON )

@@ -22,8 +22,6 @@ public:
 		m_generic_paletteram_8(*this, "paletteram")
 	{ }
 
-	void tunhunt(machine_config &config);
-
 protected:
 	DECLARE_WRITE8_MEMBER(control_w);
 	DECLARE_READ8_MEMBER(button_r);
@@ -45,6 +43,8 @@ protected:
 	void draw_box(bitmap_ind16 &bitmap, const rectangle &cliprect);
 	void draw_shell(bitmap_ind16 &bitmap, const rectangle &cliprect, int picture_code,
 	int hposition,int vstart,int vstop,int vstretch,int hstretch);
+
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_map(address_map &map);
 
 private:

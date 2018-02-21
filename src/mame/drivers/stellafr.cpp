@@ -26,8 +26,6 @@ public:
 		m_duart(*this, "duart")
 	{ }
 
-	void stellafr(machine_config &config);
-
 protected:
 	IRQ_CALLBACK_MEMBER(irq_ack);
 	DECLARE_WRITE8_MEMBER(write_8000c1);
@@ -36,6 +34,7 @@ protected:
 	DECLARE_WRITE8_MEMBER(duart_output_w);
 	DECLARE_WRITE8_MEMBER(ay8910_portb_w);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void stellafr_map(address_map &map);
 
 private:
@@ -90,7 +89,7 @@ static INPUT_PORTS_START( stellafr )
 INPUT_PORTS_END
 
 
-MACHINE_CONFIG_START(stellafr_state::stellafr)
+MACHINE_CONFIG_START(stellafr_state::device_add_mconfig)
 	MCFG_CPU_ADD("maincpu", M68000, 10000000 ) //?
 	MCFG_CPU_PROGRAM_MAP(stellafr_map)
 	MCFG_CPU_IRQ_ACKNOWLEDGE_DRIVER(stellafr_state, irq_ack)
@@ -121,5 +120,5 @@ ROM_START( st_vulkn )
 ROM_END
 
 
-GAME(199?,  st_ohla,   0,  stellafr,  stellafr, stellafr_state,  0,  ROT0,  "Stella",    "Oh La La (Stella)",    MACHINE_IS_SKELETON_MECHANICAL )
-GAME(199?,  st_vulkn,  0,  stellafr,  stellafr, stellafr_state,  0,  ROT0,  "Stella",    "Vulkan (Stella)",      MACHINE_IS_SKELETON_MECHANICAL )
+GAME(199?,  st_ohla,   0,  stellafr, stellafr_state,  0,  ROT0,  "Stella",    "Oh La La (Stella)",    MACHINE_IS_SKELETON_MECHANICAL )
+GAME(199?,  st_vulkn,  0,  stellafr, stellafr_state,  0,  ROT0,  "Stella",    "Vulkan (Stella)",      MACHINE_IS_SKELETON_MECHANICAL )

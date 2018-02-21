@@ -191,7 +191,7 @@ GFXDECODE_END
  *
  *************************************/
 
-MACHINE_CONFIG_START(batman_state::batman)
+MACHINE_CONFIG_START(batman_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, ATARI_CLOCK_14MHz)
@@ -302,4 +302,4 @@ ROM_END
  *
  *************************************/
 
-GAME( 1991, batman, 0, batman, batman, batman_state, 0, ROT0, "Atari Games", "Batman", MACHINE_SUPPORTS_SAVE )
+GAME( 1991, batman, 0, batman, batman_state, 0, ROT0, "Atari Games", "Batman", MACHINE_SUPPORTS_SAVE )

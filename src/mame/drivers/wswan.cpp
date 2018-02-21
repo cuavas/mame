@@ -108,7 +108,7 @@ static SLOT_INTERFACE_START(wswan_cart)
 	SLOT_INTERFACE_INTERNAL("ws_eeprom",  WS_ROM_EEPROM)
 SLOT_INTERFACE_END
 
-MACHINE_CONFIG_START(wswan_state::wswan)
+MACHINE_CONFIG_START(wswan_state::device_add_mconfig)
 	/* Basic machine hardware */
 	MCFG_CPU_ADD("maincpu", V30MZ, XTAL(3'072'000))
 	MCFG_CPU_PROGRAM_MAP(wswan_mem)
@@ -154,8 +154,8 @@ MACHINE_CONFIG_START(wswan_state::wswan)
 	MCFG_SOFTWARE_LIST_COMPATIBLE_ADD("pc2_list","pockchalv2")
 MACHINE_CONFIG_END
 
-MACHINE_CONFIG_START(wscolor_state::wscolor)
-	wswan(config);
+MACHINE_CONFIG_START(wscolor_state::device_add_mconfig)
+	wswan_state::device_add_mconfig(config);
 
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(wscolor_mem)
@@ -190,6 +190,6 @@ ROM_START( wscolor )
 //  ROM_LOAD_OPTIONAL( "wsc_bios.bin", 0x0000, 0x0001, NO_DUMP )
 ROM_END
 
-//    YEAR  NAME     PARENT  COMPAT  MACHINE  INPUT  STATE          INIT   COMPANY   FULLNAME
-CONS( 1999, wswan,   0,      0,      wswan,   wswan, wswan_state,   0,    "Bandai",  "WonderSwan",       MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
-CONS( 2000, wscolor, wswan,  0,      wscolor, wswan, wscolor_state, 0,    "Bandai",  "WonderSwan Color", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+/*    YEAR  NAME     PARENT  COMPAT  INPUT  STATE          INIT   COMPANY   FULLNAME*/
+CONS( 1999, wswan,   0,      0,      wswan, wswan_state,   0,    "Bandai",  "WonderSwan",       MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+CONS( 2000, wscolor, wswan,  0,      wswan, wscolor_state, 0,    "Bandai",  "WonderSwan Color", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )

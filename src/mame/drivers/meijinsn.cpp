@@ -93,6 +93,7 @@ protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void meijinsn_map(address_map &map);
 	void meijinsn_sound_io_map(address_map &map);
 	void meijinsn_sound_map(address_map &map);
@@ -355,7 +356,7 @@ void meijinsn_state::machine_reset()
 }
 
 
-MACHINE_CONFIG_START(meijinsn_state::meijinsn)
+MACHINE_CONFIG_START(meijinsn_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, 9000000 )
@@ -419,4 +420,4 @@ ROM_START( meijinsn )
 	ROM_LOAD( "clr", 0x00, 0x20, CRC(7b95b5a7) SHA1(c15be28bcd6f5ffdde659f2d352ae409f04b2557) )
 ROM_END
 
-GAME( 1986, meijinsn, 0, meijinsn, meijinsn, meijinsn_state, 0, ROT0, "SNK", "Meijinsen", MACHINE_SUPPORTS_SAVE )
+GAME( 1986, meijinsn, 0, meijinsn, meijinsn_state, 0, ROT0, "SNK", "Meijinsen", MACHINE_SUPPORTS_SAVE )

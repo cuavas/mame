@@ -304,7 +304,7 @@ static GFXDECODE_START( wolfpack )
 GFXDECODE_END
 
 
-MACHINE_CONFIG_START(wolfpack_state::wolfpack)
+MACHINE_CONFIG_START(wolfpack_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, 12096000 / 16)
@@ -363,4 +363,4 @@ ROM_START( wolfpack )
 ROM_END
 
 
-GAME( 1978, wolfpack, 0, wolfpack, wolfpack, wolfpack_state, 0, ORIENTATION_FLIP_Y, "Atari", "Wolf Pack (prototype)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1978, wolfpack, 0, wolfpack, wolfpack_state, 0, ORIENTATION_FLIP_Y, "Atari", "Wolf Pack (prototype)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )

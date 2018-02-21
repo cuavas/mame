@@ -31,7 +31,6 @@ public:
 	{ }
 
 	DECLARE_CUSTOM_INPUT_MEMBER(get_vblank);
-	void cloud9(machine_config &config);
 
 protected:
 	DECLARE_WRITE8_MEMBER(irq_ack_w);
@@ -55,6 +54,7 @@ protected:
 	inline void cloud9_write_vram( uint16_t addr, uint8_t data, uint8_t bitmd, uint8_t pixba );
 	inline void bitmode_autoinc();
 	inline void schedule_next_irq(int curscanline);
+	virtual void device_add_mconfig(machine_config &config) override;
 	void cloud9_map(address_map &map);
 
 private:

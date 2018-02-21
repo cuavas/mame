@@ -51,11 +51,11 @@ public:
 	DECLARE_CUSTOM_INPUT_MEMBER(tape_headpos_r);
 	DECLARE_INPUT_CHANGED_MEMBER(category_select);
 	DECLARE_DRIVER_INIT(quizshow);
-	void quizshow(machine_config &config);
 
 protected:
 	virtual void machine_reset() override;
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void mem_map(address_map &map);
 
 	DECLARE_WRITE8_MEMBER(lamps1_w);
@@ -384,7 +384,7 @@ void quizshow_state::machine_reset()
 	m_tape_head_pos = 0;
 }
 
-MACHINE_CONFIG_START(quizshow_state::quizshow)
+MACHINE_CONFIG_START(quizshow_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", S2650, MASTER_CLOCK / 16) // divider guessed
@@ -462,4 +462,4 @@ DRIVER_INIT_MEMBER(quizshow_state,quizshow)
 }
 
 
-GAMEL( 1976, quizshow, 0, quizshow, quizshow, quizshow_state, quizshow, ROT0, "Atari (Kee Games)", "Quiz Show", MACHINE_NOT_WORKING, layout_quizshow )
+GAMEL( 1976, quizshow, 0, quizshow, quizshow_state, quizshow, ROT0, "Atari (Kee Games)", "Quiz Show", MACHINE_NOT_WORKING, layout_quizshow )

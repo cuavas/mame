@@ -45,8 +45,6 @@ public:
 			m_palette(*this, "palette")
 	{ }
 
-	void z88(machine_config &config);
-
 protected:
 	enum
 	{
@@ -81,6 +79,7 @@ protected:
 
 	DECLARE_PALETTE_INIT(z88);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void z88_io(address_map &map);
 	void z88_mem(address_map &map);
 

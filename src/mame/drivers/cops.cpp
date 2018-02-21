@@ -68,16 +68,15 @@ public:
 	// screen updates
 	uint32_t screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 
-	void revlatns(machine_config &config);
-	void cops(machine_config &config);
-	void cops_map(address_map &map);
-	void revlatns_map(address_map &map);
 protected:
 	// driver_device overrides
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
 
 	virtual void video_start() override;
+
+	virtual void device_add_mconfig(machine_config &config) override;
+	void cops_map(address_map &map);
 
 public:
 	DECLARE_WRITE8_MEMBER(io1_w);
@@ -166,7 +165,15 @@ public:
 	void laserdisc_response_w(uint8_t data);
 };
 
-const int timer_divide_select[16] =
+class revlatns_state : public cops_state
+{
+protected:
+	using cops_state::cops_state;
+	virtual void device_add_mconfig(machine_config &config) override;
+	void revlatns_map(address_map &map);
+};
+
+static const int timer_divide_select[16] =
 {
 	73728,
 	33538,
@@ -814,7 +821,7 @@ ADDRESS_MAP_START(cops_state::cops_map)
 	AM_RANGE(0xe000, 0xffff) AM_ROMBANK("sysbank1")
 ADDRESS_MAP_END
 
-ADDRESS_MAP_START(cops_state::revlatns_map)
+ADDRESS_MAP_START(revlatns_state::revlatns_map)
 	AM_RANGE(0x0000, 0x1fff) AM_RAM
 	AM_RANGE(0x2000, 0x9fff) AM_ROM AM_REGION("program", 0)
 	AM_RANGE(0xa000, 0xafff) AM_READWRITE(io1_lm_r, io1_w)
@@ -916,7 +923,7 @@ DRIVER_INIT_MEMBER(cops_state,cops)
 	membank("sysbank1")->set_entry(2);
 }
 
-MACHINE_CONFIG_START(cops_state::cops)
+MACHINE_CONFIG_START(cops_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, MAIN_CLOCK/2)
@@ -952,7 +959,7 @@ MACHINE_CONFIG_START(cops_state::cops)
 MACHINE_CONFIG_END
 
 
-MACHINE_CONFIG_START(cops_state::revlatns)
+MACHINE_CONFIG_START(revlatns_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, MAIN_CLOCK/2)
@@ -1027,6 +1034,6 @@ ROM_START( revlatns )
 ROM_END
 
 
-GAMEL( 1994, cops,      0,   cops,      cops,      cops_state, cops,       ROT0, "Atari Games",                     "Cops (USA)",   MACHINE_NOT_WORKING | MACHINE_NO_SOUND, layout_cops )
-GAMEL( 1994, copsuk,    cops,cops,      cops,      cops_state, cops,       ROT0, "Nova Productions / Deith Leisure","Cops (UK)",    MACHINE_NOT_WORKING | MACHINE_NO_SOUND, layout_cops )
-GAMEL( 1994, revlatns,  0,   revlatns,  revlatns,  cops_state, cops,       ROT0, "Nova Productions",                "Revelations",  MACHINE_NOT_WORKING | MACHINE_NO_SOUND, layout_cops )
+GAMEL( 1994, cops,      0,   cops,      cops_state,     cops,       ROT0, "Atari Games",                     "Cops (USA)",   MACHINE_NOT_WORKING | MACHINE_NO_SOUND, layout_cops )
+GAMEL( 1994, copsuk,    cops,cops,      cops_state,     cops,       ROT0, "Nova Productions / Deith Leisure","Cops (UK)",    MACHINE_NOT_WORKING | MACHINE_NO_SOUND, layout_cops )
+GAMEL( 1994, revlatns,  0,   revlatns,  revlatns_state, cops,       ROT0, "Nova Productions",                "Revelations",  MACHINE_NOT_WORKING | MACHINE_NO_SOUND, layout_cops )

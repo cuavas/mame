@@ -41,8 +41,6 @@ public:
 		m_palette(*this, "palette")
 	{ }
 
-	void gridlee(machine_config &config);
-
 protected:
 	DECLARE_READ8_MEMBER(analog_port_r);
 	DECLARE_READ8_MEMBER(random_num_r);
@@ -66,6 +64,7 @@ protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 
 private:
 	required_shared_ptr<uint8_t> m_spriteram;

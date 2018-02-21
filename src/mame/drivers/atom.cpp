@@ -278,7 +278,7 @@ ADDRESS_MAP_END
     ADDRESS_MAP( atombb_mem )
 -------------------------------------------------*/
 
-ADDRESS_MAP_START(atom_state::atombb_mem)
+ADDRESS_MAP_START(atombb_state::atombb_mem)
 	AM_RANGE(0x0000, 0x3fff) AM_RAM
 	AM_RANGE(0x4000, 0x57ff) AM_RAM AM_SHARE("video_ram")
 
@@ -704,7 +704,7 @@ FLOPPY_FORMATS_END0
     MACHINE_DRIVER( atom )
 -------------------------------------------------*/
 
-MACHINE_CONFIG_START(atom_state::atom)
+MACHINE_CONFIG_START(atom_state::device_add_mconfig)
 	/* basic machine hardware */
 	MCFG_CPU_ADD(SY6502_TAG, M6502, X2/4)
 	MCFG_CPU_PROGRAM_MAP(atom_mem)
@@ -781,8 +781,8 @@ MACHINE_CONFIG_END
 	MCFG_GENERIC_EXTENSIONS("bin,rom") \
 	MCFG_GENERIC_LOAD(atomeb_state, _load)
 
-MACHINE_CONFIG_START(atomeb_state::atomeb)
-	atom(config);
+MACHINE_CONFIG_START(atomeb_state::device_add_mconfig)
+	atom_state::device_add_mconfig(config);
 	MCFG_CPU_MODIFY(SY6502_TAG)
 	MCFG_CPU_PROGRAM_MAP(atomeb_mem)
 
@@ -814,7 +814,7 @@ MACHINE_CONFIG_END
     MACHINE_DRIVER( atombb )
 -------------------------------------------------*/
 
-MACHINE_CONFIG_START(atom_state::atombb)
+MACHINE_CONFIG_START(atombb_state::device_add_mconfig)
 	/* basic machine hardware */
 	MCFG_CPU_ADD(SY6502_TAG, M6502, X2/4)
 	MCFG_CPU_PROGRAM_MAP(atombb_mem)
@@ -986,10 +986,10 @@ DRIVER_INIT_MEMBER(atomeb_state, atomeb)
     SYSTEM DRIVERS
 ***************************************************************************/
 
-/*    YEAR  NAME      PARENT    COMPAT  MACHINE   INPUT CLASS         INIT      COMPANY          FULLNAME                FLAGS */
-COMP( 1979, atom,     0,        0,      atom,     atom, atom_state,   0,        "Acorn",         "Atom"                , 0)
-COMP( 1979, atomeb,   atom,     0,      atomeb,   atom, atomeb_state, atomeb,   "Acorn",         "Atom with Eprom Box" , 0)
-COMP( 1982, atombb,   atom,     0,      atombb,   atom, atom_state,   0,        "Acorn",         "Atom with BBC Basic" , 0)
+/*    YEAR  NAME      PARENT    COMPAT  INPUT CLASS         INIT      COMPANY          FULLNAME                FLAGS */
+COMP( 1979, atom,     0,        0,      atom, atom_state,   0,        "Acorn",         "Atom"                , 0)
+COMP( 1979, atomeb,   atom,     0,      atom, atomeb_state, atomeb,   "Acorn",         "Atom with Eprom Box" , 0)
+COMP( 1982, atombb,   atom,     0,      atom, atombb_state, 0,        "Acorn",         "Atom with BBC Basic" , 0)
 //COMP( 1983, prophet2, atom,     0,      prophet2, atom, driver_device,     0,        "Busicomputers", "Prophet 2"           , 0)
 //COMP( 1983, prophet3, atom,     0,      prophet3, atom, driver_device,     0,        "Busicomputers", "Prophet 3"           , 0)
 //COMP( 2011, atommc,   atom,     0,      atommc,   atom, driver_device,     0,        "Acorn",         "Atom with AtoMMC2"   , 0)

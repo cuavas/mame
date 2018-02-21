@@ -38,7 +38,6 @@ public:
 	DECLARE_DRIVER_INIT(yukon);
 	DECLARE_DRIVER_INIT(exidy440);
 	DECLARE_DRIVER_INIT(claypign);
-	void exidy440(machine_config &config);
 
 protected:
 	DECLARE_WRITE8_MEMBER(bankram_w);
@@ -71,6 +70,7 @@ protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void exidy440_video(machine_config &config);
 	void exidy440_map(address_map &map);
 	void exidy440_audio_map(address_map &map);
@@ -107,15 +107,14 @@ class topsecex_state : public exidy440_state
 public:
 	using exidy440_state::exidy440_state;
 	DECLARE_DRIVER_INIT(topsecex);
-	void topsecex(machine_config &config);
 
 protected:
+	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void topsecex_video(machine_config &config);
 	DECLARE_READ8_MEMBER(topsecex_input_port_5_r);
 	DECLARE_WRITE8_MEMBER(topsecex_yscroll_w);
 	uint32_t screen_update_topsecex(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
-
-	virtual void video_start() override;
 
 private:
 	uint8_t m_topsecex_yscroll;

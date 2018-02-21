@@ -27,8 +27,6 @@ public:
 		m_video_ram(*this, "video_ram")
 	{ }
 
-	void mgolf(machine_config &config);
-
 protected:
 	DECLARE_WRITE8_MEMBER(vram_w);
 	DECLARE_READ8_MEMBER(wram_r);
@@ -51,6 +49,7 @@ protected:
 	virtual void machine_reset() override;
 	virtual void video_start() override;
 	virtual void device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr) override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void cpu_map(address_map &map);
 
 private:
@@ -367,7 +366,7 @@ void mgolf_state::machine_reset()
 }
 
 
-MACHINE_CONFIG_START(mgolf_state::mgolf)
+MACHINE_CONFIG_START(mgolf_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, 12096000 / 16) /* ? */
@@ -414,4 +413,4 @@ ROM_START( mgolf )
 ROM_END
 
 
-GAME( 1978, mgolf, 0, mgolf, mgolf, mgolf_state, 0, ROT270, "Atari", "Atari Mini Golf (prototype)", MACHINE_NO_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1978, mgolf, 0, mgolf, mgolf_state, 0, ROT270, "Atari", "Atari Mini Golf (prototype)", MACHINE_NO_SOUND | MACHINE_SUPPORTS_SAVE )

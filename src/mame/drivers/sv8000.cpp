@@ -51,8 +51,6 @@ public:
 		, m_io_joy(*this, "JOY")
 	{ }
 
-	void sv8000(machine_config &config);
-
 protected:
 	DECLARE_DEVICE_IMAGE_LOAD_MEMBER( cart );
 
@@ -72,6 +70,7 @@ protected:
 
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void sv8000_io(address_map &map);
 	void sv8000_mem(address_map &map);
 
@@ -373,7 +372,7 @@ READ8_MEMBER( sv8000_state::mc6847_videoram_r )
 	return data;
 }
 
-MACHINE_CONFIG_START(sv8000_state::sv8000)
+MACHINE_CONFIG_START(sv8000_state::device_add_mconfig)
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu",Z80, XTAL(10'738'635)/3)  /* Not verified */
 	MCFG_CPU_PROGRAM_MAP(sv8000_mem)
@@ -420,5 +419,5 @@ ROM_END
 
 /* Driver */
 
-/*    YEAR  NAME    PARENT  COMPAT   MACHINE  INPUT   STATE          INIT  COMPANY   FULLNAME                            FLAGS */
-CONS( 1979, sv8000, 0,      0,       sv8000,  sv8000, sv8000_state,  0,    "Bandai", "Super Vision 8000 (TV Jack 8000)", 0 )
+//    YEAR  NAME    PARENT  COMPAT   INPUT   STATE          INIT  COMPANY   FULLNAME                            FLAGS
+CONS( 1979, sv8000, 0,      0,       sv8000, sv8000_state,  0,    "Bandai", "Super Vision 8000 (TV Jack 8000)", 0 )

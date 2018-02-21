@@ -44,12 +44,12 @@ public:
 	{ }
 
 	DECLARE_DRIVER_INIT(carpolo);
-	void carpolo(machine_config &config);
 
 protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 
 private:
 	required_shared_ptr<uint8_t> m_alpharam;

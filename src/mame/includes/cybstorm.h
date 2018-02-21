@@ -26,7 +26,6 @@ public:
 	{ }
 
 	DECLARE_DRIVER_INIT(cybstorm);
-	void cybstorm(machine_config &config);
 
 protected:
 	virtual void machine_start() override;
@@ -43,6 +42,7 @@ protected:
 
 	uint32_t screen_update_cybstorm(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void round2(machine_config &config);
 	void main_map(address_map &map);
 	void vadbank_map(address_map &map);

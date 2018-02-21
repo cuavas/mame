@@ -225,7 +225,7 @@ GFXDECODE_END
  *
  *************************************/
 
-MACHINE_CONFIG_START(skullxbo_state::skullxbo)
+MACHINE_CONFIG_START(skullxbo_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, ATARI_CLOCK_14MHz/2)
@@ -608,8 +608,8 @@ DRIVER_INIT_MEMBER(skullxbo_state,skullxbo)
  *
  *************************************/
 
-GAME( 1989, skullxbo,  0,        skullxbo, skullxbo, skullxbo_state, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 5)", 0 )
-GAME( 1989, skullxbo4, skullxbo, skullxbo, skullxbo, skullxbo_state, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 4)", 0 )
-GAME( 1989, skullxbo3, skullxbo, skullxbo, skullxbo, skullxbo_state, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 3)", 0 )
-GAME( 1989, skullxbo2, skullxbo, skullxbo, skullxbo, skullxbo_state, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 2)", 0 )
-GAME( 1989, skullxbo1, skullxbo, skullxbo, skullxbo, skullxbo_state, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 1)", 0 )
+GAME( 1989, skullxbo,  0,        skullxbo, skullxbo_state, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 5)", 0 )
+GAME( 1989, skullxbo4, skullxbo, skullxbo, skullxbo_state, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 4)", 0 )
+GAME( 1989, skullxbo3, skullxbo, skullxbo, skullxbo_state, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 3)", 0 )
+GAME( 1989, skullxbo2, skullxbo, skullxbo, skullxbo_state, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 2)", 0 )
+GAME( 1989, skullxbo1, skullxbo, skullxbo, skullxbo_state, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 1)", 0 )

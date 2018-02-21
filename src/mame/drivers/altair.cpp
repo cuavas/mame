@@ -41,12 +41,11 @@ public:
 		, m_ram(*this, "ram")
 	{ }
 
-	void altair(machine_config &config);
-
 protected:
 	DECLARE_QUICKLOAD_LOAD_MEMBER(altair);
 
 	virtual void machine_reset() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void io_map(address_map &map);
 	void mem_map(address_map &map);
 
@@ -96,7 +95,7 @@ void altair_state::machine_reset()
 	m_maincpu->set_state_int(i8080_cpu_device::I8085_PC, 0xFD00);
 }
 
-MACHINE_CONFIG_START(altair_state::altair)
+MACHINE_CONFIG_START(altair_state::device_add_mconfig)
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", I8080, 2_MHz_XTAL)
 	MCFG_CPU_PROGRAM_MAP(mem_map)
@@ -129,5 +128,5 @@ ROM_END
 
 /* Driver */
 
-//    YEAR  NAME       PARENT   COMPAT   MACHINE    INPUT    STATE          INIT   COMPANY   FULLNAME         FLAGS
-COMP( 1977, al8800bt,  0,       0,       altair,    altair,  altair_state,  0,     "MITS",   "Altair 8800bt", MACHINE_NOT_WORKING | MACHINE_NO_SOUND_HW)
+//    YEAR  NAME       PARENT   COMPAT   INPUT    STATE          INIT   COMPANY   FULLNAME         FLAGS
+COMP( 1977, al8800bt,  0,       0,       altair,  altair_state,  0,     "MITS",   "Altair 8800bt", MACHINE_NOT_WORKING | MACHINE_NO_SOUND_HW)

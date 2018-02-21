@@ -207,8 +207,6 @@ public:
 		m_maincpu(*this, "maincpu")
 	{ }
 
-	void mpu5(machine_config &config);
-
 protected:
 	DECLARE_READ32_MEMBER(mpu5_mem_r);
 	DECLARE_WRITE32_MEMBER(mpu5_mem_w);
@@ -222,6 +220,7 @@ protected:
 	DECLARE_WRITE32_MEMBER(pic_w);
 
 	virtual void machine_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void mpu5_map(address_map &map);
 
 private:
@@ -546,7 +545,7 @@ void mpu5_state::machine_start()
 }
 
 
-MACHINE_CONFIG_START(mpu5_state::mpu5)
+MACHINE_CONFIG_START(mpu5_state::device_add_mconfig)
 	MCFG_CPU_ADD("maincpu", M68340, 16000000)    // ?
 	MCFG_CPU_PROGRAM_MAP(mpu5_map)
 

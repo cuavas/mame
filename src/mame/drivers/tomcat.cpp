@@ -55,8 +55,6 @@ public:
 		m_mainlatch(*this, "mainlatch")
 	{ }
 
-	void tomcat(machine_config &config);
-
 protected:
 	DECLARE_WRITE16_MEMBER(tomcat_adcon_w);
 	DECLARE_READ16_MEMBER(tomcat_adcread_r);
@@ -78,6 +76,7 @@ protected:
 	DECLARE_READ_LINE_MEMBER(dsp_BIO_r);
 	DECLARE_WRITE8_MEMBER(soundlatches_w);
 	virtual void machine_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void dsp_map(address_map &map);
 	void sound_map(address_map &map);
 	void tomcat_map(address_map &map);
@@ -329,7 +328,7 @@ void tomcat_state::machine_start()
 	m_dsp_BIO = 0;
 }
 
-MACHINE_CONFIG_START(tomcat_state::tomcat)
+MACHINE_CONFIG_START(tomcat_state::device_add_mconfig)
 	MCFG_CPU_ADD("maincpu", M68010, 12_MHz_XTAL / 2)
 	MCFG_CPU_PROGRAM_MAP(tomcat_map)
 	MCFG_CPU_PERIODIC_INT_DRIVER(tomcat_state, irq1_line_assert,  5*60)
@@ -413,4 +412,4 @@ ROM_START( tomcat )
 	ROM_LOAD( "136021-105.1l",   0x0000, 0x0100, CRC(82fc3eb2) SHA1(184231c7baef598294860a7d2b8a23798c5c7da6) ) /* AVG PROM */
 ROM_END
 
-GAME( 1985, tomcat, 0,        tomcat, tomcat, tomcat_state, 0, ROT0, "Atari", "TomCat (prototype)", MACHINE_SUPPORTS_SAVE )
+GAME( 1985, tomcat, 0,        tomcat, tomcat_state, 0, ROT0, "Atari", "TomCat (prototype)", MACHINE_SUPPORTS_SAVE )

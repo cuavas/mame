@@ -335,7 +335,7 @@ INPUT_PORTS_END
  *
  *************************************/
 
-MACHINE_CONFIG_START(jedi_state::jedi)
+MACHINE_CONFIG_START(jedi_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, JEDI_MAIN_CPU_CLOCK)
@@ -409,4 +409,4 @@ ROM_END
  *
  *************************************/
 
-GAME( 1984, jedi, 0, jedi, jedi, jedi_state, 0, ROT0, "Atari", "Return of the Jedi", MACHINE_SUPPORTS_SAVE )
+GAME( 1984, jedi, 0, jedi, jedi_state, 0, ROT0, "Atari", "Return of the Jedi", MACHINE_SUPPORTS_SAVE )

@@ -32,8 +32,6 @@ public:
 		m_maincpu(*this, "maincpu")
 	{ }
 
-	void clayshoo(machine_config &config);
-
 protected:
 	DECLARE_WRITE8_MEMBER(analog_reset_w);
 	DECLARE_READ8_MEMBER(analog_r);
@@ -46,6 +44,7 @@ protected:
 
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_io_map(address_map &map);
 	void main_map(address_map &map);
 
@@ -320,7 +319,7 @@ void clayshoo_state::machine_reset()
 	m_analog_port_val = 0;
 }
 
-MACHINE_CONFIG_START(clayshoo_state::clayshoo)
+MACHINE_CONFIG_START(clayshoo_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80,5068000/4)      /* 5.068/4 Mhz (divider is a guess) */
@@ -370,4 +369,4 @@ ROM_END
  *
  *************************************/
 
-GAME( 1979, clayshoo, 0, clayshoo, clayshoo, clayshoo_state, 0, ROT0, "Allied Leisure", "Clay Shoot", MACHINE_NO_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1979, clayshoo, 0, clayshoo, clayshoo_state, 0, ROT0, "Allied Leisure", "Clay Shoot", MACHINE_NO_SOUND | MACHINE_SUPPORTS_SAVE )

@@ -215,7 +215,7 @@ PALETTE_INIT_MEMBER(poolshrk_state, poolshrk)
 }
 
 
-MACHINE_CONFIG_START(poolshrk_state::poolshrk)
+MACHINE_CONFIG_START(poolshrk_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6800, 11055000 / 8) /* ? */
@@ -262,4 +262,4 @@ ROM_START( poolshrk )
 ROM_END
 
 
-GAME( 1977, poolshrk, 0, poolshrk, poolshrk, poolshrk_state, poolshrk, 0, "Atari", "Poolshark", MACHINE_SUPPORTS_SAVE )
+GAME( 1977, poolshrk, 0, poolshrk, poolshrk_state, poolshrk, 0, "Atari", "Poolshark", MACHINE_SUPPORTS_SAVE )

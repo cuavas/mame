@@ -25,7 +25,6 @@ public:
 	{ }
 
 	DECLARE_DRIVER_INIT(thunderj);
-	void thunderj(machine_config &config);
 
 protected:
 	virtual void machine_start() override;
@@ -37,6 +36,7 @@ protected:
 	TILE_GET_INFO_MEMBER(get_playfield2_tile_info);
 	uint32_t screen_update_thunderj(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void extra_map(address_map &map);
 	void main_map(address_map &map);
 

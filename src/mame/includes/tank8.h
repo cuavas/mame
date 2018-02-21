@@ -53,7 +53,6 @@ public:
 	{ }
 
 	DECLARE_DRIVER_INIT(decode);
-	void tank8(machine_config &config);
 
 protected:
 	DECLARE_READ8_MEMBER(collision_r);
@@ -83,6 +82,7 @@ protected:
 	void set_collision(int index);
 
 	virtual void device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr) override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void tank8_cpu_map(address_map &map);
 
 private:

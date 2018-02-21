@@ -234,7 +234,6 @@ public:
 	}
 
 	DECLARE_DRIVER_INIT(bfcobra);
-	void bfcobra(machine_config &config);
 
 protected:
 	DECLARE_READ8_MEMBER(chipset_r);
@@ -268,6 +267,7 @@ protected:
 	inline uint8_t* blitter_get_addr(uint32_t addr);
 	inline void z80_bank(int num, int data);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void m6809_prog_map(address_map &map);
 	void ramdac_map(address_map &map);
 	void z80_io_map(address_map &map);
@@ -1637,7 +1637,7 @@ INTERRUPT_GEN_MEMBER(bfcobra_state::vblank_gen)
 	update_irqs();
 }
 
-MACHINE_CONFIG_START(bfcobra_state::bfcobra)
+MACHINE_CONFIG_START(bfcobra_state::device_add_mconfig)
 	MCFG_CPU_ADD("maincpu", Z80, Z80_XTAL)
 	MCFG_CPU_PROGRAM_MAP(z80_prog_map)
 	MCFG_CPU_IO_MAP(z80_io_map)
@@ -1847,11 +1847,11 @@ ROM_START( qosb )
 ROM_END
 
 
-GAME( 1989, inquiztr, 0         ,   bfcobra, bfcobra, bfcobra_state, bfcobra, ROT0, "BFM", "Inquizitor",                       MACHINE_NOT_WORKING )
-GAME( 1990, escounts, 0         ,   bfcobra, bfcobra, bfcobra_state, bfcobra, ROT0, "BFM", "Every Second Counts (39-360-053)", MACHINE_IMPERFECT_GRAPHICS )
-GAME( 1991, trebltop, 0         ,   bfcobra, bfcobra, bfcobra_state, bfcobra, ROT0, "BFM", "Treble Top (39-360-070)",          MACHINE_IMPERFECT_GRAPHICS )
-GAME( 1991, beeline,  0         ,   bfcobra, bfcobra, bfcobra_state, bfcobra, ROT0, "BFM", "Beeline (39-360-075)",             MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS )
-GAME( 1991, quizvadr, 0         ,   bfcobra, bfcobra, bfcobra_state, bfcobra, ROT0, "BFM", "Quizvaders (39-360-078)",          MACHINE_IMPERFECT_GRAPHICS )
-GAME( 1992, qos,      0         ,   bfcobra, bfcobra, bfcobra_state, bfcobra, ROT0, "BFM", "A Question of Sport (set 1, 39-960-107)", MACHINE_IMPERFECT_GRAPHICS )
-GAME( 1992, qosa,     qos       ,   bfcobra, bfcobra, bfcobra_state, bfcobra, ROT0, "BFM", "A Question of Sport (set 2, 39-960-099)", MACHINE_IMPERFECT_GRAPHICS )
-GAME( 1992, qosb,     qos       ,   bfcobra, bfcobra, bfcobra_state, bfcobra, ROT0, "BFM", "A Question of Sport (set 3, 39-960-089)", MACHINE_IMPERFECT_GRAPHICS )
+GAME( 1989, inquiztr, 0         ,   bfcobra, bfcobra_state, bfcobra, ROT0, "BFM", "Inquizitor",                              MACHINE_NOT_WORKING )
+GAME( 1990, escounts, 0         ,   bfcobra, bfcobra_state, bfcobra, ROT0, "BFM", "Every Second Counts (39-360-053)",        MACHINE_IMPERFECT_GRAPHICS )
+GAME( 1991, trebltop, 0         ,   bfcobra, bfcobra_state, bfcobra, ROT0, "BFM", "Treble Top (39-360-070)",                 MACHINE_IMPERFECT_GRAPHICS )
+GAME( 1991, beeline,  0         ,   bfcobra, bfcobra_state, bfcobra, ROT0, "BFM", "Beeline (39-360-075)",                    MACHINE_NOT_WORKING | MACHINE_IMPERFECT_GRAPHICS )
+GAME( 1991, quizvadr, 0         ,   bfcobra, bfcobra_state, bfcobra, ROT0, "BFM", "Quizvaders (39-360-078)",                 MACHINE_IMPERFECT_GRAPHICS )
+GAME( 1992, qos,      0         ,   bfcobra, bfcobra_state, bfcobra, ROT0, "BFM", "A Question of Sport (set 1, 39-960-107)", MACHINE_IMPERFECT_GRAPHICS )
+GAME( 1992, qosa,     qos       ,   bfcobra, bfcobra_state, bfcobra, ROT0, "BFM", "A Question of Sport (set 2, 39-960-099)", MACHINE_IMPERFECT_GRAPHICS )
+GAME( 1992, qosb,     qos       ,   bfcobra, bfcobra_state, bfcobra, ROT0, "BFM", "A Question of Sport (set 3, 39-960-089)", MACHINE_IMPERFECT_GRAPHICS )

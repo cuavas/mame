@@ -241,7 +241,7 @@ GFXDECODE_END
  *
  *************************************/
 
-MACHINE_CONFIG_START(thunderj_state::thunderj)
+MACHINE_CONFIG_START(thunderj_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, ATARI_CLOCK_14MHz/2)
@@ -465,5 +465,5 @@ DRIVER_INIT_MEMBER(thunderj_state,thunderj)
  *
  *************************************/
 
-GAME( 1990, thunderj,         0, thunderj, thunderj, thunderj_state, thunderj, ROT0, "Atari Games", "ThunderJaws (rev 3)", 0 )
-GAME( 1990, thunderja, thunderj, thunderj, thunderj, thunderj_state, thunderj, ROT0, "Atari Games", "ThunderJaws (rev 2)", 0 )
+GAME( 1990, thunderj,         0, thunderj, thunderj_state, thunderj, ROT0, "Atari Games", "ThunderJaws (rev 3)", 0 )
+GAME( 1990, thunderja, thunderj, thunderj, thunderj_state, thunderj, ROT0, "Atari Games", "ThunderJaws (rev 2)", 0 )

@@ -475,7 +475,7 @@ void super6_state::machine_reset()
 //  MACHINE_CONFIG( super6 )
 //-------------------------------------------------
 
-MACHINE_CONFIG_START(super6_state::super6)
+MACHINE_CONFIG_START(super6_state::device_add_mconfig)
 	// basic machine hardware
 	MCFG_CPU_ADD(Z80_TAG, Z80, XTAL(24'000'000)/4)
 	MCFG_CPU_PROGRAM_MAP(super6_mem)
@@ -565,5 +565,5 @@ ROM_END
 //  SYSTEM DRIVERS
 //**************************************************************************
 
-//    YEAR  NAME     PARENT  COMPAT  MACHINE  INPUT   STATE         INIT    COMPANY                         FULLNAME     FLAGS
-COMP( 1983, super6,  0,      0,      super6,  super6, super6_state, 0,      "Advanced Digital Corporation", "Super Six", MACHINE_NOT_WORKING | MACHINE_NO_SOUND_HW )
+//    YEAR  NAME     PARENT  COMPAT  INPUT   STATE         INIT    COMPANY                         FULLNAME     FLAGS
+COMP( 1983, super6,  0,      0,      super6, super6_state, 0,      "Advanced Digital Corporation", "Super Six", MACHINE_NOT_WORKING | MACHINE_NO_SOUND_HW )

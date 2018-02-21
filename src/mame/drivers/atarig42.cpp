@@ -522,7 +522,7 @@ static const atari_rle_objects_config modesc_0x400 =
  *
  *************************************/
 
-MACHINE_CONFIG_START(atarig42_state::atarig42)
+MACHINE_CONFIG_START(atarig42_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, ATARI_CLOCK_14MHz)
@@ -560,16 +560,16 @@ MACHINE_CONFIG_START(atarig42_state::atarig42)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
-MACHINE_CONFIG_START(atarig42_0x200_state::atarig42_0x200)
-	atarig42(config);
+MACHINE_CONFIG_START(atarig42_0x200_state::device_add_mconfig)
+	atarig42_state::device_add_mconfig(config);
 	MCFG_ATARIRLE_ADD("rle", modesc_0x200)
 
 	/* ASIC65 */
 	MCFG_ASIC65_ADD("asic65", ASIC65_ROMBASED)
 MACHINE_CONFIG_END
 
-MACHINE_CONFIG_START(atarig42_0x400_state::atarig42_0x400)
-	atarig42(config);
+MACHINE_CONFIG_START(atarig42_0x400_state::device_add_mconfig)
+	atarig42_state::device_add_mconfig(config);
 	MCFG_ATARIRLE_ADD("rle", modesc_0x400)
 
 	/* ASIC65 */
@@ -896,7 +896,7 @@ DRIVER_INIT_MEMBER(atarig42_0x400_state,guardian)
  *
  *************************************/
 
-GAME( 1991, roadriot,  0,        atarig42_0x200, roadriot, atarig42_0x200_state, roadriot, ROT0, "Atari Games", "Road Riot 4WD (set 1, 04 Dec 1991)", MACHINE_UNEMULATED_PROTECTION )
-GAME( 1991, roadriota, roadriot, atarig42_0x200, roadriot, atarig42_0x200_state, roadriot, ROT0, "Atari Games", "Road Riot 4WD (set 2, 13 Nov 1991)", MACHINE_UNEMULATED_PROTECTION )
-GAME( 1991, roadriotb, roadriot, atarig42_0x200, roadriot, atarig42_0x200_state, roadriot, ROT0, "Atari Games", "Road Riot 4WD (set 3, 04 Jun 1991)", MACHINE_UNEMULATED_PROTECTION )
-GAME( 1992, guardian,  0,        atarig42_0x400, guardian, atarig42_0x400_state, guardian, ROT0, "Atari Games", "Guardians of the 'Hood", 0 )
+GAME( 1991, roadriot,  0,        roadriot, atarig42_0x200_state, roadriot, ROT0, "Atari Games", "Road Riot 4WD (set 1, 04 Dec 1991)", MACHINE_UNEMULATED_PROTECTION )
+GAME( 1991, roadriota, roadriot, roadriot, atarig42_0x200_state, roadriot, ROT0, "Atari Games", "Road Riot 4WD (set 2, 13 Nov 1991)", MACHINE_UNEMULATED_PROTECTION )
+GAME( 1991, roadriotb, roadriot, roadriot, atarig42_0x200_state, roadriot, ROT0, "Atari Games", "Road Riot 4WD (set 3, 04 Jun 1991)", MACHINE_UNEMULATED_PROTECTION )
+GAME( 1992, guardian,  0,        guardian, atarig42_0x400_state, guardian, ROT0, "Atari Games", "Guardians of the 'Hood", 0 )

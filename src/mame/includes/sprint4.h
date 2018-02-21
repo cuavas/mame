@@ -31,7 +31,6 @@ public:
 	DECLARE_CUSTOM_INPUT_MEMBER(get_lever);
 	DECLARE_CUSTOM_INPUT_MEMBER(get_wheel);
 	DECLARE_CUSTOM_INPUT_MEMBER(get_collision);
-	void sprint4(machine_config &config);
 
 protected:
 	DECLARE_READ8_MEMBER(wram_r);
@@ -65,6 +64,7 @@ protected:
 	DECLARE_WRITE_LINE_MEMBER(screen_vblank);
 	TIMER_CALLBACK_MEMBER(nmi_callback);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void sprint4_cpu_map(address_map &map);
 
 private:

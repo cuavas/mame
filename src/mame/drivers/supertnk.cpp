@@ -119,7 +119,6 @@ public:
 	{ }
 
 	DECLARE_DRIVER_INIT(supertnk);
-	void supertnk(machine_config &config);
 
 protected:
 	DECLARE_WRITE8_MEMBER(supertnk_bankswitch_0_w);
@@ -135,6 +134,7 @@ protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void supertnk_io_map(address_map &map);
 	void supertnk_map(address_map &map);
 
@@ -431,7 +431,7 @@ INPUT_PORTS_END
  *
  *************************************/
 
-MACHINE_CONFIG_START(supertnk_state::supertnk)
+MACHINE_CONFIG_START(supertnk_state::device_add_mconfig)
 
 	// CPU TMS9980A; no line connections
 	MCFG_TMS99xx_ADD("maincpu", TMS9980A, 2598750, supertnk_map, supertnk_io_map)
@@ -503,4 +503,4 @@ DRIVER_INIT_MEMBER(supertnk_state,supertnk)
 }
 
 
-GAME( 1981, supertnk, 0, supertnk, supertnk, supertnk_state, supertnk, ROT90, "Video Games GmbH", "Super Tank", 0 )
+GAME( 1981, supertnk, 0, supertnk, supertnk_state, supertnk, ROT90, "Video Games GmbH", "Super Tank", 0 )

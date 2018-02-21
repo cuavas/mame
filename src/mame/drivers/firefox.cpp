@@ -64,7 +64,6 @@ public:
 
 	DECLARE_CUSTOM_INPUT_MEMBER(mainflag_r);
 	DECLARE_CUSTOM_INPUT_MEMBER(soundflag_r);
-	void firefox(machine_config &config);
 
 protected:
 	DECLARE_READ8_MEMBER(firefox_disc_status_r);
@@ -110,6 +109,7 @@ protected:
 
 	virtual void machine_start() override;
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void audio_map(address_map &map);
 	void main_map(address_map &map);
 
@@ -732,7 +732,7 @@ GFXDECODE_END
  *
  *************************************/
 
-MACHINE_CONFIG_START(firefox_state::firefox)
+MACHINE_CONFIG_START(firefox_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", MC6809E, MASTER_XTAL/8) // 68B09E
@@ -918,5 +918,5 @@ ROM_END
  *
  *************************************/
 
-GAME( 1984, firefox,  0,       firefox, firefox, firefox_state, 0, ROT0, "Atari", "Fire Fox (set 1)", 0 )
-GAME( 1984, firefoxa, firefox, firefox, firefox, firefox_state, 0, ROT0, "Atari", "Fire Fox (set 2)", 0 )
+GAME( 1984, firefox,  0,       firefox, firefox_state, 0, ROT0, "Atari", "Fire Fox (set 1)", 0 )
+GAME( 1984, firefoxa, firefox, firefox, firefox_state, 0, ROT0, "Atari", "Fire Fox (set 2)", 0 )

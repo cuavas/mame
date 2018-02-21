@@ -41,8 +41,6 @@ public:
 		m_screen(*this, "screen"),
 		m_palette(*this, "palette"){ }
 
-	void boxer(machine_config &config);
-
 protected:
 	DECLARE_READ8_MEMBER(input_r);
 	DECLARE_READ8_MEMBER(misc_r);
@@ -60,6 +58,7 @@ protected:
 
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void boxer_map(address_map &map);
 
 	virtual void device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr) override;
@@ -485,7 +484,7 @@ void boxer_state::machine_reset()
 }
 
 
-MACHINE_CONFIG_START(boxer_state::boxer)
+MACHINE_CONFIG_START(boxer_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, MASTER_CLOCK / 16)
@@ -550,4 +549,4 @@ ROM_END
  *
  *************************************/
 
-GAME( 1978, boxer, 0, boxer, boxer, boxer_state, 0, 0, "Atari", "Boxer (prototype)", MACHINE_NO_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1978, boxer, 0, boxer, boxer_state, 0, 0, "Atari", "Boxer (prototype)", MACHINE_NO_SOUND | MACHINE_SUPPORTS_SAVE )

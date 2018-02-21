@@ -37,8 +37,6 @@ public:
 		m_buttons(*this, "BUTTONS")
 	{ }
 
-	void wswan(machine_config &config);
-
 protected:
 	/* Interrupt flags */
 	static const uint8_t WSWAN_IFLAG_STX    = 0x01;
@@ -95,6 +93,7 @@ protected:
 	virtual void machine_reset() override;
 	DECLARE_PALETTE_INIT(wswan);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void wswan_io(address_map &map);
 	void wswan_mem(address_map &map);
 
@@ -105,12 +104,10 @@ protected:
 
 class wscolor_state : public wswan_state
 {
-public:
-	using wswan_state::wswan_state;
-	void wscolor(machine_config &config);
-
 protected:
+	using wswan_state::wswan_state;
 	virtual void machine_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void wscolor_mem(address_map &map);
 	DECLARE_PALETTE_INIT(wscolor);
 };

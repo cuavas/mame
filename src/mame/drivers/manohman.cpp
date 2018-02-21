@@ -151,10 +151,9 @@ public:
 		m_pit(*this, "pit")
 	{ }
 
-	void manohman(machine_config &config);
-
 protected:
 	virtual void machine_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void mem_map(address_map &map);
 
 	IRQ_CALLBACK_MEMBER(iack_handler);
@@ -236,7 +235,7 @@ INPUT_PORTS_END
 *               Machine Config               *
 *********************************************/
 
-MACHINE_CONFIG_START(manohman_state::manohman)
+MACHINE_CONFIG_START(manohman_state::device_add_mconfig)
 	MCFG_CPU_ADD("maincpu", M68000, XTAL(8'000'000)) // MC68000P8
 	MCFG_CPU_PROGRAM_MAP(mem_map)
 	MCFG_CPU_IRQ_ACKNOWLEDGE_DRIVER(manohman_state, iack_handler)
@@ -277,6 +276,6 @@ ROM_END
 *                Game Drivers                *
 *********************************************/
 
-//    YEAR  NAME      PARENT  MACHINE   INPUT     STATE           INIT    ROT   COMPANY   FULLNAME         FLAGS
-GAME( 199?, manohman, 0,      manohman, manohman, manohman_state, 0,      ROT0, "Merkur", "Mann, oh-Mann", MACHINE_NOT_WORKING | MACHINE_NO_SOUND | MACHINE_REQUIRES_ARTWORK )
-GAME( 1990, backgamn, 0,      manohman, manohman, manohman_state, 0,      ROT0, "Merkur", "Backgammon",    MACHINE_NOT_WORKING | MACHINE_NO_SOUND | MACHINE_REQUIRES_ARTWORK )
+//    YEAR  NAME      PARENT  INPUT     STATE           INIT    ROT   COMPANY   FULLNAME         FLAGS
+GAME( 199?, manohman, 0,      manohman, manohman_state, 0,      ROT0, "Merkur", "Mann, oh-Mann", MACHINE_NOT_WORKING | MACHINE_NO_SOUND | MACHINE_REQUIRES_ARTWORK )
+GAME( 1990, backgamn, 0,      manohman, manohman_state, 0,      ROT0, "Merkur", "Backgammon",    MACHINE_NOT_WORKING | MACHINE_NO_SOUND | MACHINE_REQUIRES_ARTWORK )

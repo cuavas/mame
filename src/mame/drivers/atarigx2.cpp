@@ -1494,7 +1494,7 @@ static const atari_rle_objects_config modesc_0x400 =
  *
  *************************************/
 
-MACHINE_CONFIG_START(atarigx2_state::atarigx2)
+MACHINE_CONFIG_START(atarigx2_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68EC020, ATARI_CLOCK_14MHz)
@@ -1530,14 +1530,14 @@ MACHINE_CONFIG_START(atarigx2_state::atarigx2)
 MACHINE_CONFIG_END
 
 
-MACHINE_CONFIG_START(atarigx2_state::atarigx2_0x200)
-	atarigx2(config);
+MACHINE_CONFIG_START(atarigx2_0x200_state::device_add_mconfig)
+	atarigx2_state::device_add_mconfig(config);
 	MCFG_DEVICE_ADD("xga", ATARI_136094_0072, 0)
 	MCFG_ATARIRLE_ADD("rle", modesc_0x200)
 MACHINE_CONFIG_END
 
-MACHINE_CONFIG_START(atarigx2_state::atarigx2_0x400)
-	atarigx2(config);
+MACHINE_CONFIG_START(atarigx2_0x400_state::device_add_mconfig)
+	atarigx2_state::device_add_mconfig(config);
 	MCFG_DEVICE_ADD("xga", ATARI_136095_0072, 0)
 	MCFG_ATARIRLE_ADD("rle", modesc_0x400)
 MACHINE_CONFIG_END
@@ -2303,16 +2303,16 @@ DRIVER_INIT_MEMBER(atarigx2_state,rrreveng)
  *
  *************************************/
 
-GAME( 1992, spclords,  0,         atarigx2_0x400, spclords, atarigx2_state, spclords, ROT0, "Atari Games", "Space Lords (rev C)", 0 )
-GAME( 1992, spclordsb, spclords,  atarigx2_0x400, spclords, atarigx2_state, spclords, ROT0, "Atari Games", "Space Lords (rev B)", 0 )
-GAME( 1992, spclordsg, spclords,  atarigx2_0x400, spclords, atarigx2_state, spclords, ROT0, "Atari Games", "Space Lords (rev A, German)", 0 )
-GAME( 1992, spclordsa, spclords,  atarigx2_0x400, spclords, atarigx2_state, spclords, ROT0, "Atari Games", "Space Lords (rev A)", 0 )
+GAME( 1992, spclords,  0,         spclords, atarigx2_0x400_state, spclords, ROT0, "Atari Games", "Space Lords (rev C)", 0 )
+GAME( 1992, spclordsb, spclords,  spclords, atarigx2_0x400_state, spclords, ROT0, "Atari Games", "Space Lords (rev B)", 0 )
+GAME( 1992, spclordsg, spclords,  spclords, atarigx2_0x400_state, spclords, ROT0, "Atari Games", "Space Lords (rev A, German)", 0 )
+GAME( 1992, spclordsa, spclords,  spclords, atarigx2_0x400_state, spclords, ROT0, "Atari Games", "Space Lords (rev A)", 0 )
 
-GAME( 1992, motofren,   0,        atarigx2_0x200, motofren, atarigx2_state, motofren, ROT0, "Atari Games", "Moto Frenzy", 0 )
-GAME( 1992, motofrenmd, motofren, atarigx2_0x200, motofren, atarigx2_state, motofren, ROT0, "Atari Games", "Moto Frenzy (Mini Deluxe)", 0 )
-GAME( 1992, motofrenft, motofren, atarigx2_0x200, motofren, atarigx2_state, motofren, ROT0, "Atari Games", "Moto Frenzy (Field Test Version)", 0 )
-GAME( 1992, motofrenmf, motofren, atarigx2_0x200, motofren, atarigx2_state, motofren, ROT0, "Atari Games", "Moto Frenzy (Mini Deluxe Field Test Version)", 0 )
+GAME( 1992, motofren,   0,        motofren, atarigx2_0x200_state, motofren, ROT0, "Atari Games", "Moto Frenzy", 0 )
+GAME( 1992, motofrenmd, motofren, motofren, atarigx2_0x200_state, motofren, ROT0, "Atari Games", "Moto Frenzy (Mini Deluxe)", 0 )
+GAME( 1992, motofrenft, motofren, motofren, atarigx2_0x200_state, motofren, ROT0, "Atari Games", "Moto Frenzy (Field Test Version)", 0 )
+GAME( 1992, motofrenmf, motofren, motofren, atarigx2_0x200_state, motofren, ROT0, "Atari Games", "Moto Frenzy (Mini Deluxe Field Test Version)", 0 )
 
-GAME( 1993, rrreveng,  0,         atarigx2_0x400, rrreveng, atarigx2_state, rrreveng, ROT0, "Atari Games", "Road Riot's Revenge (prototype, Sep 06, 1994)", MACHINE_UNEMULATED_PROTECTION | MACHINE_NOT_WORKING )
-GAME( 1993, rrrevenga, rrreveng,  atarigx2_0x400, rrreveng, atarigx2_state, rrreveng, ROT0, "Atari Games", "Road Riot's Revenge (prototype, Jan 27, 1994, set 1)", MACHINE_UNEMULATED_PROTECTION | MACHINE_NOT_WORKING )
-GAME( 1993, rrrevengb, rrreveng,  atarigx2_0x400, rrreveng, atarigx2_state, rrreveng, ROT0, "Atari Games", "Road Riot's Revenge (prototype, Jan 27, 1994, set 2)", MACHINE_UNEMULATED_PROTECTION | MACHINE_NOT_WORKING )
+GAME( 1993, rrreveng,  0,         rrreveng, atarigx2_0x400_state, rrreveng, ROT0, "Atari Games", "Road Riot's Revenge (prototype, Sep 06, 1994)", MACHINE_UNEMULATED_PROTECTION | MACHINE_NOT_WORKING )
+GAME( 1993, rrrevenga, rrreveng,  rrreveng, atarigx2_0x400_state, rrreveng, ROT0, "Atari Games", "Road Riot's Revenge (prototype, Jan 27, 1994, set 1)", MACHINE_UNEMULATED_PROTECTION | MACHINE_NOT_WORKING )
+GAME( 1993, rrrevengb, rrreveng,  rrreveng, atarigx2_0x400_state, rrreveng, ROT0, "Atari Games", "Road Riot's Revenge (prototype, Jan 27, 1994, set 2)", MACHINE_UNEMULATED_PROTECTION | MACHINE_NOT_WORKING )

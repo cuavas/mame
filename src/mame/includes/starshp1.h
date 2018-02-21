@@ -63,7 +63,6 @@ public:
 
 	DECLARE_CUSTOM_INPUT_MEMBER(starshp1_analog_r);
 	DECLARE_CUSTOM_INPUT_MEMBER(collision_latch_r);
-	void starshp1(machine_config &config);
 
 protected:
 	DECLARE_WRITE8_MEMBER(starshp1_collision_reset_w);
@@ -103,6 +102,7 @@ protected:
 	int spaceship_collision(bitmap_ind16 &bitmap, const rectangle &rect);
 	int point_in_circle(int x, int y, int center_x, int center_y, int r);
 	int circle_collision(const rectangle &rect);
+	virtual void device_add_mconfig(machine_config &config) override;
 	void starshp1_map(address_map &map);
 
 private:

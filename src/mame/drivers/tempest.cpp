@@ -316,7 +316,6 @@ public:
 	DECLARE_CUSTOM_INPUT_MEMBER(tempest_knob_r);
 	DECLARE_CUSTOM_INPUT_MEMBER(tempest_buttons_r);
 	DECLARE_CUSTOM_INPUT_MEMBER(clock_r);
-	void tempest(machine_config &config);
 
 protected:
 	DECLARE_WRITE8_MEMBER(wdclr_w);
@@ -328,6 +327,7 @@ protected:
 	DECLARE_READ8_MEMBER(rom_ae1f_r);
 
 	virtual void machine_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_map(address_map &map);
 
 private:
@@ -595,7 +595,7 @@ INPUT_PORTS_END
  *
  *************************************/
 
-MACHINE_CONFIG_START(tempest_state::tempest)
+MACHINE_CONFIG_START(tempest_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, MASTER_CLOCK / 8)
@@ -869,9 +869,9 @@ ROM_END
  *
  *************************************/
 
-GAME( 1980, tempest,   0,       tempest, tempest, tempest_state, 0, ROT270, "Atari", "Tempest (rev 3, Revised Hardware)", MACHINE_SUPPORTS_SAVE )
-GAME( 1980, tempest3,  tempest, tempest, tempest, tempest_state, 0, ROT270, "Atari", "Tempest (rev 3)", MACHINE_SUPPORTS_SAVE )
-GAME( 1980, tempest2,  tempest, tempest, tempest, tempest_state, 0, ROT270, "Atari", "Tempest (rev 2)", MACHINE_SUPPORTS_SAVE )
-GAME( 1980, tempest1,  tempest, tempest, tempest, tempest_state, 0, ROT270, "Atari", "Tempest (rev 1)", MACHINE_SUPPORTS_SAVE )
-GAME( 1980, tempest1r, tempest, tempest, tempest, tempest_state, 0, ROT270, "Atari", "Tempest (rev 1, Revised Hardware)", MACHINE_SUPPORTS_SAVE )
-GAME( 1980, temptube,  tempest, tempest, tempest, tempest_state, 0, ROT270, "hack (Duncan Brown)", "Tempest Tubes", MACHINE_SUPPORTS_SAVE )
+GAME( 1980, tempest,   0,       tempest, tempest_state, 0, ROT270, "Atari", "Tempest (rev 3, Revised Hardware)", MACHINE_SUPPORTS_SAVE )
+GAME( 1980, tempest3,  tempest, tempest, tempest_state, 0, ROT270, "Atari", "Tempest (rev 3)", MACHINE_SUPPORTS_SAVE )
+GAME( 1980, tempest2,  tempest, tempest, tempest_state, 0, ROT270, "Atari", "Tempest (rev 2)", MACHINE_SUPPORTS_SAVE )
+GAME( 1980, tempest1,  tempest, tempest, tempest_state, 0, ROT270, "Atari", "Tempest (rev 1)", MACHINE_SUPPORTS_SAVE )
+GAME( 1980, tempest1r, tempest, tempest, tempest_state, 0, ROT270, "Atari", "Tempest (rev 1, Revised Hardware)", MACHINE_SUPPORTS_SAVE )
+GAME( 1980, temptube,  tempest, tempest, tempest_state, 0, ROT270, "hack (Duncan Brown)", "Tempest Tubes", MACHINE_SUPPORTS_SAVE )

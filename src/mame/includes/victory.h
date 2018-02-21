@@ -37,8 +37,6 @@ public:
 	{
 	}
 
-	void victory(machine_config &config);
-
 protected:
 	DECLARE_WRITE8_MEMBER(lamp_control_w);
 	DECLARE_WRITE8_MEMBER(paletteram_w);
@@ -61,7 +59,9 @@ protected:
 	void update_background();
 	void update_foreground();
 
+protected:
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void victory_audio(machine_config &config);
 	void main_io_map(address_map &map);
 	void main_map(address_map &map);

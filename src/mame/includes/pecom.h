@@ -29,11 +29,10 @@ public:
 		m_bank2(*this, "bank2"),
 		m_bank3(*this, "bank3"),
 		m_bank4(*this, "bank4"),
+		m_io_cnt(*this, "CNT") { }
 		m_io_cnt(*this, "CNT")
-	{ }
 
 	DECLARE_INPUT_CHANGED_MEMBER(ef_w);
-	void pecom64(machine_config &config);
 
 protected:
 	DECLARE_READ8_MEMBER(pecom_cdp1869_charram_r);
@@ -56,6 +55,7 @@ protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void pecom_video(machine_config &config);
 	void cdp1869_page_ram(address_map &map);
 	void pecom64_io(address_map &map);

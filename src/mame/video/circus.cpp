@@ -117,7 +117,7 @@ uint32_t circus_state::screen_update_circus(screen_device &screen, bitmap_ind16 
 	return 0;
 }
 
-void circus_state::robotbwl_draw_box( bitmap_ind16 &bitmap, const rectangle &cliprect, int x, int y )
+void robotbwl_state::robotbwl_draw_box( bitmap_ind16 &bitmap, const rectangle &cliprect, int x, int y )
 {
 	/* Box */
 	int ex = x + 24;
@@ -135,7 +135,7 @@ void circus_state::robotbwl_draw_box( bitmap_ind16 &bitmap, const rectangle &cli
 	draw_line(bitmap, cliprect, x + 16, y, x + 16, ey, 0);
 }
 
-void circus_state::robotbwl_draw_scoreboard( bitmap_ind16 &bitmap, const rectangle &cliprect )
+void robotbwl_state::robotbwl_draw_scoreboard( bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	int offs;
 
@@ -160,7 +160,7 @@ void circus_state::robotbwl_draw_scoreboard( bitmap_ind16 &bitmap, const rectang
 	draw_line(bitmap, cliprect, 39 + 152, 137, 47 + 152, 137, 0);
 }
 
-void circus_state::robotbwl_draw_bowling_alley( bitmap_ind16 &bitmap, const rectangle &cliprect )
+void robotbwl_state::robotbwl_draw_bowling_alley( bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	draw_line(bitmap, cliprect, 103, 17, 103, 205, 0);
 	draw_line(bitmap, cliprect, 111, 17, 111, 203, 1);
@@ -168,7 +168,7 @@ void circus_state::robotbwl_draw_bowling_alley( bitmap_ind16 &bitmap, const rect
 	draw_line(bitmap, cliprect, 144, 17, 144, 203, 1);
 }
 
-void circus_state::robotbwl_draw_ball( bitmap_ind16 &bitmap, const rectangle &cliprect )
+void robotbwl_state::robotbwl_draw_ball( bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	m_gfxdecode->gfx(1)->transpen(bitmap,/* Y is horizontal position */
 			cliprect,
@@ -178,7 +178,7 @@ void circus_state::robotbwl_draw_ball( bitmap_ind16 &bitmap, const rectangle &cl
 			m_clown_y + 8, m_clown_x + 8, 0);
 }
 
-uint32_t circus_state::screen_update_robotbwl(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
+uint32_t robotbwl_state::screen_update_robotbwl(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	m_bg_tilemap->draw(screen, bitmap, cliprect, 0, 0);
 	robotbwl_draw_scoreboard(bitmap, cliprect);
@@ -187,7 +187,7 @@ uint32_t circus_state::screen_update_robotbwl(screen_device &screen, bitmap_ind1
 	return 0;
 }
 
-void circus_state::crash_draw_car( bitmap_ind16 &bitmap, const rectangle &cliprect )
+void crash_state::crash_draw_car( bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	m_gfxdecode->gfx(1)->transpen(bitmap,/* Y is horizontal position */
 		cliprect,
@@ -197,14 +197,14 @@ void circus_state::crash_draw_car( bitmap_ind16 &bitmap, const rectangle &clipre
 		m_clown_y, m_clown_x - 1, 0);
 }
 
-uint32_t circus_state::screen_update_crash(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
+uint32_t crash_state::screen_update_crash(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	m_bg_tilemap->draw(screen, bitmap, cliprect, 0, 0);
 	crash_draw_car(bitmap, cliprect);
 	return 0;
 }
 
-uint32_t circus_state::screen_update_ripcord(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
+uint32_t ripcord_state::screen_update_ripcord(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	m_bg_tilemap->draw(screen, bitmap, cliprect, 0, 0);
 	draw_sprite_collision(bitmap, cliprect);

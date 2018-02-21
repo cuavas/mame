@@ -415,7 +415,7 @@ GFXDECODE_END
  *
  *************************************/
 
-MACHINE_CONFIG_START(cloud9_state::cloud9)
+MACHINE_CONFIG_START(cloud9_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, MASTER_CLOCK/8)
@@ -517,5 +517,5 @@ ROM_END
  *
  *************************************/
 
-GAME( 1983, cloud9,   0, cloud9, cloud9,   cloud9_state, 0, ROT0, "Atari", "Cloud 9 (prototype)",   MACHINE_SUPPORTS_SAVE )
-GAME( 1983, firebeas, 0, cloud9, firebeas, cloud9_state, 0, ROT0, "Atari", "Firebeast (prototype)", MACHINE_SUPPORTS_SAVE )
+GAME( 1983, cloud9,   0, cloud9,   cloud9_state, 0, ROT0, "Atari", "Cloud 9 (prototype)",   MACHINE_SUPPORTS_SAVE )
+GAME( 1983, firebeas, 0, firebeas, cloud9_state, 0, ROT0, "Atari", "Firebeast (prototype)", MACHINE_SUPPORTS_SAVE )

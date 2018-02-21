@@ -61,8 +61,6 @@ public:
 		m_palette(*this, "palette")
 	{ }
 
-	void ace(machine_config &config);
-
 protected:
 	DECLARE_WRITE8_MEMBER(ace_objpos_w);
 	DECLARE_WRITE8_MEMBER(ace_characterram_w);
@@ -71,6 +69,7 @@ protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	uint32_t screen_update_ace(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 	void ace_postload();
 	void main_map(address_map &map);
@@ -321,7 +320,7 @@ void aceal_state::machine_reset()
 		elem = 0;
 }
 
-MACHINE_CONFIG_START(aceal_state::ace)
+MACHINE_CONFIG_START(aceal_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", I8080, MASTER_CLOCK/9) /* 2 MHz ? */
@@ -363,4 +362,4 @@ ROM_START( ace )
 ROM_END
 
 
-GAMEL(1976, ace, 0, ace, ace, aceal_state, 0, ROT0, "Allied Leisure", "Ace", MACHINE_SUPPORTS_SAVE | MACHINE_NO_SOUND, layout_ace )
+GAMEL(1976, ace, 0, ace, aceal_state, 0, ROT0, "Allied Leisure", "Ace", MACHINE_SUPPORTS_SAVE | MACHINE_NO_SOUND, layout_ace )

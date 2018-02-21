@@ -346,7 +346,7 @@ GFXDECODE_END
  *
  *************************************/
 
-MACHINE_CONFIG_START(skydiver_state::skydiver)
+MACHINE_CONFIG_START(skydiver_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6800,MASTER_CLOCK/16)     /* ???? */
@@ -434,4 +434,4 @@ ROM_END
  *
  *************************************/
 
-GAMEL(1978, skydiver, 0, skydiver, skydiver, skydiver_state, 0, ROT0, "Atari", "Sky Diver", MACHINE_SUPPORTS_SAVE, layout_skydiver )
+GAMEL(1978, skydiver, 0, skydiver, skydiver_state, 0, ROT0, "Atari", "Sky Diver", MACHINE_SUPPORTS_SAVE, layout_skydiver )

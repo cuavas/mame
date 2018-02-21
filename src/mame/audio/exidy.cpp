@@ -726,7 +726,7 @@ void venture_sound_device::sound_stream_update(sound_stream &stream, stream_samp
 
 
 
-ADDRESS_MAP_START(exidy_state::venture_audio_map)
+ADDRESS_MAP_START(venture_state::venture_audio_map)
 	ADDRESS_MAP_GLOBAL_MASK(0x7fff)
 	AM_RANGE(0x0000, 0x007f) AM_MIRROR(0x0780) AM_RAM
 	AM_RANGE(0x0800, 0x087f) AM_MIRROR(0x0780) AM_DEVREADWRITE("riot", riot6532_device, read, write)
@@ -739,7 +739,7 @@ ADDRESS_MAP_START(exidy_state::venture_audio_map)
 ADDRESS_MAP_END
 
 
-MACHINE_CONFIG_START(exidy_state::venture_audio)
+MACHINE_CONFIG_START(venture_state::venture_audio)
 
 	MCFG_CPU_ADD("audiocpu", M6502, 3579545/4)
 	MCFG_CPU_PROGRAM_MAP(venture_audio_map)
@@ -806,19 +806,19 @@ READ8_MEMBER( venture_sound_device::mtrap_voiceio_r )
 }
 
 
-ADDRESS_MAP_START(exidy_state::cvsd_map)
+ADDRESS_MAP_START(mtrap_state::cvsd_map)
 	ADDRESS_MAP_GLOBAL_MASK(0x3fff)
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 ADDRESS_MAP_END
 
 
-ADDRESS_MAP_START(exidy_state::cvsd_iomap)
+ADDRESS_MAP_START(mtrap_state::cvsd_iomap)
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0xff) AM_DEVREADWRITE("custom", venture_sound_device, mtrap_voiceio_r, mtrap_voiceio_w)
 ADDRESS_MAP_END
 
 
-MACHINE_CONFIG_START(exidy_state::mtrap_cvsd_audio)
+MACHINE_CONFIG_START(mtrap_state::mtrap_cvsd_audio)
 
 	MCFG_CPU_ADD("cvsdcpu", Z80, CVSD_Z80_CLOCK)
 	MCFG_CPU_PROGRAM_MAP(cvsd_map)

@@ -40,8 +40,6 @@ public:
 		m_gfxdecode(*this, "gfxdecode")
 	{ }
 
-	void patapata(machine_config &config);
-
 protected:
 	DECLARE_WRITE16_MEMBER(bg_videoram_w);
 	DECLARE_WRITE16_MEMBER(fg_videoram_w);
@@ -51,8 +49,9 @@ protected:
 
 	uint32_t screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 
-	void main_map(address_map &map);
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
+	void main_map(address_map &map);
 
 private:
 	/* memory pointers */
@@ -283,7 +282,7 @@ TIMER_DEVICE_CALLBACK_MEMBER(patapata_state::scanline)
 	if (param==128) m_maincpu->set_input_line(1, HOLD_LINE);
 }
 
-MACHINE_CONFIG_START(patapata_state::patapata)
+MACHINE_CONFIG_START(patapata_state::device_add_mconfig)
 
 	MCFG_CPU_ADD("maincpu", M68000, 16_MHz_XTAL) // 16 MHz XTAL, 16 MHz CPU
 	MCFG_CPU_PROGRAM_MAP(main_map)
@@ -344,4 +343,4 @@ ROM_START( patapata )
 ROM_END
 
 // cabinet shows Atlus logo, though there's no copyright on the title screen and PCB is NTC / NMK
-GAME( 1993, patapata, 0, patapata, patapata, patapata_state, 0, ROT0,  "Atlus", "Pata Pata Panic", MACHINE_SUPPORTS_SAVE )
+GAME( 1993, patapata, 0, patapata, patapata_state, 0, ROT0,  "Atlus", "Pata Pata Panic", MACHINE_SUPPORTS_SAVE )

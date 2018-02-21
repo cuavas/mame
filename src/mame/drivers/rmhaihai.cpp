@@ -46,10 +46,10 @@ public:
 		m_msm(*this, "msm"),
 		m_gfxdecode(*this, "gfxdecode"),
 		m_colorram(*this, "colorram"),
-		m_videoram(*this, "videoram") { }
+		m_videoram(*this, "videoram")
+	{ }
 
 	DECLARE_DRIVER_INIT(rmhaihai);
-	void rmhaihai(machine_config &config);
 
 protected:
 	DECLARE_WRITE8_MEMBER(videoram_w);
@@ -66,6 +66,7 @@ protected:
 
 	TILE_GET_INFO_MEMBER(get_bg_tile_info);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void rmhaihai_io_map(address_map &map);
 	void rmhaihai_map(address_map &map);
 
@@ -85,24 +86,24 @@ private:
 
 class rmhaisei_state : public rmhaihai_state
 {
-public:
+protected:
 	using rmhaihai_state::rmhaihai_state;
-	void rmhaisei(machine_config &config);
+	virtual void device_add_mconfig(machine_config &config) override;
 };
 
 
 class themj_state : public rmhaihai_state
 {
-public:
-	using rmhaihai_state::rmhaihai_state;
-	void themj(machine_config &config);
-
 protected:
+	using rmhaihai_state::rmhaihai_state;
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void themj_io_map(address_map &map);
 	void themj_map(address_map &map);
 	DECLARE_WRITE8_MEMBER(themj_rombank_w);
+	DECLARE_MACHINE_START(themj);
+	DECLARE_MACHINE_RESET(themj);
 };
 
 
@@ -498,7 +499,7 @@ static GFXDECODE_START( themj )
 GFXDECODE_END
 
 
-MACHINE_CONFIG_START(rmhaihai_state::rmhaihai)
+MACHINE_CONFIG_START(rmhaihai_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu",Z80,20000000/4)  /* 5 MHz ??? */
@@ -534,8 +535,8 @@ MACHINE_CONFIG_START(rmhaihai_state::rmhaihai)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
-MACHINE_CONFIG_START(rmhaisei_state::rmhaisei)
-	rmhaihai(config);
+MACHINE_CONFIG_START(rmhaisei_state::device_add_mconfig)
+	rmhaihai_state::device_add_mconfig(config);
 
 	/* basic machine hardware */
 
@@ -545,8 +546,8 @@ MACHINE_CONFIG_START(rmhaisei_state::rmhaisei)
 	MCFG_PALETTE_ENTRIES(0x200)
 MACHINE_CONFIG_END
 
-MACHINE_CONFIG_START(themj_state::themj)
-	rmhaihai(config);
+MACHINE_CONFIG_START(themj_state::device_add_mconfig)
+	rmhaihai_state::device_add_mconfig(config);
 
 	/* basic machine hardware */
 
@@ -756,9 +757,9 @@ DRIVER_INIT_MEMBER(rmhaihai_state,rmhaihai)
 }
 
 
-GAME( 1985, rmhaihai,  0,        rmhaihai, rmhaihai, rmhaihai_state, rmhaihai, ROT0, "Alba",  "Real Mahjong Haihai (Japan, newer)", MACHINE_SUPPORTS_SAVE ) // writes Homedata in NVRAM
-GAME( 1985, rmhaihai2, rmhaihai, rmhaihai, rmhaihai, rmhaihai_state, rmhaihai, ROT0, "Alba",  "Real Mahjong Haihai (Japan, older)", MACHINE_SUPPORTS_SAVE )
-GAME( 1985, rmhaihib,  rmhaihai, rmhaihai, rmhaihib, rmhaihai_state, rmhaihai, ROT0, "Alba",  "Real Mahjong Haihai [BET] (Japan)", MACHINE_SUPPORTS_SAVE )
-GAME( 1986, rmhaijin,  0,        rmhaihai, rmhaihai, rmhaihai_state, rmhaihai, ROT0, "Alba",  "Real Mahjong Haihai Jinji Idou Hen (Japan)", MACHINE_SUPPORTS_SAVE )
-GAME( 1986, rmhaisei,  0,        rmhaisei, rmhaihai, rmhaisei_state, rmhaihai, ROT0, "Visco", "Real Mahjong Haihai Seichouhen (Japan)", MACHINE_SUPPORTS_SAVE )
-GAME( 1987, themj,     0,        themj,    rmhaihai, themj_state,    rmhaihai, ROT0, "Visco", "The Mah-jong (Japan)", MACHINE_SUPPORTS_SAVE )
+GAME( 1985, rmhaihai,  0,        rmhaihai, rmhaihai_state, rmhaihai, ROT0, "Alba",  "Real Mahjong Haihai (Japan, newer)", MACHINE_SUPPORTS_SAVE ) // writes Homedata in NVRAM
+GAME( 1985, rmhaihai2, rmhaihai, rmhaihai, rmhaihai_state, rmhaihai, ROT0, "Alba",  "Real Mahjong Haihai (Japan, older)", MACHINE_SUPPORTS_SAVE )
+GAME( 1985, rmhaihib,  rmhaihai, rmhaihib, rmhaihai_state, rmhaihai, ROT0, "Alba",  "Real Mahjong Haihai [BET] (Japan)", MACHINE_SUPPORTS_SAVE )
+GAME( 1986, rmhaijin,  0,        rmhaihai, rmhaihai_state, rmhaihai, ROT0, "Alba",  "Real Mahjong Haihai Jinji Idou Hen (Japan)", MACHINE_SUPPORTS_SAVE )
+GAME( 1986, rmhaisei,  0,        rmhaihai, rmhaisei_state, rmhaihai, ROT0, "Visco", "Real Mahjong Haihai Seichouhen (Japan)", MACHINE_SUPPORTS_SAVE )
+GAME( 1987, themj,     0,        rmhaihai, themj_state,    rmhaihai, ROT0, "Visco", "The Mah-jong (Japan)", MACHINE_SUPPORTS_SAVE )

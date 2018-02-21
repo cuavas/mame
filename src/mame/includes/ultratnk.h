@@ -35,7 +35,6 @@ public:
 
 	DECLARE_CUSTOM_INPUT_MEMBER(get_collision);
 	DECLARE_CUSTOM_INPUT_MEMBER(get_joystick);
-	void ultratnk(machine_config &config);
 
 protected:
 	DECLARE_READ8_MEMBER(wram_r);
@@ -64,6 +63,7 @@ protected:
 	TIMER_CALLBACK_MEMBER(nmi_callback);
 
 	virtual void device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr) override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void ultratnk_cpu_map(address_map &map);
 
 	required_device<cpu_device> m_maincpu;

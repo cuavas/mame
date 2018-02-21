@@ -24,8 +24,6 @@ public:
 		m_spriteram(*this, "spriteram")
 	{ }
 
-	void foodf(machine_config &config);
-
 protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
@@ -42,6 +40,7 @@ protected:
 	uint32_t screen_update_foodf(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 	TIMER_DEVICE_CALLBACK_MEMBER(scanline_update_timer);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_map(address_map &map);
 
 private:

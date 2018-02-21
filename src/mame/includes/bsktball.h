@@ -33,8 +33,6 @@ public:
 		m_palette(*this, "palette")
 	{ }
 
-	void bsktball(machine_config &config);
-
 protected:
 	DECLARE_WRITE_LINE_MEMBER(nmion_w);
 	DECLARE_WRITE_LINE_MEMBER(ld1_w);
@@ -51,10 +49,10 @@ protected:
 	DECLARE_WRITE8_MEMBER(bsktball_note_w);
 	void draw_sprites(bitmap_ind16 &bitmap, const rectangle &cliprect);
 
-protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_map(address_map &map);
 
 private:

@@ -90,11 +90,11 @@ public:
 		m_keylatch(0xff)
 	{ }
 
-	void portfolio(machine_config &config);
 
 protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 
 	void portfolio_io(address_map &map);
 	void portfolio_lcdc(address_map &map);
@@ -1013,7 +1013,7 @@ void portfolio_state::machine_reset()
 //  MACHINE_CONFIG( portfolio )
 //-------------------------------------------------
 
-MACHINE_CONFIG_START(portfolio_state::portfolio)
+MACHINE_CONFIG_START(portfolio_state::device_add_mconfig)
 	// basic machine hardware
 	MCFG_CPU_ADD(M80C88A_TAG, I8088, XTAL(4'915'200))
 	MCFG_CPU_PROGRAM_MAP(portfolio_mem)
@@ -1095,5 +1095,5 @@ ROM_END
 //  SYSTEM DRIVERS
 //**************************************************************************
 
-//    YEAR  NAME    PARENT  COMPAT  MACHINE     INPUT      STATE            INIT  COMPANY   FULLNAME      FLAGS
-COMP( 1989, pofo,   0,      0,      portfolio,  portfolio, portfolio_state, 0,    "Atari",  "Portfolio",  MACHINE_IMPERFECT_GRAPHICS | MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+//    YEAR  NAME    PARENT  COMPAT  INPUT      STATE            INIT  COMPANY   FULLNAME      FLAGS
+COMP( 1989, pofo,   0,      0,      portfolio, portfolio_state, 0,    "Atari",  "Portfolio",  MACHINE_IMPERFECT_GRAPHICS | MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )

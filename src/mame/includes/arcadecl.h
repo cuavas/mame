@@ -23,11 +23,10 @@ public:
 		, m_bitmap(*this, "bitmap")
 	{ }
 
-	void sparkz(machine_config &config);
-
 protected:
 	virtual void machine_reset() override;
 	virtual void update_interrupts() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	virtual void scanline_update(screen_device &screen, int scanline) override;
 	DECLARE_WRITE16_MEMBER(latch_w);
 	virtual uint32_t screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
@@ -47,9 +46,8 @@ public:
 		, m_mob(*this, "mob")
 	{ }
 
-	void arcadecl(machine_config &config);
-
 protected:
+	virtual void device_add_mconfig(machine_config &config) override;
 	virtual void video_start() override;
 	virtual uint32_t screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect) override;
 

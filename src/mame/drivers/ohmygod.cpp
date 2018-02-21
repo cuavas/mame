@@ -318,7 +318,7 @@ void ohmygod_state::machine_reset()
 	m_scrolly = 0;
 }
 
-MACHINE_CONFIG_START(ohmygod_state::ohmygod)
+MACHINE_CONFIG_START(ohmygod_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, 12000000)
@@ -399,5 +399,5 @@ DRIVER_INIT_MEMBER(ohmygod_state,naname)
 }
 
 
-GAME( 1993, ohmygod, 0, ohmygod, ohmygod, ohmygod_state, ohmygod, ROT0, "Atlus", "Oh My God! (Japan)",       MACHINE_NO_COCKTAIL | MACHINE_SUPPORTS_SAVE )
-GAME( 1994, naname,  0, ohmygod, naname,  ohmygod_state, naname,  ROT0, "Atlus", "Naname de Magic! (Japan)", MACHINE_NO_COCKTAIL | MACHINE_SUPPORTS_SAVE )
+GAME( 1993, ohmygod, 0, ohmygod, ohmygod_state, ohmygod, ROT0, "Atlus", "Oh My God! (Japan)",       MACHINE_NO_COCKTAIL | MACHINE_SUPPORTS_SAVE )
+GAME( 1994, naname,  0, naname,  ohmygod_state, naname,  ROT0, "Atlus", "Naname de Magic! (Japan)", MACHINE_NO_COCKTAIL | MACHINE_SUPPORTS_SAVE )

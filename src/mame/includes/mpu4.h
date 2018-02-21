@@ -1,5 +1,9 @@
 // license:BSD-3-Clause
 // copyright-holders:David Haywood
+#ifndef MAME_INCLUDES_MPU4_H
+#define MAME_INCLUDES_MPU4_H
+
+#pragma once
 
 #include "machine/6821pia.h"
 #include "machine/6840ptm.h"
@@ -82,50 +86,31 @@ static const uint8_t bwb_chr_table_common[10]= {0x00,0x04,0x04,0x0c,0x0c,0x1c,0x
 #define HOPPER_NONDUART_A   4
 #define HOPPER_NONDUART_B   5
 
-/* Lookup table for CHR data */
-
-struct mpu4_chr_table
-{
-	uint8_t call;
-	uint8_t response;
-};
-
-struct bwb_chr_table//dynamically populated table for BwB protection
-{
-	uint8_t response;
-};
-
 
 class mpu4_state : public driver_device
 {
 public:
-	mpu4_state(const machine_config &mconfig, device_type type, const char *tag)
-		: driver_device(mconfig, type, tag),
-			m_maincpu(*this, "maincpu"),
-			m_vfd(*this, "vfd"),
-			m_6840ptm(*this, "ptm_ic2"),
-			m_pia3(*this, "pia_ic3"),
-			m_pia4(*this, "pia_ic4"),
-			m_pia5(*this, "pia_ic5"),
-			m_pia6(*this, "pia_ic6"),
-			m_pia7(*this, "pia_ic7"),
-			m_pia8(*this, "pia_ic8"),
-			m_port_mux(*this, {"ORANGE1", "ORANGE2", "BLACK1", "BLACK2", "ORANGE1", "ORANGE2", "DIL1", "DIL2"}),
-			m_aux1_port(*this, "AUX1"),
-			m_aux2_port(*this, "AUX2"),
-			m_bank1(*this, "bank1"),
-			m_msm6376(*this, "msm6376"),
-			m_reel0(*this, "reel0"),
-			m_reel1(*this, "reel1"),
-			m_reel2(*this, "reel2"),
-			m_reel3(*this, "reel3"),
-			m_reel4(*this, "reel4"),
-			m_reel5(*this, "reel5"),
-			m_reel6(*this, "reel6"),
-			m_reel7(*this, "reel7"),
-			m_palette(*this, "palette"),
-			m_meters(*this, "meters")
-	{}
+	mpu4_state(const machine_config &mconfig, device_type type, const char *tag) :
+		driver_device(mconfig, type, tag),
+		m_maincpu(*this, "maincpu"),
+		m_vfd(*this, "vfd"),
+		m_6840ptm(*this, "ptm_ic2"),
+		m_pia3(*this, "pia_ic3"),
+		m_pia4(*this, "pia_ic4"),
+		m_pia5(*this, "pia_ic5"),
+		m_pia6(*this, "pia_ic6"),
+		m_pia7(*this, "pia_ic7"),
+		m_pia8(*this, "pia_ic8"),
+		m_port_mux(*this, {"ORANGE1", "ORANGE2", "BLACK1", "BLACK2", "ORANGE1", "ORANGE2", "DIL1", "DIL2"}),
+		m_aux1_port(*this, "AUX1"),
+		m_aux2_port(*this, "AUX2"),
+		m_bank1(*this, "bank1"),
+		m_msm6376(*this, "msm6376"),
+		m_reel(*this, "reel%u", 0U),
+		m_palette(*this, "palette"),
+		m_meters(*this, "meters")
+	{
+	}
 
 	uint32_t screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 	{
@@ -141,8 +126,6 @@ public:
 	DECLARE_READ8_MEMBER(bwb_characteriser_r);
 	DECLARE_WRITE8_MEMBER(mpu4_ym2413_w);
 	DECLARE_READ8_MEMBER(mpu4_ym2413_r);
-	DECLARE_READ8_MEMBER(crystal_sound_r);
-	DECLARE_WRITE8_MEMBER(crystal_sound_w);
 	DECLARE_WRITE8_MEMBER(ic3ss_w);
 	DECLARE_WRITE_LINE_MEMBER(cpu0_irq);
 	DECLARE_WRITE_LINE_MEMBER(ic2_o1_callback);
@@ -182,10 +165,7 @@ public:
 	DECLARE_WRITE_LINE_MEMBER(pia_gb_ca2_w);
 	DECLARE_WRITE_LINE_MEMBER(pia_gb_cb2_w);
 	DECLARE_DRIVER_INIT(m4default_alt);
-	DECLARE_DRIVER_INIT(crystali);
 	DECLARE_DRIVER_INIT(m4tst2);
-	DECLARE_DRIVER_INIT(crystal);
-	DECLARE_DRIVER_INIT(m_frkstn);
 	DECLARE_DRIVER_INIT(m4default_big);
 	DECLARE_DRIVER_INIT(m4default);
 	DECLARE_DRIVER_INIT(m4default_banks);
@@ -213,43 +193,19 @@ public:
 	DECLARE_DRIVER_INIT(m4_led_a);
 	DECLARE_DRIVER_INIT(m4_led_b);
 	DECLARE_DRIVER_INIT(m4_led_c);
-	DECLARE_DRIVER_INIT(m4_andycp10c);
-	DECLARE_DRIVER_INIT(m_blsbys);
-	DECLARE_DRIVER_INIT(m_oldtmr);
 	DECLARE_DRIVER_INIT(m4tst);
-	DECLARE_DRIVER_INIT(m_ccelbr);
-	DECLARE_DRIVER_INIT(m4gambal);
 	DECLARE_DRIVER_INIT(m4debug);
 	DECLARE_DRIVER_INIT(m4_showstring);
-	DECLARE_DRIVER_INIT(m4_showstring_mod4yam);
-	DECLARE_DRIVER_INIT(m4_debug_mod4yam);
 	DECLARE_DRIVER_INIT(m4_showstring_mod2);
 	DECLARE_DRIVER_INIT(m4_showstring_big);
-	DECLARE_DRIVER_INIT(connect4);
 	DECLARE_DRIVER_INIT(m4altreels);//legacy, will be removed once things are sorted out
 	DECLARE_DRIVER_INIT(m_grtecp);//legacy, will be removed once things are sorted out RE: CHR
-	DECLARE_DRIVER_INIT(m4tenten);
-	DECLARE_DRIVER_INIT(m4actbnk);
-	DECLARE_DRIVER_INIT(m4actclb);
-	DECLARE_DRIVER_INIT(m4actpak);
-	DECLARE_DRIVER_INIT(m4addr);
-	DECLARE_DRIVER_INIT(m4aao);
-	DECLARE_DRIVER_INIT(m4alladv);
-	DECLARE_DRIVER_INIT(m4alpha);
-	DECLARE_DRIVER_INIT(m4andycp);
-	DECLARE_DRIVER_INIT(m4andybt);
-	DECLARE_DRIVER_INIT(m4andyfh);
-	DECLARE_DRIVER_INIT(m4andyge);
-	DECLARE_DRIVER_INIT(m4apachg);
 	DECLARE_MACHINE_START(mod2);
 	DECLARE_MACHINE_RESET(mpu4);
 	DECLARE_MACHINE_START(mpu4yam);
-	DECLARE_MACHINE_START(mpu4oki);
 	DECLARE_MACHINE_START(mpu4oki_alt);
 	DECLARE_MACHINE_START(mod4oki_5r);
 	DECLARE_MACHINE_START(mod2_alt);
-	DECLARE_MACHINE_START(mpu4bwb);
-	DECLARE_MACHINE_START(mpu4cry);
 	TIMER_DEVICE_CALLBACK_MEMBER(gen_50hz);
 	DECLARE_WRITE_LINE_MEMBER(reel0_optic_cb) { if (state) m_optic_pattern |= 0x01; else m_optic_pattern &= ~0x01; }
 	DECLARE_WRITE_LINE_MEMBER(reel1_optic_cb) { if (state) m_optic_pattern |= 0x02; else m_optic_pattern &= ~0x02; }
@@ -259,16 +215,8 @@ public:
 	DECLARE_WRITE_LINE_MEMBER(reel5_optic_cb) { if (state) m_optic_pattern |= 0x20; else m_optic_pattern &= ~0x20; }
 	DECLARE_WRITE_LINE_MEMBER(reel6_optic_cb) { if (state) m_optic_pattern |= 0x40; else m_optic_pattern &= ~0x40; }
 	DECLARE_WRITE_LINE_MEMBER(reel7_optic_cb) { if (state) m_optic_pattern |= 0x80; else m_optic_pattern &= ~0x80; }
-	void bwboki(machine_config &config);
-	void mod2(machine_config &config);
-	void mod2_alt(machine_config &config);
-	void mod4oki(machine_config &config);
-	void mod4oki_5r(machine_config &config);
-	void mod4oki_alt(machine_config &config);
-	void mod4yam(machine_config &config);
 	void mpu4_common(machine_config &config);
 	void mpu4_common2(machine_config &config);
-	void mpu4crys(machine_config &config);
 	void mpu4_std_3reel(machine_config &config);
 	void mpu4_type2_3reel(machine_config &config);
 	void mpu4_type3_3reel(machine_config &config);
@@ -283,7 +231,6 @@ public:
 	void mpu4_type2_5reel(machine_config &config);
 	void mpu4_type3_5reel(machine_config &config);
 	void mpu4_type4_5reel(machine_config &config);
-	void mpu4_bwb_5reel(machine_config &config);
 	void mpu4_std_6reel(machine_config &config);
 	void mpu4_type2_6reel(machine_config &config);
 	void mpu4_type3_6reel(machine_config &config);
@@ -298,7 +245,21 @@ public:
 
 	void mpu4_6809_map(address_map &map);
 	void mpu4_memmap(address_map &map);
+
 protected:
+	/* Lookup table for CHR data */
+
+	struct mpu4_chr_table
+	{
+		uint8_t call;
+		uint8_t response;
+	};
+
+	struct bwb_chr_table//dynamically populated table for BwB protection
+	{
+		uint8_t response;
+	};
+
 	virtual void device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr) override;
 
 	void lamp_extend_small(int data);
@@ -311,7 +272,6 @@ protected:
 	void update_ay(device_t *device);
 	void mpu4_install_mod4yam_space(address_space &space);
 	void mpu4_install_mod4oki_space(address_space &space);
-	void mpu4_install_mod4bwb_space(address_space &space);
 	void mpu4_config_common();
 
 	required_device<cpu_device> m_maincpu;
@@ -328,14 +288,7 @@ protected:
 	required_ioport m_aux2_port;
 	optional_memory_bank m_bank1;
 	optional_device<okim6376_device> m_msm6376;
-	optional_device<stepper_device> m_reel0;
-	optional_device<stepper_device> m_reel1;
-	optional_device<stepper_device> m_reel2;
-	optional_device<stepper_device> m_reel3;
-	optional_device<stepper_device> m_reel4;
-	optional_device<stepper_device> m_reel5;
-	optional_device<stepper_device> m_reel6;
-	optional_device<stepper_device> m_reel7;
+	optional_device_array<stepper_device, 8> m_reel;
 	optional_device<palette_device> m_palette;
 	required_device<meters_device> m_meters;
 
@@ -406,6 +359,128 @@ protected:
 	uint8_t m_numbanks;
 	mpu4_chr_table* m_current_chr_table;
 	const bwb_chr_table* m_bwb_chr_table1;
+
+private:
+	static mpu4_chr_table s_grtecp_data[];
+};
+
+class mpu4_mod2_state : public mpu4_state
+{
+public:
+	using mpu4_state::mpu4_state;
+	DECLARE_DRIVER_INIT(connect4);
+	DECLARE_DRIVER_INIT(m4actclb);
+	DECLARE_DRIVER_INIT(m4actpak);
+	DECLARE_DRIVER_INIT(m4alladv);
+	DECLARE_DRIVER_INIT(m4alpha);
+	DECLARE_DRIVER_INIT(m_ccelbr);
+	DECLARE_DRIVER_INIT(m4addr);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+
+private:
+	static mpu4_chr_table s_ccelbr_data[];
+};
+
+class mpu4_mod2_alt_state : public mpu4_state
+{
+protected:
+	using mpu4_state::mpu4_state;
+	virtual void device_add_mconfig(machine_config &config) override;
+};
+
+class mpu4_mod4oki_state : public mpu4_state
+{
+public:
+	using mpu4_state::mpu4_state;
+	DECLARE_DRIVER_INIT(m4aao);
+	DECLARE_DRIVER_INIT(m4apachg);
+	DECLARE_DRIVER_INIT(m4andycp);
+	DECLARE_DRIVER_INIT(m4andyfh);
+	DECLARE_DRIVER_INIT(m4andybt);
+	DECLARE_DRIVER_INIT(m4_andycp10c);
+	DECLARE_DRIVER_INIT(m4tenten);
+	DECLARE_DRIVER_INIT(m4actbnk);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	DECLARE_MACHINE_START(mpu4oki);
+
+private:
+	static mpu4_chr_table s_andycp10c_data[];
+};
+
+class mpu4_mod4oki_alt_state : public mpu4_mod4oki_state
+{
+public:
+	using mpu4_mod4oki_state::mpu4_mod4oki_state;
+	DECLARE_DRIVER_INIT(m_oldtmr);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+
+private:
+	static mpu4_chr_table s_oldtmr_data[];
+};
+
+class mpu4_mod4oki_5r_state : public mpu4_mod4oki_state
+{
+public:
+	using mpu4_mod4oki_state::mpu4_mod4oki_state;
+	DECLARE_DRIVER_INIT(m4andyge);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+};
+
+class mpu4_bwboki_state : public mpu4_state
+{
+public:
+	using mpu4_state::mpu4_state;
+	DECLARE_DRIVER_INIT(m_blsbys);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	void mpu4_bwb_5reel(machine_config &config);
+	DECLARE_MACHINE_START(mpu4bwb);
+	void mpu4_install_mod4bwb_space(address_space &space);
+
+private:
+	static const bwb_chr_table s_blsbys_data1[];
+	static mpu4_chr_table s_blsbys_data[];
+};
+
+class mpu4_mod4yam_state : public mpu4_state
+{
+public:
+	using mpu4_state::mpu4_state;
+	DECLARE_DRIVER_INIT(m4_showstring_mod4yam);
+	DECLARE_DRIVER_INIT(m4_debug_mod4yam);
+	DECLARE_DRIVER_INIT(m4gambal);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+
+private:
+	static mpu4_chr_table s_gmball_data[];
+};
+
+class mpu4_mpu4crys_state : public mpu4_mod2_state
+{
+public:
+	using mpu4_mod2_state::mpu4_mod2_state;
+	DECLARE_DRIVER_INIT(m_frkstn);
+	DECLARE_DRIVER_INIT(crystali);
+	DECLARE_DRIVER_INIT(crystal);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	DECLARE_MACHINE_START(mpu4cry);
+	DECLARE_READ8_MEMBER(crystal_sound_r);
+	DECLARE_WRITE8_MEMBER(crystal_sound_w);
 };
 
 INPUT_PORTS_EXTERN( mpu4 );
+
+#endif // MAME_INCLUDES_MPU4_H

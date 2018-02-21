@@ -118,9 +118,17 @@ public:
 	image_init_result load_cart(device_image_interface &image, generic_slot_device *slot);
 	DECLARE_DEVICE_IMAGE_LOAD_MEMBER(cart_load) { return load_cart(image, m_cart); }
 	DECLARE_QUICKLOAD_LOAD_MEMBER(atom_atm);
-	void atombb(machine_config &config);
-	void atom(machine_config &config);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
 	void atom_mem(address_map &map);
+};
+
+class atombb_state : public atom_state
+{
+protected:
+	using atom_state::atom_state;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void atombb_mem(address_map &map);
 };
 
@@ -133,8 +141,6 @@ public:
 		m_e1(*this, "rom_e1")
 	{
 	}
-
-	virtual void machine_start() override;
 
 	DECLARE_READ8_MEMBER(eprom_r);
 	DECLARE_WRITE8_MEMBER(eprom_w);
@@ -168,7 +174,10 @@ public:
 	DECLARE_DEVICE_IMAGE_LOAD_MEMBER(af_load) { return load_cart(image, m_ext[0xf]); }
 	DECLARE_DEVICE_IMAGE_LOAD_MEMBER(e0_load) { return load_cart(image, m_e0); }
 	DECLARE_DEVICE_IMAGE_LOAD_MEMBER(e1_load) { return load_cart(image, m_e1); }
-	void atomeb(machine_config &config);
+
+protected:
+	virtual void machine_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void atomeb_mem(address_map &map);
 };
 

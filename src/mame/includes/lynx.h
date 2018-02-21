@@ -157,13 +157,13 @@ public:
 	void lynx_uart_reset();
 	image_verify_result lynx_verify_cart(char *header, int kind);
 	DECLARE_QUICKLOAD_LOAD_MEMBER( lynx );
-	void lynx(machine_config &config);
 
 protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
 	virtual void video_start() override;
 	virtual void device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr) override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void lynx_mem(address_map &map);
 
 private:

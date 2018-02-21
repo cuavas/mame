@@ -685,7 +685,7 @@ INPUT_PORTS_END
  *
  *************************************/
 
-MACHINE_CONFIG_START(metalmx_state::metalmx)
+MACHINE_CONFIG_START(metalmx_state::device_add_mconfig)
 
 	MCFG_CPU_ADD("maincpu", M68EC020, XTAL(14'318'181))
 	MCFG_CPU_PROGRAM_MAP(main_map)
@@ -855,4 +855,4 @@ ROM_END
  *
  *************************************/
 
-GAME( 1994, metalmx, 0, metalmx, metalmx, metalmx_state, metalmx, ROT0, "Atari Games", "Metal Maniax (prototype)", MACHINE_NO_SOUND | MACHINE_NOT_WORKING )
+GAME( 1994, metalmx, 0, metalmx, metalmx_state, metalmx, ROT0, "Atari Games", "Metal Maniax (prototype)", MACHINE_NO_SOUND | MACHINE_NOT_WORKING )

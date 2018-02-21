@@ -101,7 +101,6 @@ constexpr u64 MACHINE_IS_SKELETON_MECHANICAL    = MACHINE_IS_SKELETON | MACHINE_
 class game_driver
 {
 public:
-	typedef void (*machine_creator_wrapper)(machine_config &, device_t &);
 	typedef void (*driver_init_wrapper)(device_t &);
 
 	static constexpr device_t::feature_type unemulated_features(u64 flags)
@@ -129,7 +128,6 @@ public:
 	const char *                parent;             // if this is a clone, the name of the parent
 	const char *                year;               // year the game was released
 	const char *                manufacturer;       // manufacturer of the game
-	machine_creator_wrapper     machine_creator;    // machine driver tokens
 	ioport_constructor          ipt;                // pointer to constructor for input ports
 	driver_init_wrapper         driver_init;        // DRIVER_INIT callback
 	const tiny_rom_entry *      rom;                // pointer to list of ROMs for the game
@@ -171,7 +169,7 @@ driver_device_creator< \
 		game_driver::imperfect_features(FLAGS)>
 
 // standard GAME() macro
-#define GAME(YEAR,NAME,PARENT,MACHINE,INPUT,CLASS,INIT,MONITOR,COMPANY,FULLNAME,FLAGS) \
+#define GAME(YEAR,NAME,PARENT,INPUT,CLASS,INIT,MONITOR,COMPANY,FULLNAME,FLAGS) \
 GAME_DRIVER_TRAITS(NAME,FULLNAME)                                       \
 extern game_driver const GAME_NAME(NAME)                                \
 {                                                                       \
@@ -179,7 +177,6 @@ extern game_driver const GAME_NAME(NAME)                                \
 	#PARENT,                                                            \
 	#YEAR,                                                              \
 	COMPANY,                                                            \
-	[] (machine_config &config, device_t &owner) { downcast<CLASS &>(owner).MACHINE(config); }, \
 	INPUT_PORTS_NAME(INPUT),                                            \
 	[] (device_t &owner) { downcast<CLASS &>(owner).init_##INIT(); },   \
 	ROM_NAME(NAME),                                                     \
@@ -190,7 +187,7 @@ extern game_driver const GAME_NAME(NAME)                                \
 };
 
 // standard macro with additional layout
-#define GAMEL(YEAR,NAME,PARENT,MACHINE,INPUT,CLASS,INIT,MONITOR,COMPANY,FULLNAME,FLAGS,LAYOUT) \
+#define GAMEL(YEAR,NAME,PARENT,INPUT,CLASS,INIT,MONITOR,COMPANY,FULLNAME,FLAGS,LAYOUT) \
 GAME_DRIVER_TRAITS(NAME,FULLNAME)                                       \
 extern game_driver const GAME_NAME(NAME)                                \
 {                                                                       \
@@ -198,7 +195,6 @@ extern game_driver const GAME_NAME(NAME)                                \
 	#PARENT,                                                            \
 	#YEAR,                                                              \
 	COMPANY,                                                            \
-	[] (machine_config &config, device_t &owner) { downcast<CLASS &>(owner).MACHINE(config); }, \
 	INPUT_PORTS_NAME(INPUT),                                            \
 	[] (device_t &owner) { downcast<CLASS &>(owner).init_##INIT(); },   \
 	ROM_NAME(NAME),                                                     \
@@ -210,7 +206,7 @@ extern game_driver const GAME_NAME(NAME)                                \
 
 
 // standard console definition macro
-#define CONS(YEAR,NAME,PARENT,COMPAT,MACHINE,INPUT,CLASS,INIT,COMPANY,FULLNAME,FLAGS) \
+#define CONS(YEAR,NAME,PARENT,COMPAT,INPUT,CLASS,INIT,COMPANY,FULLNAME,FLAGS) \
 GAME_DRIVER_TRAITS(NAME,FULLNAME)                                       \
 extern game_driver const GAME_NAME(NAME)                                \
 {                                                                       \
@@ -218,7 +214,6 @@ extern game_driver const GAME_NAME(NAME)                                \
 	#PARENT,                                                            \
 	#YEAR,                                                              \
 	COMPANY,                                                            \
-	[] (machine_config &config, device_t &owner) { downcast<CLASS &>(owner).MACHINE(config); }, \
 	INPUT_PORTS_NAME(INPUT),                                            \
 	[] (device_t &owner) { downcast<CLASS &>(owner).init_##INIT(); },   \
 	ROM_NAME(NAME),                                                     \
@@ -229,7 +224,7 @@ extern game_driver const GAME_NAME(NAME)                                \
 };
 
 // standard computer definition macro
-#define COMP(YEAR,NAME,PARENT,COMPAT,MACHINE,INPUT,CLASS,INIT,COMPANY,FULLNAME,FLAGS) \
+#define COMP(YEAR,NAME,PARENT,COMPAT,INPUT,CLASS,INIT,COMPANY,FULLNAME,FLAGS) \
 GAME_DRIVER_TRAITS(NAME,FULLNAME)                                       \
 extern game_driver const GAME_NAME(NAME)                                \
 {                                                                       \
@@ -237,7 +232,6 @@ extern game_driver const GAME_NAME(NAME)                                \
 	#PARENT,                                                            \
 	#YEAR,                                                              \
 	COMPANY,                                                            \
-	[] (machine_config &config, device_t &owner) { downcast<CLASS &>(owner).MACHINE(config); }, \
 	INPUT_PORTS_NAME(INPUT),                                            \
 	[] (device_t &owner) { downcast<CLASS &>(owner).init_##INIT(); },   \
 	ROM_NAME(NAME),                                                     \
@@ -248,7 +242,7 @@ extern game_driver const GAME_NAME(NAME)                                \
 };
 
 // standard system definition macro
-#define SYST(YEAR,NAME,PARENT,COMPAT,MACHINE,INPUT,CLASS,INIT,COMPANY,FULLNAME,FLAGS) \
+#define SYST(YEAR,NAME,PARENT,COMPAT,INPUT,CLASS,INIT,COMPANY,FULLNAME,FLAGS) \
 GAME_DRIVER_TRAITS(NAME,FULLNAME)                                       \
 extern game_driver const GAME_NAME(NAME)                                \
 {                                                                       \
@@ -256,7 +250,6 @@ extern game_driver const GAME_NAME(NAME)                                \
 	#PARENT,                                                            \
 	#YEAR,                                                              \
 	COMPANY,                                                            \
-	[] (machine_config &config, device_t &owner) { downcast<CLASS &>(owner).MACHINE(config); }, \
 	INPUT_PORTS_NAME(INPUT),                                            \
 	[] (device_t &owner) { downcast<CLASS &>(owner).init_##INIT(); },   \
 	ROM_NAME(NAME),                                                     \

@@ -60,8 +60,6 @@ public:
 		m_jsa(*this, "jsa")
 	{ }
 
-	void cyberbal2p(machine_config &config);
-
 protected:
 	DECLARE_READ16_MEMBER(sound_state_r);
 
@@ -71,7 +69,7 @@ protected:
 	virtual void video_start() override;
 	uint32_t screen_update_cyberbal2p(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 
-	// memory maps
+	virtual void device_add_mconfig(machine_config &config) override;
 	void cyberbal2p_map(address_map &map);
 
 private:
@@ -97,10 +95,6 @@ public:
 		m_lscreen(*this, "lscreen"),
 		m_rscreen(*this, "rscreen")
 	{ }
-
-	DECLARE_DRIVER_INIT(cyberbalt);
-	void cyberbal(machine_config &config);
-	void cyberbalt(machine_config &config);
 
 protected:
 	DECLARE_WRITE16_MEMBER(p2_reset_w);
@@ -129,7 +123,7 @@ protected:
 	void cyberbal_sound_reset();
 	void update_sound_68k_interrupts();
 
-	// memory maps
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_map(address_map &map);
 	void extra_map(address_map &map);
 	void sound_map(address_map &map);
@@ -155,6 +149,17 @@ private:
 	uint8_t m_sound_data_from_6502;
 	uint8_t m_sound_data_from_68k_ready;
 	uint8_t m_sound_data_from_6502_ready;
+};
+
+
+class cyberbalt_state : public cyberbal_state
+{
+public:
+	using cyberbal_state::cyberbal_state;
+	DECLARE_DRIVER_INIT(cyberbalt);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
 };
 
 #endif // MAME_INCLUDES_CYBERBAL_H

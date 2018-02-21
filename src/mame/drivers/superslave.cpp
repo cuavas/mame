@@ -59,11 +59,10 @@ public:
 		, m_cmd(0x01)
 	{ }
 
-	void superslave(machine_config &config);
-
 protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void superslave_io(address_map &map);
 	void superslave_mem(address_map &map);
 
@@ -377,7 +376,7 @@ void superslave_state::machine_reset()
 //  MACHINE_CONFIG( superslave )
 //-------------------------------------------------
 
-MACHINE_CONFIG_START(superslave_state::superslave)
+MACHINE_CONFIG_START(superslave_state::device_add_mconfig)
 	// basic machine hardware
 	MCFG_CPU_ADD(Z80_TAG, Z80, XTAL(8'000'000)/2)
 	MCFG_CPU_PROGRAM_MAP(superslave_mem)
@@ -465,5 +464,5 @@ ROM_END
 //  SYSTEM DRIVERS
 //**************************************************************************
 
-//    YEAR  NAME      PARENT  COMPAT  MACHINE     INPUT       CLASS             INIT  COMPANY                         FULLNAME        FLAGS
-COMP( 1983, superslv, 0,      0,      superslave, superslave, superslave_state, 0,    "Advanced Digital Corporation", "Super Slave",  MACHINE_NOT_WORKING | MACHINE_NO_SOUND_HW )
+//    YEAR  NAME      PARENT  COMPAT  INPUT       CLASS             INIT  COMPANY                         FULLNAME        FLAGS
+COMP( 1983, superslv, 0,      0,      superslave, superslave_state, 0,    "Advanced Digital Corporation", "Super Slave",  MACHINE_NOT_WORKING | MACHINE_NO_SOUND_HW )

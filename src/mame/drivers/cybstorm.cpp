@@ -267,7 +267,7 @@ MACHINE_CONFIG_START(cybstorm_state::round2)
 MACHINE_CONFIG_END
 
 
-MACHINE_CONFIG_START(cybstorm_state::cybstorm)
+MACHINE_CONFIG_START(cybstorm_state::device_add_mconfig)
 	round2(config);
 
 	/* sound hardware */
@@ -365,4 +365,4 @@ DRIVER_INIT_MEMBER(cybstorm_state, cybstorm)
  *
  *************************************/
 
-GAME( 1993, cybstorm, 0, cybstorm, cybstorm, cybstorm_state, cybstorm, ROT0, "Atari Games", "Cyberstorm (prototype)", MACHINE_SUPPORTS_SAVE )
+GAME( 1993, cybstorm, 0, cybstorm, cybstorm_state, cybstorm, ROT0, "Atari Games", "Cyberstorm (prototype)", MACHINE_SUPPORTS_SAVE )

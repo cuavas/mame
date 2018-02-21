@@ -50,7 +50,6 @@ public:
 	{ }
 
 	DECLARE_DRIVER_INIT(pengadvb);
-	void pengadvb(machine_config &config);
 
 protected:
 	DECLARE_READ8_MEMBER(mem_r);
@@ -65,6 +64,7 @@ protected:
 
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void pengadvb_decrypt(const char* region);
 	void bank_mem(address_map &map);
 	void io_mem(address_map &map);
@@ -212,7 +212,7 @@ WRITE8_MEMBER(pengadvb_state::pengadvb_ppi_port_c_w)
 
 ***************************************************************************/
 
-MACHINE_CONFIG_START(pengadvb_state::pengadvb)
+MACHINE_CONFIG_START(pengadvb_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80, XTAL(10'738'635)/3)
@@ -339,4 +339,4 @@ ROM_START( pengadvb )
 ROM_END
 
 
-GAME( 1988, pengadvb, 0, pengadvb, pengadvb, pengadvb_state, pengadvb, ROT0, "bootleg (Screen) / Konami", "Penguin Adventure (bootleg of MSX version)", MACHINE_SUPPORTS_SAVE )
+GAME( 1988, pengadvb, 0, pengadvb, pengadvb_state, pengadvb, ROT0, "bootleg (Screen) / Konami", "Penguin Adventure (bootleg of MSX version)", MACHINE_SUPPORTS_SAVE )

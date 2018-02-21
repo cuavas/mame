@@ -389,7 +389,7 @@ GFXDECODE_END
  *
  *************************************/
 
-MACHINE_CONFIG_START(cyberbal_state::cyberbal)
+MACHINE_CONFIG_START(cyberbal_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, ATARI_CLOCK_14MHz/2)
@@ -465,8 +465,9 @@ MACHINE_CONFIG_START(cyberbal_state::cyberbal)
 MACHINE_CONFIG_END
 
 
-MACHINE_CONFIG_START(cyberbal_state::cyberbalt)
-	cyberbal(config);
+MACHINE_CONFIG_START(cyberbalt_state::device_add_mconfig)
+	cyberbal_state::device_add_mconfig(config);
+
 	MCFG_DEVICE_REMOVE("eeprom")
 	MCFG_EEPROM_2816_ADD("eeprom")
 	MCFG_EEPROM_28XX_LOCK_AFTER_WRITE(true)
@@ -475,7 +476,7 @@ MACHINE_CONFIG_START(cyberbal_state::cyberbalt)
 MACHINE_CONFIG_END
 
 
-MACHINE_CONFIG_START(cyberbal2p_state::cyberbal2p)
+MACHINE_CONFIG_START(cyberbal2p_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, ATARI_CLOCK_14MHz/2)
@@ -1045,7 +1046,7 @@ ROM_END
  *
  *************************************/
 
-DRIVER_INIT_MEMBER(cyberbal_state,cyberbalt)
+DRIVER_INIT_MEMBER(cyberbalt_state,cyberbalt)
 {
 	slapstic_configure(*m_maincpu, 0x018000, 0, memregion("maincpu")->base() + 0x18000);
 }
@@ -1058,15 +1059,15 @@ DRIVER_INIT_MEMBER(cyberbal_state,cyberbalt)
  *
  *************************************/
 
-GAMEL(1988, cyberbal,    0,        cyberbal,   cyberbal,   cyberbal_state,   0,          ROT0, "Atari Games", "Cyberball (rev 4)", 0, layout_dualhsxs )
-GAMEL(1988, cyberbal2,   cyberbal, cyberbal,   cyberbal,   cyberbal_state,   0,          ROT0, "Atari Games", "Cyberball (rev 2)", 0, layout_dualhsxs )
-GAMEL(1988, cyberbal1,   cyberbal, cyberbal,   cyberbal,   cyberbal_state,   0,          ROT0, "Atari Games", "Cyberball (rev 1)", 0, layout_dualhsxs )
-GAMEL(1988, cyberbalp,   cyberbal, cyberbal,   cyberbal,   cyberbal_state,   0,          ROT0, "Atari Games", "Cyberball (prototype)", 0, layout_dualhsxs )
+GAMEL(1988, cyberbal,    0,        cyberbal,   cyberbal_state,   0,          ROT0, "Atari Games", "Cyberball (rev 4)",     0, layout_dualhsxs )
+GAMEL(1988, cyberbal2,   cyberbal, cyberbal,   cyberbal_state,   0,          ROT0, "Atari Games", "Cyberball (rev 2)",     0, layout_dualhsxs )
+GAMEL(1988, cyberbal1,   cyberbal, cyberbal,   cyberbal_state,   0,          ROT0, "Atari Games", "Cyberball (rev 1)",     0, layout_dualhsxs )
+GAMEL(1988, cyberbalp,   cyberbal, cyberbal,   cyberbal_state,   0,          ROT0, "Atari Games", "Cyberball (prototype)", 0, layout_dualhsxs )
 
-GAME( 1989, cyberbal2p,  cyberbal, cyberbal2p, cyberbal2p, cyberbal2p_state, 0,          ROT0, "Atari Games", "Cyberball 2072 (2 player, rev 4)", 0 )
-GAME( 1989, cyberbal2p3, cyberbal, cyberbal2p, cyberbal2p, cyberbal2p_state, 0,          ROT0, "Atari Games", "Cyberball 2072 (2 player, rev 3)", 0 )
-GAME( 1989, cyberbal2p2, cyberbal, cyberbal2p, cyberbal2p, cyberbal2p_state, 0,          ROT0, "Atari Games", "Cyberball 2072 (2 player, rev 2)", 0 )
-GAME( 1989, cyberbal2p1, cyberbal, cyberbal2p, cyberbal2p, cyberbal2p_state, 0,          ROT0, "Atari Games", "Cyberball 2072 (2 player, rev 1)", 0 )
+GAME( 1989, cyberbal2p,  cyberbal, cyberbal2p, cyberbal2p_state, 0,          ROT0, "Atari Games", "Cyberball 2072 (2 player, rev 4)", 0 )
+GAME( 1989, cyberbal2p3, cyberbal, cyberbal2p, cyberbal2p_state, 0,          ROT0, "Atari Games", "Cyberball 2072 (2 player, rev 3)", 0 )
+GAME( 1989, cyberbal2p2, cyberbal, cyberbal2p, cyberbal2p_state, 0,          ROT0, "Atari Games", "Cyberball 2072 (2 player, rev 2)", 0 )
+GAME( 1989, cyberbal2p1, cyberbal, cyberbal2p, cyberbal2p_state, 0,          ROT0, "Atari Games", "Cyberball 2072 (2 player, rev 1)", 0 )
 
-GAMEL(1989, cyberbalt,   cyberbal, cyberbalt,  cyberbal,   cyberbal_state,   cyberbalt,  ROT0, "Atari Games", "Tournament Cyberball 2072 (rev 2)", 0, layout_dualhsxs )
-GAMEL(1989, cyberbalt1,  cyberbal, cyberbalt,  cyberbal,   cyberbal_state,   cyberbalt,  ROT0, "Atari Games", "Tournament Cyberball 2072 (rev 1)", 0, layout_dualhsxs )
+GAMEL(1989, cyberbalt,   cyberbal, cyberbal,   cyberbalt_state,  cyberbalt,  ROT0, "Atari Games", "Tournament Cyberball 2072 (rev 2)", 0, layout_dualhsxs )
+GAMEL(1989, cyberbalt1,  cyberbal, cyberbal,   cyberbalt_state,  cyberbalt,  ROT0, "Atari Games", "Tournament Cyberball 2072 (rev 1)", 0, layout_dualhsxs )

@@ -26,8 +26,6 @@ public:
 		m_palette(*this, "palette")
 	{ }
 
-	void cloak(machine_config &config);
-
 protected:
 	DECLARE_WRITE_LINE_MEMBER(start_led_1_w);
 	DECLARE_WRITE_LINE_MEMBER(start_led_2_w);
@@ -51,6 +49,7 @@ protected:
 	void set_pen(int i);
 	void draw_bitmap(bitmap_ind16 &bitmap, const rectangle &cliprect);
 	void draw_sprites(bitmap_ind16 &bitmap, const rectangle &cliprect);
+	virtual void device_add_mconfig(machine_config &config) override;
 	void master_map(address_map &map);
 	void slave_map(address_map &map);
 

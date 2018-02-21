@@ -154,7 +154,7 @@ public:
 	DECLARE_WRITE_LINE_MEMBER( write_centronics_select );
 	DECLARE_WRITE_LINE_MEMBER( write_centronics_fault );
 	DECLARE_WRITE_LINE_MEMBER( write_centronics_perror );
-	void fp(machine_config &config);
+	virtual void device_add_mconfig(machine_config &config) override;
 	void fp_io(address_map &map);
 	void fp_mem(address_map &map);
 	void sound_io(address_map &map);
@@ -579,7 +579,7 @@ SLOT_INTERFACE_END
 //  MACHINE_CONFIG( fp )
 //-------------------------------------------------
 
-MACHINE_CONFIG_START(fp_state::fp)
+MACHINE_CONFIG_START(fp_state::device_add_mconfig)
 	/* basic machine hardware */
 	MCFG_CPU_ADD(I8086_TAG, I8086, XTAL(15'000'000)/3)
 	MCFG_CPU_PROGRAM_MAP(fp_mem)
@@ -696,5 +696,5 @@ ROM_END
 //  SYSTEM DRIVERS
 //**************************************************************************
 
-//    YEAR  NAME   PARENT  COMPAT  MACHINE  INPUT  STATE     INIT  COMPANY  FULLNAME                 FLAGS
-COMP( 1984, fp,    0,      0,      fp,      fp,    fp_state, 0,    "ACT",   "Apricot Portable / FP", MACHINE_NOT_WORKING )
+//    YEAR  NAME   PARENT  COMPAT  INPUT  STATE     INIT  COMPANY  FULLNAME                 FLAGS
+COMP( 1984, fp,    0,      0,      fp,    fp_state, 0,    "ACT",   "Apricot Portable / FP", MACHINE_NOT_WORKING )

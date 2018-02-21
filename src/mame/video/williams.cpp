@@ -175,7 +175,7 @@ VIDEO_START_MEMBER(williams_state,williams)
 }
 
 
-VIDEO_START_MEMBER(blaster_state,blaster)
+VIDEO_START_MEMBER(blastkit_state,blaster)
 {
 	blitter_init(m_blitter_config, memregion("proms")->base());
 	create_palette_lookup();
@@ -233,7 +233,7 @@ uint32_t williams_state::screen_update_williams(screen_device &screen, bitmap_rg
 }
 
 
-uint32_t blaster_state::screen_update_blaster(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
+uint32_t blastkit_state::screen_update_blaster(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	rgb_t pens[16];
 	int x, y;
@@ -484,14 +484,14 @@ WRITE8_MEMBER(williams2_state::williams2_xscroll_high_w)
  *
  *************************************/
 
-WRITE8_MEMBER(blaster_state::blaster_remap_select_w)
+WRITE8_MEMBER(blastkit_state::blaster_remap_select_w)
 {
 	m_blitter_remap_index = data;
 	m_blitter_remap = m_blitter_remap_lookup.get() + data * 256;
 }
 
 
-WRITE8_MEMBER(blaster_state::blaster_video_control_w)
+WRITE8_MEMBER(blastkit_state::blaster_video_control_w)
 {
 	m_blaster_video_control = data;
 }

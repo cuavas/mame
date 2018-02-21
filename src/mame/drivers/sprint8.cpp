@@ -454,7 +454,7 @@ static GFXDECODE_START( sprint8 )
 GFXDECODE_END
 
 
-MACHINE_CONFIG_START(sprint8_state::sprint8)
+MACHINE_CONFIG_START(sprint8_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6800, 11055000 / 11) /* ? */
@@ -514,5 +514,5 @@ ROM_START( sprint8a )
 ROM_END
 
 
-GAME( 1977, sprint8,  0,       sprint8, sprint8,  sprint8_state, 0, ROT0, "Atari", "Sprint 8",                    MACHINE_SUPPORTS_SAVE )
-GAME( 1977, sprint8a, sprint8, sprint8, sprint8p, sprint8_state, 0, ROT0, "Atari", "Sprint 8 (play tag & chase)", MACHINE_SUPPORTS_SAVE )
+GAME( 1977, sprint8,  0,       sprint8,  sprint8_state, 0, ROT0, "Atari", "Sprint 8",                    MACHINE_SUPPORTS_SAVE )
+GAME( 1977, sprint8a, sprint8, sprint8p, sprint8_state, 0, ROT0, "Atari", "Sprint 8 (play tag & chase)", MACHINE_SUPPORTS_SAVE )

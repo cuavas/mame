@@ -44,7 +44,7 @@ protected:
 	TILEMAP_MAPPER_MEMBER(atarig42_playfield_scan);
 	DECLARE_VIDEO_START(atarig42);
 	uint32_t screen_update_atarig42(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
-	void atarig42(machine_config &config);
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_map(address_map &map);
 
 	required_device<atari_jsa_iii_device> m_jsa;
@@ -79,9 +79,9 @@ class atarig42_0x200_state : public atarig42_state
 public:
 	using atarig42_state::atarig42_state;
 	DECLARE_DRIVER_INIT(roadriot);
-	void atarig42_0x200(machine_config &config);
 
 protected:
+	virtual void device_add_mconfig(machine_config &config) override;
 	DECLARE_READ16_MEMBER(roadriot_sloop_data_r);
 	DECLARE_WRITE16_MEMBER(roadriot_sloop_data_w);
 	void roadriot_sloop_tweak(int offset);
@@ -92,9 +92,9 @@ class atarig42_0x400_state : public atarig42_state
 public:
 	using atarig42_state::atarig42_state;
 	DECLARE_DRIVER_INIT(guardian);
-	void atarig42_0x400(machine_config &config);
 
 protected:
+	virtual void device_add_mconfig(machine_config &config) override;
 	DECLARE_READ16_MEMBER(guardians_sloop_data_r);
 	DECLARE_WRITE16_MEMBER(guardians_sloop_data_w);
 	void guardians_sloop_tweak(int offset);

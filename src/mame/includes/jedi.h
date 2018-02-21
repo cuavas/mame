@@ -41,7 +41,6 @@ public:
 	{ }
 
 	DECLARE_CUSTOM_INPUT_MEMBER(jedi_audio_comm_stat_r);
-	void jedi(machine_config &config);
 
 protected:
 	DECLARE_WRITE8_MEMBER(main_irq_ack_w);
@@ -77,6 +76,7 @@ protected:
 	void do_pen_lookup(bitmap_rgb32 &bitmap, const rectangle &cliprect);
 	void draw_background_and_text(bitmap_rgb32 &bitmap, const rectangle &cliprect);
 	void draw_sprites(bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	virtual void device_add_mconfig(machine_config &config) override;
 	void jedi_audio(machine_config &config);
 	void jedi_video(machine_config &config);
 	void audio_map(address_map &map);

@@ -298,7 +298,7 @@ GFXDECODE_END
  *
  *************************************/
 
-MACHINE_CONFIG_START(irobot_state::irobot)
+MACHINE_CONFIG_START(irobot_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", MC6809E, MAIN_CLOCK/8)
@@ -398,4 +398,4 @@ ROM_END
  *
  *************************************/
 
-GAME( 1983, irobot, 0, irobot, irobot, irobot_state, irobot, ROT0, "Atari", "I, Robot", 0 )
+GAME( 1983, irobot, 0, irobot, irobot_state, irobot, ROT0, "Atari", "I, Robot", 0 )

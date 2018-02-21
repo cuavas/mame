@@ -69,7 +69,6 @@ public:
 		m_digit(0)
 	{ }
 
-	void acrnsys1(machine_config &config);
 
 protected:
 	DECLARE_READ8_MEMBER(ins8154_b1_port_a_r);
@@ -77,6 +76,7 @@ protected:
 	DECLARE_WRITE8_MEMBER(acrnsys1_led_segment_w);
 	TIMER_DEVICE_CALLBACK_MEMBER(acrnsys1_c);
 	TIMER_DEVICE_CALLBACK_MEMBER(acrnsys1_p);
+	virtual void device_add_mconfig(machine_config &config) override;
 	void acrnsys1_map(address_map &map);
 
 private:
@@ -248,7 +248,7 @@ INPUT_PORTS_END
     MACHINE DRIVERS
 ***************************************************************************/
 
-MACHINE_CONFIG_START(acrnsys1_state::acrnsys1)
+MACHINE_CONFIG_START(acrnsys1_state::device_add_mconfig)
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, 1008000)  /* 1.008 MHz */
 	MCFG_CPU_PROGRAM_MAP(acrnsys1_map)
@@ -286,5 +286,5 @@ ROM_END
     GAME DRIVERS
 ***************************************************************************/
 
-/*    YEAR  NAME      PARENT COMPAT MACHINE   INPUT     STATE           INIT  COMPANY  FULLNAME          FLAGS */
-COMP( 1978, acrnsys1, 0,     0,     acrnsys1, acrnsys1, acrnsys1_state, 0,    "Acorn", "Acorn System 1", 0 )
+/*    YEAR  NAME      PARENT COMPAT INPUT     STATE           INIT  COMPANY  FULLNAME          FLAGS */
+COMP( 1978, acrnsys1, 0,     0,     acrnsys1, acrnsys1_state, 0,    "Acorn", "Acorn System 1", 0 )

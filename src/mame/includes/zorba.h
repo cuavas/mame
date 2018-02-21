@@ -43,12 +43,12 @@ public:
 	}
 
 	DECLARE_INPUT_CHANGED_MEMBER(printer_type);
-	void zorba(machine_config &config);
 
 protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void zorba_io(address_map &map);
 	void zorba_mem(address_map &map);
 

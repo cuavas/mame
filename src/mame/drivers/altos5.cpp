@@ -36,7 +36,6 @@ public:
 	{ }
 
 	DECLARE_DRIVER_INIT(altos5);
-	void altos5(machine_config &config);
 
 protected:
 	DECLARE_READ8_MEMBER(memory_read_byte);
@@ -51,6 +50,7 @@ protected:
 	DECLARE_WRITE_LINE_MEMBER(busreq_w);
 	DECLARE_WRITE_LINE_MEMBER(fdc_intrq_w);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void io_map(address_map &map);
 	void mem_map(address_map &map);
 
@@ -351,7 +351,7 @@ DRIVER_INIT_MEMBER( altos5_state, altos5 )
 	membank("bankwf")->configure_entries(0, 50, &RAM[0], 0x1000);
 }
 
-MACHINE_CONFIG_START(altos5_state::altos5)
+MACHINE_CONFIG_START(altos5_state::device_add_mconfig)
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80, XTAL(8'000'000) / 2)
 	MCFG_CPU_PROGRAM_MAP(mem_map)
@@ -434,5 +434,5 @@ ROM_END
 
 /* Driver */
 
-/*   YEAR  NAME    PARENT  COMPAT   MACHINE  INPUT   CLASS         INIT    COMPANY  FULLNAME      FLAGS */
-COMP(1982, altos5, 0,      0,       altos5,  altos5, altos5_state, altos5, "Altos", "Altos 5-15", MACHINE_NOT_WORKING )
+//   YEAR  NAME    PARENT  COMPAT   INPUT   CLASS         INIT    COMPANY  FULLNAME      FLAGS
+COMP(1982, altos5, 0,      0,       altos5, altos5_state, altos5, "Altos", "Altos 5-15", MACHINE_NOT_WORKING )

@@ -33,11 +33,9 @@ public:
 		m_palette(*this, "palette")
 	{ }
 
-	void copsnrob(machine_config &config);
-
-protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void copsnrob_audio(machine_config &config);
 	void main_map(address_map &map);
 

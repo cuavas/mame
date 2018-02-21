@@ -67,27 +67,14 @@ public:
 	DECLARE_WRITE8_MEMBER(bubbles_cmos_w);
 	DECLARE_WRITE8_MEMBER(williams_watchdog_reset_w);
 	DECLARE_WRITE8_MEMBER(defender_video_control_w);
-	DECLARE_WRITE8_MEMBER(defender_bank_select_w);
 	DECLARE_READ8_MEMBER(mayday_protection_r);
 	DECLARE_WRITE8_MEMBER(sinistar_vram_select_w);
 	DECLARE_READ8_MEMBER(williams_video_counter_r);
 	DECLARE_WRITE8_MEMBER(williams_blitter_w);
 	DECLARE_DRIVER_INIT(sinistar);
 	DECLARE_DRIVER_INIT(stargate);
-	DECLARE_DRIVER_INIT(playball);
-	DECLARE_DRIVER_INIT(defender);
-	DECLARE_DRIVER_INIT(mayday);
-	DECLARE_DRIVER_INIT(lottofun);
-	DECLARE_DRIVER_INIT(alienaru);
-	DECLARE_DRIVER_INIT(defndjeu);
-	DECLARE_DRIVER_INIT(spdball);
-	DECLARE_DRIVER_INIT(splat);
-	DECLARE_DRIVER_INIT(joust);
-	DECLARE_DRIVER_INIT(alienar);
 	DECLARE_DRIVER_INIT(robotron);
 	DECLARE_DRIVER_INIT(bubbles);
-	DECLARE_MACHINE_START(defender);
-	DECLARE_MACHINE_RESET(defender);
 	DECLARE_VIDEO_START(williams);
 	DECLARE_MACHINE_START(williams);
 	DECLARE_MACHINE_RESET(williams);
@@ -99,9 +86,7 @@ public:
 	TIMER_DEVICE_CALLBACK_MEMBER(williams_va11_callback);
 	TIMER_DEVICE_CALLBACK_MEMBER(williams_count240_callback);
 	DECLARE_WRITE8_MEMBER(williams_snd_cmd_w);
-	DECLARE_WRITE8_MEMBER(playball_snd_cmd_w);
 	DECLARE_READ8_MEMBER(williams_49way_port_0_r);
-	DECLARE_WRITE_LINE_MEMBER(lottofun_coin_lock_w);
 
 	void state_save_register();
 	void create_palette_lookup();
@@ -123,27 +108,73 @@ public:
 	required_device<pia6821_device> m_pia_0;
 	required_device<pia6821_device> m_pia_1;
 	required_device<pia6821_device> m_pia_2;
-	void playball(machine_config &config);
-	void defender(machine_config &config);
 	void sinistar(machine_config &config);
-	void lottofun(machine_config &config);
-	void spdball(machine_config &config);
-	void williams(machine_config &config);
-	void williams_muxed(machine_config &config);
-	void jin(machine_config &config);
-	void defender_bankc000_map(address_map &map);
-	void defender_map(address_map &map);
-	void defender_sound_map(address_map &map);
 	void sinistar_map(address_map &map);
 	void sound_map(address_map &map);
 	void williams_map(address_map &map);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
 };
 
 
-class blaster_state : public williams_state
+class defender_state : public williams_state
 {
 public:
-	blaster_state(const machine_config &mconfig, device_type type, const char *tag)
+	using williams_state::williams_state;
+	DECLARE_DRIVER_INIT(defender);
+	DECLARE_DRIVER_INIT(defndjeu);
+	DECLARE_DRIVER_INIT(mayday);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	void defender_map(address_map &map);
+	void defender_bankc000_map(address_map &map);
+	void defender_sound_map(address_map &map);
+	DECLARE_MACHINE_START(defender);
+	DECLARE_MACHINE_RESET(defender);
+	DECLARE_WRITE8_MEMBER(defender_bank_select_w);
+};
+
+
+class jin_state : public defender_state
+{
+protected:
+	using defender_state::defender_state;
+	virtual void device_add_mconfig(machine_config &config) override;
+};
+
+
+class williams_muxed_state : public williams_state
+{
+public:
+	using williams_state::williams_state;
+	DECLARE_DRIVER_INIT(joust);
+	DECLARE_DRIVER_INIT(splat);
+	DECLARE_DRIVER_INIT(alienar);
+	DECLARE_DRIVER_INIT(alienaru);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+};
+
+
+class playball_state : public williams_state
+{
+public:
+	using williams_state::williams_state;
+	DECLARE_DRIVER_INIT(playball);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	DECLARE_WRITE8_MEMBER(playball_snd_cmd_w);
+};
+
+
+class blastkit_state : public williams_state
+{
+public:
+	blastkit_state(const machine_config &mconfig, device_type type, const char *tag)
 		: williams_state(mconfig, type, tag),
 		m_soundcpu_b(*this, "soundcpu_b"),
 		m_pia_2b(*this, "pia_2b"),
@@ -175,10 +206,42 @@ public:
 	uint32_t screen_update_blaster(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
 
 	inline void update_blaster_banking();
-	void blastkit(machine_config &config);
-	void blaster(machine_config &config);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
 	void blaster_map(address_map &map);
+};
+
+
+class blaster_state : public blastkit_state
+{
+protected:
+	using blastkit_state::blastkit_state;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void sound_map_b(address_map &map);
+};
+
+
+class spdball_state : public williams_state
+{
+public:
+	using williams_state::williams_state;
+	DECLARE_DRIVER_INIT(spdball);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+};
+
+
+class lottofun_state : public williams_state
+{
+public:
+	using williams_state::williams_state;
+	DECLARE_DRIVER_INIT(lottofun);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	DECLARE_WRITE_LINE_MEMBER(lottofun_coin_lock_w);
 };
 
 
@@ -216,19 +279,13 @@ public:
 	TIMER_DEVICE_CALLBACK_MEMBER(williams2_endscreen_callback);
 	TIMER_CALLBACK_MEMBER(williams2_deferred_snd_cmd_w);
 	DECLARE_WRITE8_MEMBER(williams2_snd_cmd_w);
-	DECLARE_WRITE_LINE_MEMBER(mysticm_main_irq);
-	DECLARE_WRITE_LINE_MEMBER(tshoot_main_irq);
 
-	DECLARE_DRIVER_INIT(mysticm);
-	DECLARE_DRIVER_INIT(tshoot);
-	DECLARE_DRIVER_INIT(inferno);
 	DECLARE_MACHINE_START(williams2);
 	DECLARE_MACHINE_RESET(williams2);
 	DECLARE_VIDEO_START(williams2);
 	uint32_t screen_update_williams2(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
 	void williams2(machine_config &config);
 	void mysticm(machine_config &config);
-	void inferno(machine_config &config);
 	void williams2_bank8000_map(address_map &map);
 	void williams2_common_map(address_map &map);
 	void williams2_d000_ram_map(address_map &map);
@@ -237,6 +294,17 @@ public:
 };
 
 
+class mysticm_state : public williams2_state
+{
+public:
+	using williams2_state::williams2_state;
+	DECLARE_DRIVER_INIT(mysticm);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	DECLARE_WRITE_LINE_MEMBER(mysticm_main_irq);
+};
+
 class tshoot_state : public williams2_state
 {
 public:
@@ -244,13 +312,27 @@ public:
 		: williams2_state(mconfig, type, tag),
 		m_gun(*this, {"GUNX", "GUNY"}) { }
 
+	DECLARE_DRIVER_INIT(tshoot);
 	DECLARE_CUSTOM_INPUT_MEMBER(gun_r);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	DECLARE_WRITE_LINE_MEMBER(tshoot_main_irq);
 	DECLARE_WRITE_LINE_MEMBER(maxvol_w);
 	DECLARE_WRITE8_MEMBER(lamp_w);
 
-	void tshoot(machine_config &config);
 private:
 	required_ioport_array<2> m_gun;
+};
+
+class inferno_state : public williams2_state
+{
+public:
+	using williams2_state::williams2_state;
+	DECLARE_DRIVER_INIT(inferno);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
 };
 
 class joust2_state : public williams2_state
@@ -260,16 +342,19 @@ public:
 		: williams2_state(mconfig, type, tag),
 		m_cvsd_sound(*this, "cvsd") { }
 
-	required_device<williams_cvsd_sound_device> m_cvsd_sound;
-	uint16_t m_joust2_current_sound_data;
-
 	DECLARE_DRIVER_INIT(joust2);
+
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
 	DECLARE_MACHINE_START(joust2);
 	DECLARE_MACHINE_RESET(joust2);
 	TIMER_CALLBACK_MEMBER(joust2_deferred_snd_cmd_w);
 	DECLARE_WRITE8_MEMBER(joust2_snd_cmd_w);
 	DECLARE_WRITE_LINE_MEMBER(joust2_pia_3_cb1_w);
-	void joust2(machine_config &config);
+
+private:
+	required_device<williams_cvsd_sound_device> m_cvsd_sound;
+	uint16_t m_joust2_current_sound_data;
 };
 
 /*----------- defined in video/williams.cpp -----------*/

@@ -85,7 +85,6 @@ public:
 	{ }
 
 	DECLARE_DRIVER_INIT(rx78);
-	void rx78(machine_config &config);
 
 protected:
 	DECLARE_READ8_MEMBER( key_r );
@@ -103,6 +102,7 @@ protected:
 	uint32_t screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 
 	virtual void machine_reset() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void rx78_io(address_map &map);
 	void rx78_mem(address_map &map);
 
@@ -468,7 +468,7 @@ static GFXDECODE_START( rx78 )
 GFXDECODE_END
 
 
-MACHINE_CONFIG_START(rx78_state::rx78)
+MACHINE_CONFIG_START(rx78_state::device_add_mconfig)
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu",Z80, MASTER_CLOCK/7) // unknown divider
 	MCFG_CPU_PROGRAM_MAP(rx78_mem)
@@ -531,5 +531,5 @@ DRIVER_INIT_MEMBER(rx78_state,rx78)
 
 /* Driver */
 
-/*    YEAR  NAME    PARENT  COMPAT   MACHINE    INPUT    CLASS       INIT   COMPANY     FULLNAME     FLAGS */
-COMP( 1983, rx78,   0,      0,       rx78,      rx78,    rx78_state, rx78,  "Bandai", "Gundam RX-78", MACHINE_NOT_WORKING )
+//    YEAR  NAME    PARENT  COMPAT   INPUT    CLASS       INIT   COMPANY   FULLNAME        FLAGS
+COMP( 1983, rx78,   0,      0,       rx78,    rx78_state, rx78,  "Bandai", "Gundam RX-78", MACHINE_NOT_WORKING )

@@ -21,8 +21,6 @@ public:
 		m_palette(*this, "palette")
 	{ }
 
-	void skyraid(machine_config &config);
-
 protected:
 	DECLARE_READ8_MEMBER(skyraid_port_0_r);
 	DECLARE_WRITE8_MEMBER(skyraid_range_w);
@@ -38,6 +36,7 @@ protected:
 	void draw_missiles(bitmap_ind16 &bitmap, const rectangle &cliprect);
 	void draw_trapezoid(bitmap_ind16& dst, bitmap_ind16& src);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void skyraid_map(address_map &map);
 
 private:

@@ -31,12 +31,15 @@ public:
 		, m_exp(*this, "exp")
 	{ }
 
+protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	void astrocade_io(address_map &map);
+	void astrocade_mem(address_map &map);
+
+private:
 	required_device<astrocade_cart_slot_device> m_cart;
 	required_device<astrocade_exp_device> m_exp;
 	DECLARE_MACHINE_START(astrocde);
-	void astrocde(machine_config &config);
-	void astrocade_io(address_map &map);
-	void astrocade_mem(address_map &map);
 };
 
 /*********************************************************************************
@@ -193,7 +196,7 @@ static SLOT_INTERFACE_START(astrocade_exp)
 SLOT_INTERFACE_END
 
 
-MACHINE_CONFIG_START(astrocde_mess_state::astrocde)
+MACHINE_CONFIG_START(astrocde_mess_state::device_add_mconfig)
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80, ASTROCADE_CLOCK/4)        /* 1.789 MHz */
 	MCFG_CPU_PROGRAM_MAP(astrocade_mem)
@@ -275,7 +278,7 @@ MACHINE_START_MEMBER(astrocde_mess_state, astrocde)
  *
  *************************************/
 
-/*    YEAR  NAME      PARENT    COMPAT    MACHINE   INPUT     STATE                INIT      COMPANY                FULLNAME                       FLAGS */
-CONS( 1978, astrocde, 0,        0,        astrocde, astrocde, astrocde_mess_state, astrocde, "Bally Manufacturing", "Bally Professional Arcade",   MACHINE_SUPPORTS_SAVE )
-CONS( 1977, astrocdl, astrocde, 0,        astrocde, astrocde, astrocde_mess_state, astrocde, "Bally Manufacturing", "Bally Home Library Computer", MACHINE_SUPPORTS_SAVE )
-CONS( 1977, astrocdw, astrocde, 0,        astrocde, astrocde, astrocde_mess_state, astrocde, "Bally Manufacturing", "Bally Computer System",       MACHINE_SUPPORTS_SAVE )
+/*    YEAR  NAME      PARENT    COMPAT    INPUT     STATE                INIT      COMPANY                FULLNAME                       FLAGS */
+CONS( 1978, astrocde, 0,        0,        astrocde, astrocde_mess_state, astrocde, "Bally Manufacturing", "Bally Professional Arcade",   MACHINE_SUPPORTS_SAVE )
+CONS( 1977, astrocdl, astrocde, 0,        astrocde, astrocde_mess_state, astrocde, "Bally Manufacturing", "Bally Home Library Computer", MACHINE_SUPPORTS_SAVE )
+CONS( 1977, astrocdw, astrocde, 0,        astrocde, astrocde_mess_state, astrocde, "Bally Manufacturing", "Bally Computer System",       MACHINE_SUPPORTS_SAVE )

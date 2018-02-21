@@ -1140,7 +1140,7 @@ void equites_state::machine_reset()
 }
 
 
-MACHINE_CONFIG_START(equites_state::equites)
+MACHINE_CONFIG_START(equites_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, 12_MHz_XTAL/4) /* 68000P8 running at 3mhz! verified on pcb */
@@ -1175,8 +1175,8 @@ MACHINE_CONFIG_START(equites_state::equites)
 	MCFG_VIDEO_START_OVERRIDE(equites_state,equites)
 MACHINE_CONFIG_END
 
-MACHINE_CONFIG_START(gekisou_state::gekisou)
-	equites(config);
+MACHINE_CONFIG_START(gekisou_state::device_add_mconfig)
+	equites_state::device_add_mconfig(config);
 
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
@@ -1191,7 +1191,7 @@ MACHINE_CONFIG_START(gekisou_state::gekisou)
 MACHINE_CONFIG_END
 
 
-MACHINE_CONFIG_START(splndrbt_state::splndrbt)
+MACHINE_CONFIG_START(splndrbt_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, 24_MHz_XTAL/4) /* 68000P8 running at 6mhz, verified on pcb */
@@ -1225,8 +1225,8 @@ MACHINE_CONFIG_START(splndrbt_state::splndrbt)
 	MCFG_VIDEO_START_OVERRIDE(splndrbt_state,splndrbt)
 MACHINE_CONFIG_END
 
-MACHINE_CONFIG_START(splndrbt_state::hvoltage)
-	splndrbt(config);
+MACHINE_CONFIG_START(hvoltage_state::device_add_mconfig)
+	splndrbt_state::device_add_mconfig(config);
 
 	// mcu not dumped, so add simulated mcu
 	MCFG_CPU_ADD("mcu", ALPHA8301L, 4000000/8)
@@ -1973,16 +1973,16 @@ DRIVER_INIT_MEMBER(splndrbt_state,splndrbt)
 // Game Entries
 
 // Equites Hardware
-GAME( 1984, equites,   0,        equites,  equites,  equites_state, equites,  ROT90, "Alpha Denshi Co.", "Equites", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
-GAME( 1984, equitess,  equites,  equites,  equites,  equites_state, equites,  ROT90, "Alpha Denshi Co. (Sega license)", "Equites (Sega)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
-GAME( 1984, bullfgtr,  0,        equites,  bullfgtr, equites_state, equites,  ROT90, "Alpha Denshi Co.", "Bull Fighter", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
-GAME( 1984, bullfgtrs, bullfgtr, equites,  bullfgtr, equites_state, equites,  ROT90, "Alpha Denshi Co. (Sega license)", "Bull Fighter (Sega)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
-GAME( 1985, kouyakyu,  0,        equites,  kouyakyu, equites_state, equites,  ROT0,  "Alpha Denshi Co.", "The Koukou Yakyuu", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
-GAME( 1985, gekisou,   0,        gekisou,  gekisou,  gekisou_state, equites,  ROT90, "Eastern Corp.", "Gekisou (Japan)", MACHINE_UNEMULATED_PROTECTION | MACHINE_IMPERFECT_SOUND | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )
+GAME( 1984, equites,   0,        equites,  equites_state,  equites,  ROT90, "Alpha Denshi Co.",                "Equites",             MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1984, equitess,  equites,  equites,  equites_state,  equites,  ROT90, "Alpha Denshi Co. (Sega license)", "Equites (Sega)",      MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1984, bullfgtr,  0,        bullfgtr, equites_state,  equites,  ROT90, "Alpha Denshi Co.",                "Bull Fighter",        MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1984, bullfgtrs, bullfgtr, bullfgtr, equites_state,  equites,  ROT90, "Alpha Denshi Co. (Sega license)", "Bull Fighter (Sega)", MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1985, kouyakyu,  0,        kouyakyu, equites_state,  equites,  ROT0,  "Alpha Denshi Co.",                "The Koukou Yakyuu",   MACHINE_IMPERFECT_SOUND | MACHINE_SUPPORTS_SAVE )
+GAME( 1985, gekisou,   0,        gekisou,  gekisou_state,  equites,  ROT90, "Eastern Corp.",                   "Gekisou (Japan)",     MACHINE_UNEMULATED_PROTECTION | MACHINE_IMPERFECT_SOUND | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )
 
 // Splendor Blast Hardware
-GAME( 1985, splndrbt,  0,        splndrbt, splndrbt, splndrbt_state, splndrbt, ROT0,  "Alpha Denshi Co.", "Splendor Blast (set 1)", MACHINE_IMPERFECT_SOUND | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )
-GAME( 1985, splndrbta, splndrbt, splndrbt, splndrbt, splndrbt_state, splndrbt, ROT0,  "Alpha Denshi Co.", "Splendor Blast (set 2)", MACHINE_IMPERFECT_SOUND | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )
-GAME( 1985, splndrbtb, splndrbt, splndrbt, splndrbt, splndrbt_state, splndrbt, ROT0,  "Alpha Denshi Co.", "Splendor Blast (set 3)", MACHINE_IMPERFECT_SOUND | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )
-GAME( 1985, splndrbt2, 0,        splndrbt, splndrbt, splndrbt_state, splndrbt, ROT0,  "Alpha Denshi Co.", "Splendor Blast II", MACHINE_IMPERFECT_SOUND | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )
-GAME( 1985, hvoltage,  0,        hvoltage, hvoltage, splndrbt_state, splndrbt, ROT0,  "Alpha Denshi Co.", "High Voltage", MACHINE_UNEMULATED_PROTECTION | MACHINE_IMPERFECT_SOUND | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )
+GAME( 1985, splndrbt,  0,        splndrbt, splndrbt_state, splndrbt, ROT0,  "Alpha Denshi Co.", "Splendor Blast (set 1)", MACHINE_IMPERFECT_SOUND | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )
+GAME( 1985, splndrbta, splndrbt, splndrbt, splndrbt_state, splndrbt, ROT0,  "Alpha Denshi Co.", "Splendor Blast (set 2)", MACHINE_IMPERFECT_SOUND | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )
+GAME( 1985, splndrbtb, splndrbt, splndrbt, splndrbt_state, splndrbt, ROT0,  "Alpha Denshi Co.", "Splendor Blast (set 3)", MACHINE_IMPERFECT_SOUND | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )
+GAME( 1985, splndrbt2, 0,        splndrbt, splndrbt_state, splndrbt, ROT0,  "Alpha Denshi Co.", "Splendor Blast II",      MACHINE_IMPERFECT_SOUND | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )
+GAME( 1985, hvoltage,  0,        hvoltage, hvoltage_state, splndrbt, ROT0,  "Alpha Denshi Co.", "High Voltage",           MACHINE_UNEMULATED_PROTECTION | MACHINE_IMPERFECT_SOUND | MACHINE_IMPERFECT_GRAPHICS | MACHINE_SUPPORTS_SAVE )

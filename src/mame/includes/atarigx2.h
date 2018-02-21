@@ -32,8 +32,6 @@ public:
 	DECLARE_DRIVER_INIT(spclords);
 	DECLARE_DRIVER_INIT(rrreveng);
 	DECLARE_DRIVER_INIT(motofren);
-	void atarigx2_0x200(machine_config &config);
-	void atarigx2_0x400(machine_config &config);
 
 protected:
 	virtual void machine_reset() override;
@@ -54,7 +52,7 @@ protected:
 	uint32_t screen_update_atarigx2(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 	DECLARE_WRITE16_MEMBER( atarigx2_mo_control_w );
 
-	void atarigx2(machine_config &config);
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_map(address_map &map);
 
 private:
@@ -79,6 +77,20 @@ private:
 	uint16_t          m_last_write;
 	uint16_t          m_last_write_offset;
 	uint32_t          m_protection_ram[0x1000];
+};
+
+class atarigx2_0x200_state : public atarigx2_state
+{
+protected:
+	using atarigx2_state::atarigx2_state;
+	virtual void device_add_mconfig(machine_config &config) override;
+};
+
+class atarigx2_0x400_state : public atarigx2_state
+{
+protected:
+	using atarigx2_state::atarigx2_state;
+	virtual void device_add_mconfig(machine_config &config) override;
 };
 
 #endif // MAME_INCLUDES_ATARIGX2_H

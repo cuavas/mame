@@ -32,14 +32,17 @@ public:
 	{
 	}
 
-	optional_shared_ptr<uint8_t> m_dealem_videoram;
+protected:
 	DECLARE_MACHINE_RESET(dealem_vid);
 	DECLARE_PALETTE_INIT(dealem);
 	uint32_t screen_update_dealem(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 	DECLARE_WRITE_LINE_MEMBER(dealem_vsync_changed);
-	required_device<gfxdecode_device> m_gfxdecode;
-	void dealem(machine_config &config);
+	virtual void device_add_mconfig(machine_config &config) override;
 	void dealem_memmap(address_map &map);
+
+private:
+	optional_shared_ptr<uint8_t> m_dealem_videoram;
+	required_device<gfxdecode_device> m_gfxdecode;
 };
 
 
@@ -196,7 +199,7 @@ MACHINE_RESET_MEMBER(mpu4dealem_state,dealem_vid)
 
 
 /* machine driver for Zenitone Deal 'Em board */
-MACHINE_CONFIG_START(mpu4dealem_state::dealem)
+MACHINE_CONFIG_START(mpu4dealem_state::device_add_mconfig)
 	MCFG_MACHINE_START_OVERRIDE(mpu4dealem_state,mod2)                          /* main mpu4 board initialisation */
 	MCFG_MACHINE_RESET_OVERRIDE(mpu4dealem_state,dealem_vid)
 
@@ -382,4 +385,4 @@ and reel assembly with this kit and a supplied monitor. This explains why the ca
 The original Deal 'Em ran on Summit Coin hardware, and was made by someone else.
 Two further different releases were made, running on the Barcrest MPU4 Video, rather than this one. These are Deal 'Em Again and Deal 'Em 2000*/
 
-GAME(  1987,v4dealem,   0,          dealem,     dealem, mpu4dealem_state,      0,          ROT0, "Zenitone","Deal 'Em (MPU4 Conversion Kit, v7.0)",MACHINE_IMPERFECT_GRAPHICS )
+GAME(  1987,v4dealem,   0,          dealem, mpu4dealem_state,      0,          ROT0, "Zenitone","Deal 'Em (MPU4 Conversion Kit, v7.0)",MACHINE_IMPERFECT_GRAPHICS )

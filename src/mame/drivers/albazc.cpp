@@ -34,8 +34,6 @@ public:
 		m_hopper(*this, "hopper")
 	{ }
 
-	void hanaroku(machine_config &config);
-
 protected:
 	/* video-related */
 	DECLARE_WRITE8_MEMBER(hanaroku_out_0_w);
@@ -46,6 +44,7 @@ protected:
 	DECLARE_PALETTE_INIT(albazc);
 	uint32_t screen_update_hanaroku(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 	void draw_sprites(bitmap_ind16 &bitmap, const rectangle &cliprect);
+	virtual void device_add_mconfig(machine_config &config) override;
 	void hanaroku_map(address_map &map);
 
 private:
@@ -278,7 +277,7 @@ static GFXDECODE_START( hanaroku )
 GFXDECODE_END
 
 
-MACHINE_CONFIG_START(albazc_state::hanaroku)
+MACHINE_CONFIG_START(albazc_state::device_add_mconfig)
 
 	MCFG_CPU_ADD("maincpu", Z80,6000000)         /* ? MHz */
 	MCFG_CPU_PROGRAM_MAP(hanaroku_map)
@@ -328,4 +327,4 @@ ROM_START( hanaroku )
 ROM_END
 
 
-GAME( 1988, hanaroku, 0,        hanaroku, hanaroku, albazc_state, 0, ROT0, "Alba", "Hanaroku", MACHINE_IMPERFECT_GRAPHICS | MACHINE_IMPERFECT_COLORS | MACHINE_SUPPORTS_SAVE )
+GAME( 1988, hanaroku, 0,        hanaroku, albazc_state, 0, ROT0, "Alba", "Hanaroku", MACHINE_IMPERFECT_GRAPHICS | MACHINE_IMPERFECT_COLORS | MACHINE_SUPPORTS_SAVE )

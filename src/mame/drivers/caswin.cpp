@@ -86,8 +86,6 @@ public:
 		m_gfxdecode(*this, "gfxdecode")
 	{ }
 
-	void vvillage(machine_config &config);
-
 protected:
 	DECLARE_WRITE8_MEMBER(sc0_vram_w);
 	DECLARE_WRITE8_MEMBER(sc0_attr_w);
@@ -101,6 +99,7 @@ protected:
 	uint32_t screen_update_vvillage(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void vvillage_io(address_map &map);
 	void vvillage_mem(address_map &map);
 
@@ -330,7 +329,7 @@ PALETTE_INIT_MEMBER(caswin_state, caswin)
 }
 
 
-MACHINE_CONFIG_START(caswin_state::vvillage)
+MACHINE_CONFIG_START(caswin_state::device_add_mconfig)
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80, 4000000)         /* ? MHz */
 	MCFG_CPU_PROGRAM_MAP(vvillage_mem)
@@ -425,7 +424,7 @@ ROM_START( rcasinoo )
 	ROM_LOAD( "prom1.e8",  0x0020, 0x0020, CRC(2b5c7826) SHA1(c0de392aebd6982e5846c12aeb2e871358be60d7) ) /* MB7051 */
 ROM_END
 
-GAME( 1984, rcasino,  0,       vvillage, vvillage, caswin_state, 0, ROT270, "Dyna Electronics", "Royal Casino (D-2608208A1-2)",                MACHINE_IMPERFECT_GRAPHICS )
-GAME( 1984, rcasino1, rcasino, vvillage, vvillage, caswin_state, 0, ROT270, "Dyna Electronics", "Royal Casino (D-2608208A1-1, Larger Board)",  MACHINE_IMPERFECT_GRAPHICS )
-GAME( 1984, rcasinoo, rcasino, vvillage, vvillage, caswin_state, 0, ROT270, "Dyna Electronics", "Royal Casino (D-2608208A1-1, Smaller Board)", MACHINE_IMPERFECT_GRAPHICS )
-GAME( 1985, caswin,   rcasino, vvillage, vvillage, caswin_state, 0, ROT270, "Aristocrat",       "Casino Winner",                               MACHINE_IMPERFECT_GRAPHICS )
+GAME( 1984, rcasino,  0,       vvillage, caswin_state, 0, ROT270, "Dyna Electronics", "Royal Casino (D-2608208A1-2)",                MACHINE_IMPERFECT_GRAPHICS )
+GAME( 1984, rcasino1, rcasino, vvillage, caswin_state, 0, ROT270, "Dyna Electronics", "Royal Casino (D-2608208A1-1, Larger Board)",  MACHINE_IMPERFECT_GRAPHICS )
+GAME( 1984, rcasinoo, rcasino, vvillage, caswin_state, 0, ROT270, "Dyna Electronics", "Royal Casino (D-2608208A1-1, Smaller Board)", MACHINE_IMPERFECT_GRAPHICS )
+GAME( 1985, caswin,   rcasino, vvillage, caswin_state, 0, ROT270, "Aristocrat",       "Casino Winner",                               MACHINE_IMPERFECT_GRAPHICS )

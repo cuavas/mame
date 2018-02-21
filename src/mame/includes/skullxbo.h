@@ -29,7 +29,6 @@ public:
 	{ }
 
 	DECLARE_DRIVER_INIT(skullxbo);
-	void skullxbo(machine_config &config);
 
 protected:
 	virtual void machine_reset() override;
@@ -48,6 +47,7 @@ protected:
 	DECLARE_WRITE16_MEMBER( skullxbo_yscroll_w );
 	DECLARE_WRITE16_MEMBER( skullxbo_mobmsb_w );
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_map(address_map &map);
 
 private:

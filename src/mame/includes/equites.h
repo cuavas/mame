@@ -125,6 +125,7 @@ public:
 protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void common_sound(machine_config &config);
 	void equites_map(address_map &map);
 	void mcu_map(address_map &map);
@@ -137,10 +138,10 @@ class gekisou_state : public equites_state
 public:
 	using equites_state::equites_state;
 	DECLARE_CUSTOM_INPUT_MEMBER(gekisou_unknown_bit_r);
-	void gekisou(machine_config &config);
 
 protected:
 	virtual void machine_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void gekisou_map(address_map &map);
 	DECLARE_WRITE16_MEMBER(gekisou_unknown_bit_w);
 
@@ -154,11 +155,10 @@ class splndrbt_state : public equites_state
 public:
 	using equites_state::equites_state;
 	DECLARE_DRIVER_INIT(splndrbt);
-	void splndrbt(machine_config &config);
-	void hvoltage(machine_config &config);
 
 protected:
 	virtual void machine_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void splndrbt_map(address_map &map);
 	DECLARE_WRITE_LINE_MEMBER(splndrbt_selchar_w);
 	DECLARE_WRITE16_MEMBER(splndrbt_bg_scrollx_w);
@@ -176,6 +176,13 @@ private:
 	int       m_fg_char_bank;
 	uint16_t  m_splndrbt_bg_scrollx;
 	uint16_t  m_splndrbt_bg_scrolly;
+};
+
+class hvoltage_state : public splndrbt_state
+{
+protected:
+	using splndrbt_state::splndrbt_state;
+	virtual void device_add_mconfig(machine_config &config) override;
 };
 
 #endif // MAME_INCLUDES_EQUITES_H

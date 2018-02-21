@@ -57,12 +57,11 @@ public:
 	{
 	}
 
-	void sburners(machine_config &config);
-
 protected:
 	// driver_device overrides
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 
 	virtual void video_start() override;
 
@@ -100,7 +99,7 @@ void sburners_state::video_start()
 {
 }
 
-MACHINE_CONFIG_START(sburners_state::sburners)
+MACHINE_CONFIG_START(sburners_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_DEVICE_ADD("maincpu", NETLIST_CPU, NETLIST_CLOCK)
@@ -131,4 +130,4 @@ ROM_START( sburners )
 ROM_END
 
 
-GAME( 1975, sburners,  0, sburners, 0, sburners_state, 0, ROT0, "Allied Leisure", "Street Burners [TTL]", MACHINE_IS_SKELETON )
+GAME( 1975, sburners,  0, 0, sburners_state, 0, ROT0, "Allied Leisure", "Street Burners [TTL]", MACHINE_IS_SKELETON )

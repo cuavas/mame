@@ -95,7 +95,7 @@ static SLOT_INTERFACE_START(vectrex_cart)
 	SLOT_INTERFACE_INTERNAL("vec_sram",   VECTREX_ROM_SRAM)
 SLOT_INTERFACE_END
 
-MACHINE_CONFIG_START(vectrex_base_state::vectrex_base)
+MACHINE_CONFIG_START(vectrex_base_state::device_add_mconfig)
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", MC6809, 6_MHz_XTAL) // 68A09
 
@@ -129,8 +129,8 @@ MACHINE_CONFIG_START(vectrex_base_state::vectrex_base)
 	MCFG_VIA6522_IRQ_HANDLER(WRITELINE(vectrex_base_state, vectrex_via_irq))
 MACHINE_CONFIG_END
 
-MACHINE_CONFIG_START(vectrex_state::vectrex)
-	vectrex_base(config);
+MACHINE_CONFIG_START(vectrex_state::device_add_mconfig)
+	vectrex_base_state::device_add_mconfig(config);
 
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(vectrex_map)
@@ -221,8 +221,8 @@ static INPUT_PORTS_START(raaspec)
 INPUT_PORTS_END
 
 
-MACHINE_CONFIG_START(raaspec_state::raaspec)
-	vectrex_base(config);
+MACHINE_CONFIG_START(raaspec_state::device_add_mconfig)
+	vectrex_base_state::device_add_mconfig(config);
 
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(raaspec_map)
@@ -245,7 +245,7 @@ ROM_END
 
 ***************************************************************************/
 
-//   YEAR  NAME      PARENT    COMPAT   MACHINE   INPUT     STATE          INIT  MONITOR  COMPANY                         FULLNAME
-CONS(1982, vectrex,  0,        0,       vectrex,  vectrex,  vectrex_state, 0,             "General Consumer Electronics", "Vectrex" , ROT270)
+//   YEAR  NAME      PARENT    COMPAT   INPUT     STATE          INIT  MONITOR  COMPANY                         FULLNAME
+CONS(1982, vectrex,  0,        0,       vectrex,  vectrex_state, 0,             "General Consumer Electronics", "Vectrex" , ROT270)
 
-GAME(1984, raaspec,  0,                 raaspec,  raaspec,  raaspec_state, 0,    ROT270,  "Roy Abel & Associates",        "Spectrum I+", MACHINE_NOT_WORKING ) //TODO: button labels & timings, a mandatory artwork too?
+GAME(1984, raaspec,  0,                 raaspec,  raaspec_state, 0,    ROT270,  "Roy Abel & Associates",        "Spectrum I+", MACHINE_NOT_WORKING ) //TODO: button labels & timings, a mandatory artwork too?

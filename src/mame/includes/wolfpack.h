@@ -32,7 +32,6 @@ public:
 	{ }
 
 	DECLARE_CUSTOM_INPUT_MEMBER(dial_r);
-	void wolfpack(machine_config &config);
 
 protected:
 	DECLARE_READ8_MEMBER(misc_r);
@@ -78,6 +77,7 @@ protected:
 	void draw_pt(bitmap_ind16 &bitmap, const rectangle &cliprect);
 	void draw_water(palette_device &palette, bitmap_ind16 &bitmap, const rectangle &cliprect);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_map(address_map &map);
 
 private:

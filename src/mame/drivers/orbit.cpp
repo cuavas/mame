@@ -275,7 +275,7 @@ void orbit_state::machine_reset()
  *
  *************************************/
 
-MACHINE_CONFIG_START(orbit_state::orbit)
+MACHINE_CONFIG_START(orbit_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6800, MASTER_CLOCK / 16)
@@ -363,4 +363,4 @@ ROM_END
  *
  *************************************/
 
-GAME( 1978, orbit, 0, orbit, orbit, orbit_state, 0, 0, "Atari", "Orbit", MACHINE_SUPPORTS_SAVE )
+GAME( 1978, orbit, 0, orbit, orbit_state, 0, 0, "Atari", "Orbit", MACHINE_SUPPORTS_SAVE )

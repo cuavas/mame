@@ -57,8 +57,6 @@ public:
 		m_ch00rom_enabled(true)
 	{ }
 
-	void accomm(machine_config &config);
-
 protected:
 	uint32_t screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 
@@ -77,6 +75,7 @@ protected:
 
 	virtual void machine_reset() override;
 	virtual void machine_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_map(address_map &map);
 
 	// devices
@@ -830,7 +829,7 @@ static INPUT_PORTS_START( accomm )
 	PORT_BIT(0x08, IP_ACTIVE_HIGH, IPT_UNUSED)
 INPUT_PORTS_END
 
-MACHINE_CONFIG_START(accomm_state::accomm)
+MACHINE_CONFIG_START(accomm_state::device_add_mconfig)
 	MCFG_CPU_ADD("maincpu", G65816, 16_MHz_XTAL / 8)
 	MCFG_CPU_PROGRAM_MAP(main_map)
 	MCFG_CPU_VBLANK_INT_DRIVER("screen", accomm_state, vbl_int)
@@ -908,4 +907,4 @@ ROM_START(accomm)
 	/* Versone 3.00 13/gen/88 (C)1988 */
 ROM_END
 
-COMP( 1986,  accomm,  0, 0, accomm,  accomm, accomm_state,  0,  "Acorn", "Acorn Communicator", MACHINE_NOT_WORKING )
+COMP( 1986,  accomm,  0, 0, accomm, accomm_state,  0,  "Acorn", "Acorn Communicator", MACHINE_NOT_WORKING )

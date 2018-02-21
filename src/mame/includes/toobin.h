@@ -26,8 +26,6 @@ public:
 		m_interrupt_scan(*this, "interrupt_scan")
 	{ }
 
-	void toobin(machine_config &config);
-
 protected:
 	virtual void video_start() override;
 	virtual void update_interrupts() override;
@@ -44,6 +42,7 @@ protected:
 
 	uint32_t screen_update(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_map(address_map &map);
 
 private:

@@ -39,8 +39,6 @@ public:
 		m_palette(*this, "palette")
 	{ }
 
-	void canyon(machine_config &config);
-
 protected:
 	DECLARE_READ8_MEMBER(canyon_switches_r);
 	DECLARE_READ8_MEMBER(canyon_options_r);
@@ -57,6 +55,7 @@ protected:
 	void draw_bombs( bitmap_ind16 &bitmap, const rectangle &cliprect );
 
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_map(address_map &map);
 
 private:

@@ -129,8 +129,6 @@ public:
 	{
 	}
 
-	void a7800_ntsc(machine_config &config);
-
 protected:
 	DECLARE_READ8_MEMBER(bios_or_cart_r);
 	DECLARE_READ8_MEMBER(tia_r);
@@ -144,6 +142,7 @@ protected:
 
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void a7800_mem(address_map &map);
 
 	int m_lines;
@@ -180,9 +179,10 @@ class a7800_pal_state : public a7800_state
 public:
 	using a7800_state::a7800_state;
 	DECLARE_DRIVER_INIT(a7800_pal);
-	void a7800_pal(machine_config &config);
 
 protected:
+	virtual void device_add_mconfig(machine_config &config) override;
+	void a7800_pal(machine_config &config);
 	DECLARE_PALETTE_INIT(a7800p);
 };
 
@@ -1374,7 +1374,7 @@ void a7800_state::machine_reset()
 	m_bios_enabled = 0;
 }
 
-MACHINE_CONFIG_START(a7800_state::a7800_ntsc)
+MACHINE_CONFIG_START(a7800_state::device_add_mconfig)
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, A7800_NTSC_Y1/8) /* 1.79 MHz (switches to 1.19 MHz on TIA or RIOT access) */
 	MCFG_CPU_PROGRAM_MAP(a7800_mem)
@@ -1411,8 +1411,8 @@ MACHINE_CONFIG_START(a7800_state::a7800_ntsc)
 MACHINE_CONFIG_END
 
 
-MACHINE_CONFIG_START(a7800_pal_state::a7800_pal)
-	a7800_ntsc(config);
+MACHINE_CONFIG_START(a7800_pal_state::device_add_mconfig)
+	a7800_state::device_add_mconfig(config);
 
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
@@ -1483,6 +1483,6 @@ DRIVER_INIT_MEMBER(a7800_pal_state, a7800_pal)
     GAME DRIVERS
 ***************************************************************************/
 
-//    YEAR  NAME      PARENT    COMPAT  MACHINE     INPUT  STATE              INIT        COMPANY   FULLNAME             FLAGS
-CONS( 1986, a7800,    0,        0,      a7800_ntsc, a7800, a7800_ntsc_state,  a7800_ntsc, "Atari",  "Atari 7800 (NTSC)", 0 )
-CONS( 1986, a7800p,   a7800,    0,      a7800_pal,  a7800, a7800_pal_state,   a7800_pal,  "Atari",  "Atari 7800 (PAL)",  0 )
+//    YEAR  NAME      PARENT    COMPAT  INPUT  STATE             INIT         COMPANY   FULLNAME
+CONS( 1986, a7800,    0,        0,      a7800, a7800_ntsc_state, a7800_ntsc,  "Atari",  "Atari 7800 (NTSC)", 0)
+CONS( 1986, a7800p,   a7800,    0,      a7800, a7800_pal_state,  a7800_pal,   "Atari",  "Atari 7800 (PAL)",  0)

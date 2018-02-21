@@ -73,6 +73,7 @@ protected:
 
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void code_mem(address_map &map);
 	void cpu_io(address_map &map);
 	void cpu_mem(address_map &map);
@@ -688,7 +689,7 @@ static SLOT_INTERFACE_START(altos8600_floppies)
 	SLOT_INTERFACE( "8dd", FLOPPY_8_DSDD )
 SLOT_INTERFACE_END
 
-MACHINE_CONFIG_START(altos8600_state::altos8600)
+MACHINE_CONFIG_START(altos8600_state::device_add_mconfig)
 	MCFG_CPU_ADD("maincpu", I8086, 5_MHz_XTAL)
 	MCFG_CPU_PROGRAM_MAP(cpu_mem)
 	MCFG_CPU_IO_MAP(cpu_io)
@@ -776,4 +777,4 @@ ROM_START(altos8600)
 	ROMX_LOAD("11753_1.5_hi.bin", 0x0001, 0x1000, CRC(9b5e812c) SHA1(c2ef24859edd48d2096db47e16855c9bc01dae75), ROM_SKIP(1) | ROM_BIOS(1))
 ROM_END
 
-COMP(1981, altos8600, 0, 0, altos8600, 0, altos8600_state, 0, "Altos Computer Systems", "ACS8600", MACHINE_NOT_WORKING | MACHINE_NO_SOUND_HW)
+COMP(1981, altos8600, 0, 0, 0, altos8600_state, 0, "Altos Computer Systems", "ACS8600", MACHINE_NOT_WORKING | MACHINE_NO_SOUND_HW)

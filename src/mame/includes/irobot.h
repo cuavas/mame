@@ -44,11 +44,10 @@ public:
 
 	DECLARE_DRIVER_INIT(irobot);
 
-	void irobot(machine_config &config);
-
 protected:
 	virtual void machine_reset() override;
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void irobot_map(address_map &map);
 
 	DECLARE_WRITE8_MEMBER(irobot_nvram_w);

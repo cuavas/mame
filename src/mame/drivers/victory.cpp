@@ -208,7 +208,7 @@ INPUT_PORTS_END
  *
  *************************************/
 
-MACHINE_CONFIG_START(victory_state::victory)
+MACHINE_CONFIG_START(victory_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80, VICTORY_MAIN_CPU_CLOCK)
@@ -324,5 +324,5 @@ ROM_END
  *
  *************************************/
 
-GAME( 1982, victory,  0,       victory, victory, victory_state, 0, ROT0, "Exidy", "Victory", MACHINE_SUPPORTS_SAVE )
-GAME( 1982, victorba, victory, victory, victory, victory_state, 0, ROT0, "Exidy", "Victor Banana", MACHINE_SUPPORTS_SAVE )
+GAME( 1982, victory,  0,       victory, victory_state, 0, ROT0, "Exidy", "Victory",       MACHINE_SUPPORTS_SAVE )
+GAME( 1982, victorba, victory, victory, victory_state, 0, ROT0, "Exidy", "Victor Banana", MACHINE_SUPPORTS_SAVE )

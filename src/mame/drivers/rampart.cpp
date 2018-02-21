@@ -336,7 +336,7 @@ GFXDECODE_END
  *
  *************************************/
 
-MACHINE_CONFIG_START(rampart_state::rampart)
+MACHINE_CONFIG_START(rampart_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, MASTER_CLOCK/2)
@@ -494,6 +494,6 @@ DRIVER_INIT_MEMBER(rampart_state,rampart)
  *
  *************************************/
 
-GAME( 1990, rampart,  0,       rampart, rampart,  rampart_state, rampart, ROT0, "Atari Games", "Rampart (Trackball)", MACHINE_SUPPORTS_SAVE )
-GAME( 1990, rampart2p,rampart, rampart, ramprt2p, rampart_state, rampart, ROT0, "Atari Games", "Rampart (Joystick)", MACHINE_SUPPORTS_SAVE )
-GAME( 1990, rampartj, rampart, rampart, rampartj, rampart_state, rampart, ROT0, "Atari Games", "Rampart (Japan, Joystick)", MACHINE_SUPPORTS_SAVE )
+GAME( 1990, rampart,  0,       rampart,  rampart_state, rampart, ROT0, "Atari Games", "Rampart (Trackball)",       MACHINE_SUPPORTS_SAVE )
+GAME( 1990, rampart2p,rampart, ramprt2p, rampart_state, rampart, ROT0, "Atari Games", "Rampart (Joystick)",        MACHINE_SUPPORTS_SAVE )
+GAME( 1990, rampartj, rampart, rampartj, rampart_state, rampart, ROT0, "Atari Games", "Rampart (Japan, Joystick)", MACHINE_SUPPORTS_SAVE )

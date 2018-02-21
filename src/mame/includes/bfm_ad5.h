@@ -17,10 +17,10 @@ public:
 	{ }
 
 	DECLARE_DRIVER_INIT(ad5);
-	void bfm_ad5(machine_config &config);
 
 protected:
 	INTERRUPT_GEN_MEMBER(ad5_fake_timer_int);
+	virtual void device_add_mconfig(machine_config &config) override;
 	void ad5_map(address_map &map);
 
 private:

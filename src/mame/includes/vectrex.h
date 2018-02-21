@@ -77,7 +77,7 @@ protected:
 	DECLARE_DEVICE_IMAGE_LOAD_MEMBER(vectrex_cart);
 	DECLARE_WRITE_LINE_MEMBER(vectrex_via_irq);
 
-	void vectrex_base(machine_config &config);
+	virtual void device_add_mconfig(machine_config &config) override;
 
 	virtual void device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr) override;
 
@@ -158,12 +158,11 @@ public:
 		vectrex_base_state(mconfig, type, tag)
 	{ }
 
-	void vectrex(machine_config &config);
-
 protected:
 	virtual void video_start() override;
 	virtual void machine_start() override;
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void vectrex_map(address_map &map);
 };
 
@@ -176,12 +175,11 @@ public:
 		m_io_coin(*this, "COIN")
 	{ }
 
-	void raaspec(machine_config &config);
-
 protected:
 	DECLARE_WRITE8_MEMBER(raaspec_led_w);
 	DECLARE_READ8_MEMBER(vectrex_s1_via_pb_r);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void raaspec_map(address_map &map);
 
 private:

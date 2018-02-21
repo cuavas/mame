@@ -123,12 +123,10 @@ public:
 		m_maincpu(*this, "maincpu")
 	{ }
 
-	void elektron(machine_config &config);
-
 protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
-
+	virtual void device_add_mconfig(machine_config &config) override;
 	void elektron_map(address_map &map);
 
 private:
@@ -154,7 +152,7 @@ ADDRESS_MAP_START(elekmono_state::elektron_map)
 	AM_RANGE(0x10000000, 0x107fffff) AM_ROM AM_REGION("maincpu", 0)
 ADDRESS_MAP_END
 
-MACHINE_CONFIG_START(elekmono_state::elektron)
+MACHINE_CONFIG_START(elekmono_state::device_add_mconfig)
 	MCFG_CPU_ADD("maincpu", MCF5206E, XTAL(25'447'000))
 	MCFG_CPU_PROGRAM_MAP(elektron_map)
 
@@ -174,5 +172,5 @@ ROM_START( machdrum )
 	ROM_LOAD( "elektron_sps1-1uw_os1.63.bin", 0x000000, 0x800000, CRC(3d552c99) SHA1(a872a2f3527063673d6ea6d3080c4c62ef0cadc1) )
 ROM_END
 
-CONS( 2004, monomach, 0, 0, elektron, elektron, elekmono_state, 0, "Elektron", "Monomachine SFX6 MK2", MACHINE_NOT_WORKING|MACHINE_NO_SOUND )
-CONS( 2007, machdrum, 0, 0, elektron, elektron, elekmono_state, 0, "Elektron", "Machinedrum SPS-1 MK2", MACHINE_NOT_WORKING|MACHINE_NO_SOUND )
+CONS( 2004, monomach, 0, 0, elektron, elekmono_state, 0, "Elektron", "Monomachine SFX6 MK2", MACHINE_NOT_WORKING|MACHINE_NO_SOUND )
+CONS( 2007, machdrum, 0, 0, elektron, elekmono_state, 0, "Elektron", "Machinedrum SPS-1 MK2", MACHINE_NOT_WORKING|MACHINE_NO_SOUND )

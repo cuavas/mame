@@ -43,8 +43,6 @@ public:
 		m_videoram(*this, "videoram")
 	{ }
 
-	void unixpc(machine_config &config);
-
 protected:
 	uint32_t screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 
@@ -69,6 +67,7 @@ protected:
 	DECLARE_WRITE_LINE_MEMBER( wd2797_intrq_w );
 	DECLARE_WRITE_LINE_MEMBER( wd2797_drq_w );
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void ramrombank_map(address_map &map);
 	void unixpc_mem(address_map &map);
 
@@ -319,7 +318,7 @@ static SLOT_INTERFACE_START( unixpc_floppies )
 	SLOT_INTERFACE( "525dd", FLOPPY_525_DD )
 SLOT_INTERFACE_END
 
-MACHINE_CONFIG_START(unixpc_state::unixpc)
+MACHINE_CONFIG_START(unixpc_state::device_add_mconfig)
 	// basic machine hardware
 	MCFG_CPU_ADD("maincpu", M68010, XTAL(10'000'000))
 	MCFG_CPU_PROGRAM_MAP(unixpc_mem)
@@ -371,5 +370,5 @@ ROM_END
     GAME DRIVERS
 ***************************************************************************/
 
-//    YEAR  NAME  PARENT  COMPAT  MACHINE  INPUT   STATE         INIT  COMPANY  FULLNAME  FLAGS
-COMP( 1985, 3b1,  0,      0,      unixpc,  unixpc, unixpc_state, 0,    "AT&T",  "3B1",    MACHINE_NOT_WORKING | MACHINE_NO_SOUND )
+//    YEAR  NAME  PARENT  COMPAT  INPUT   STATE         INIT  COMPANY  FULLNAME  FLAGS
+COMP( 1985, 3b1,  0,      0,      unixpc, unixpc_state, 0,    "AT&T",  "3B1",    MACHINE_NOT_WORKING | MACHINE_NO_SOUND )

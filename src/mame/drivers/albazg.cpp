@@ -58,8 +58,6 @@ public:
 		m_gfxdecode(*this, "gfxdecode")
 	{ }
 
-	virtual void yumefuda(machine_config &config);
-
 protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
@@ -76,6 +74,7 @@ protected:
 	TILE_GET_INFO_MEMBER(y_get_bg_tile_info);
 	uint32_t screen_update_yumefuda(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_map(address_map &map);
 	void port_map(address_map &map);
 
@@ -357,7 +356,7 @@ void albazg_state::machine_reset()
 	m_prot_lock = 0;
 }
 
-MACHINE_CONFIG_START(albazg_state::yumefuda)
+MACHINE_CONFIG_START(albazg_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80 , MASTER_CLOCK/2) /* xtal is 12 Mhz, unknown divider*/
@@ -421,4 +420,4 @@ ROM_START( yumefuda )
 	ROM_LOAD("zg1-007.u13", 0x000, 0x100, NO_DUMP ) //could be either PROM or PAL
 ROM_END
 
-GAME( 1991, yumefuda, 0, yumefuda, yumefuda, albazg_state, 0, ROT0, "Alba", "Yumefuda [BET]", MACHINE_NO_COCKTAIL | MACHINE_SUPPORTS_SAVE )
+GAME( 1991, yumefuda, 0, yumefuda, albazg_state, 0, ROT0, "Alba", "Yumefuda [BET]", MACHINE_NO_COCKTAIL | MACHINE_SUPPORTS_SAVE )

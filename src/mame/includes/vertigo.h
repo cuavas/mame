@@ -36,8 +36,6 @@ public:
 		m_vectorram(*this, "vectorram")
 	{ }
 
-	void vertigo(machine_config &config);
-
 protected:
 	DECLARE_READ16_MEMBER(vertigo_io_convert);
 	DECLARE_READ16_MEMBER(vertigo_io_adc);
@@ -54,6 +52,7 @@ protected:
 
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void exidy440_audio(machine_config &config);
 	void vertigo_map(address_map &map);
 	void vertigo_motor(address_map &map);

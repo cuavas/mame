@@ -41,8 +41,6 @@ public:
 		m_palette(*this, "palette")
 	{ }
 
-	void orbit(machine_config &config);
-
 protected:
 	DECLARE_WRITE_LINE_MEMBER(coin_lockout_w);
 	DECLARE_WRITE_LINE_MEMBER(heat_rst_led_w);
@@ -61,6 +59,7 @@ protected:
 	virtual void machine_start() override;
 	virtual void machine_reset() override;
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void orbit_map(address_map &map);
 
 	void draw_sprites( bitmap_ind16 &bitmap, const rectangle &cliprect );

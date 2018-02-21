@@ -35,8 +35,6 @@ public:
 		m_palette(*this, "palette")
 	{ }
 
-	void nitedrvr(machine_config &config);
-
 protected:
 	DECLARE_READ8_MEMBER(nitedrvr_steering_reset_r);
 	DECLARE_WRITE8_MEMBER(nitedrvr_steering_reset_w);
@@ -54,6 +52,7 @@ protected:
 	void draw_box(bitmap_ind16 &bitmap, const rectangle &cliprect, int bx, int by, int ex, int ey);
 	void draw_roadway(bitmap_ind16 &bitmap, const rectangle &cliprect);
 	int nitedrvr_steering();
+	virtual void device_add_mconfig(machine_config &config) override;
 	void nitedrvr_map(address_map &map);
 
 private:

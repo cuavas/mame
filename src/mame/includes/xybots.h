@@ -26,7 +26,6 @@ public:
 	{ }
 
 	DECLARE_DRIVER_INIT(xybots);
-	void xybots(machine_config &config);
 
 protected:
 	virtual void update_interrupts() override;
@@ -34,6 +33,7 @@ protected:
 	TILE_GET_INFO_MEMBER(get_alpha_tile_info);
 	TILE_GET_INFO_MEMBER(get_playfield_tile_info);
 	uint32_t screen_update_xybots(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_map(address_map &map);
 
 private:

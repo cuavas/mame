@@ -29,7 +29,6 @@ public:
 	{ }
 
 	DECLARE_DRIVER_INIT(metalmx);
-	void metalmx(machine_config &config);
 
 protected:
 	DECLARE_READ32_MEMBER(unk_r);
@@ -54,6 +53,7 @@ protected:
 	virtual void machine_reset() override;
 	virtual void video_start() override;
 	uint32_t screen_update_metalmx(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	virtual void device_add_mconfig(machine_config &config) override;
 	void adsp_data_map(address_map &map);
 	void adsp_program_map(address_map &map);
 	void dsp32c_1_map(address_map &map);

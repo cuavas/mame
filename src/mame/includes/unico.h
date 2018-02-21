@@ -21,8 +21,6 @@ public:
 		m_generic_paletteram_16(*this, "paletteram")
 	{ }
 
-	void burglarx(machine_config &config);
-
 protected:
 	DECLARE_WRITE16_MEMBER(unico_palette_w);
 	DECLARE_READ16_MEMBER(unico_vram_r);
@@ -38,6 +36,7 @@ protected:
 	uint32_t screen_update_unico(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 	void unico_draw_sprites(screen_device &screen, bitmap_ind16 &bitmap,const rectangle &cliprect);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void burglarx_map(address_map &map);
 
 	required_device<palette_device> m_palette;
@@ -65,8 +64,6 @@ public:
 		m_gun_axes(*this, { "Y0", "X0", "Y1", "X1" })
 	{ }
 
-	void zeropnt(machine_config &config);
-
 protected:
 	DECLARE_WRITE16_MEMBER(zeropnt_sound_bank_w);
 	DECLARE_READ16_MEMBER(unico_gunx_0_msb_r);
@@ -74,6 +71,7 @@ protected:
 	DECLARE_READ16_MEMBER(unico_gunx_1_msb_r);
 	DECLARE_READ16_MEMBER(unico_guny_1_msb_r);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void zeropnt_map(address_map &map);
 
 private:
@@ -92,8 +90,6 @@ public:
 		m_generic_paletteram_32(*this, "paletteram")
 	{ }
 
-	void zeropnt2(machine_config &config);
-
 protected:
 	DECLARE_WRITE32_MEMBER(unico_palette32_w);
 	DECLARE_READ32_MEMBER(zeropnt2_gunx_0_msb_r);
@@ -105,6 +101,7 @@ protected:
 
 	DECLARE_WRITE32_MEMBER(zeropnt2_eeprom_w);
 
+	virtual void device_add_mconfig(machine_config &config) override;
 	void zeropnt2_map(address_map &map);
 
 private:

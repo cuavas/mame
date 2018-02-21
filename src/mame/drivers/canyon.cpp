@@ -247,7 +247,7 @@ GFXDECODE_END
  *
  *************************************/
 
-MACHINE_CONFIG_START(canyon_state::canyon)
+MACHINE_CONFIG_START(canyon_state::device_add_mconfig)
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, XTAL(12'096'000) / 16)
@@ -339,5 +339,5 @@ ROM_END
  *
  *************************************/
 
-GAME( 1977, canyon,  0,      canyon, canyon, canyon_state, 0, ROT0, "Atari", "Canyon Bomber", MACHINE_SUPPORTS_SAVE )
-GAME( 1977, canyonp, canyon, canyon, canyon, canyon_state, 0, ROT0, "Atari", "Canyon Bomber (prototype)", MACHINE_SUPPORTS_SAVE )
+GAME( 1977, canyon,  0,      canyon, canyon_state, 0, ROT0, "Atari", "Canyon Bomber", MACHINE_SUPPORTS_SAVE )
+GAME( 1977, canyonp, canyon, canyon, canyon_state, 0, ROT0, "Atari", "Canyon Bomber (prototype)", MACHINE_SUPPORTS_SAVE )

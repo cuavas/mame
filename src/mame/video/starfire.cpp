@@ -17,10 +17,10 @@
  *
  *************************************/
 
-void starfire_state::video_start()
+void fireone_state::video_start()
 {
 	m_screen->register_screen_bitmap(m_starfire_screen);
-	m_scanline_timer = machine().scheduler().timer_alloc(timer_expired_delegate(FUNC(starfire_state::starfire_scanline_callback),this));
+	m_scanline_timer = machine().scheduler().timer_alloc(timer_expired_delegate(FUNC(fireone_state::starfire_scanline_callback),this));
 	m_scanline_timer->adjust(m_screen->time_until_pos(STARFIRE_VBEND), STARFIRE_VBEND);
 
 	/* register for state saving */
@@ -37,7 +37,7 @@ void starfire_state::video_start()
  *
  *************************************/
 
-WRITE8_MEMBER(starfire_state::starfire_colorram_w)
+WRITE8_MEMBER(fireone_state::starfire_colorram_w)
 {
 	/* handle writes to the pseudo-color RAM */
 	if ((offset & 0xe0) == 0)
@@ -70,7 +70,7 @@ WRITE8_MEMBER(starfire_state::starfire_colorram_w)
 	}
 }
 
-READ8_MEMBER(starfire_state::starfire_colorram_r)
+READ8_MEMBER(fireone_state::starfire_colorram_r)
 {
 	/* handle writes to the pseudo-color RAM, which also happen on reads */
 	if ((offset & 0xe0) == 0)
@@ -97,7 +97,7 @@ READ8_MEMBER(starfire_state::starfire_colorram_r)
  *
  *************************************/
 
-WRITE8_MEMBER(starfire_state::starfire_videoram_w)
+WRITE8_MEMBER(fireone_state::starfire_videoram_w)
 {
 	int sh, lr, dm, ds, mask, d0, dalu;
 	int offset1 = offset & 0x1fff;
@@ -177,7 +177,7 @@ WRITE8_MEMBER(starfire_state::starfire_videoram_w)
 	}
 }
 
-READ8_MEMBER(starfire_state::starfire_videoram_r)
+READ8_MEMBER(fireone_state::starfire_videoram_r)
 {
 	int sh, mask, d0;
 	int offset1 = offset & 0x1fff;
@@ -215,7 +215,7 @@ READ8_MEMBER(starfire_state::starfire_videoram_r)
  *
  *************************************/
 
-void starfire_state::get_pens(pen_t *pens)
+void fireone_state::get_pens(pen_t *pens)
 {
 	offs_t offs;
 
@@ -227,7 +227,7 @@ void starfire_state::get_pens(pen_t *pens)
 	}
 }
 
-TIMER_CALLBACK_MEMBER(starfire_state::starfire_scanline_callback)
+TIMER_CALLBACK_MEMBER(fireone_state::starfire_scanline_callback)
 {
 	pen_t pens[STARFIRE_NUM_PENS];
 	int y = param;
@@ -260,7 +260,7 @@ TIMER_CALLBACK_MEMBER(starfire_state::starfire_scanline_callback)
 	m_scanline_timer->adjust(m_screen->time_until_pos(y), y);
 }
 
-uint32_t starfire_state::screen_update_starfire(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
+uint32_t fireone_state::screen_update_starfire(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	copybitmap(bitmap, m_starfire_screen, 0, 0, 0, 0, cliprect);
 

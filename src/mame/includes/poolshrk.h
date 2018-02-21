@@ -31,7 +31,6 @@ public:
 	{ }
 
 	DECLARE_DRIVER_INIT(poolshrk);
-	void poolshrk(machine_config &config);
 
 protected:
 	DECLARE_WRITE8_MEMBER(da_latch_w);
@@ -50,6 +49,7 @@ protected:
 
 	uint32_t screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 	virtual void video_start() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 	void poolshrk_cpu_map(address_map &map);
 
 private:

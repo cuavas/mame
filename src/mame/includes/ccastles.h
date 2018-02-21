@@ -30,7 +30,6 @@ public:
 	{ }
 
 	DECLARE_CUSTOM_INPUT_MEMBER(get_vblank);
-	void ccastles(machine_config &config);
 
 protected:
 	DECLARE_WRITE8_MEMBER(irq_ack_w);
@@ -56,8 +55,9 @@ protected:
 	uint32_t screen_update_ccastles(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 	TIMER_CALLBACK_MEMBER(clock_irq);
 	inline void ccastles_write_vram( uint16_t addr, uint8_t data, uint8_t bitmd, uint8_t pixba );
-	inline void bitmode_autoinc(  );
+	inline void bitmode_autoinc();
 	inline void schedule_next_irq( int curscanline );
+	virtual void device_add_mconfig(machine_config &config) override;
 	void main_map(address_map &map);
 
 private:
