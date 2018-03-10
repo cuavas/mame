@@ -5,13 +5,19 @@ copyright-holders:Vas Crabb
 Intel INTELLEC® 4/MOD 40 layout
 -->
 <mamelayout version="2">
+	<model name="led">
+		<linear tc="0.05" />
+	</model>
+
 	<element name="background">
 		<rect><color red="0.20" green="0.16" blue="0.31" /></rect>
 	</element>
 
 	<element name="led" defstate="0">
-		<rect state="0"><color red="0.43" green="0.35" blue="0.39" /></rect>
-		<rect state="1"><color red="1.0" green="0.18" blue="0.20" /></rect>
+		<rect model="led">
+			<color state="0.2" red="0.43" green="0.35" blue="0.39" />
+			<color state="1.0" red="1.0" green="0.18" blue="0.20" />
+		</rect>
 	</element>
 
 	<element name="switch" defstate="0">

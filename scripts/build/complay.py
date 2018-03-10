@@ -100,9 +100,11 @@ class LayoutChecker(Minifyer):
         super(LayoutChecker, self).__init__(output=output, **kwargs)
         self.locator = None
         self.errors = 0
+        self.models = { }
         self.elements = { }
         self.groups = { }
         self.views = { }
+        self.referenced_models = { }
         self.referenced_elements = { }
         self.referenced_groups = { }
         self.have_bounds = [ ]
@@ -114,6 +116,21 @@ class LayoutChecker(Minifyer):
     def handleError(self, msg):
         self.errors += 1
         sys.stderr.write('error: %s: %s\n' % (self.formatLocation(), msg))
+
+    def checkName(self, name, attrs, existing):
+        if 'name' not in attrs:
+            self.handleError('Element %s missing attribute name' % (name, ))
+        elif not attrs['name']:
+            self.handleError('Element %s has empty name' % (name, ))
+        elif attrs['name'] in existing:
+            self.handleError('Element %s has duplicate name (previous %s)' % (name, existing[attrs['name']]))
+        else:
+            existing[attrs['name']] = self.formatLocation()
+
+    def checkReferences(self, type, referenced, defined):
+        for name in referenced:
+            if name not in defined:
+                self.handleError('%s "%s" not found (first referenced at %s)' % (type, name, referenced[name]))
 
     def checkBoundsDimension(self, attrs, name):
         if name in attrs:
@@ -213,9 +230,11 @@ class LayoutChecker(Minifyer):
 
     def endDocument(self):
         self.locator = None
+        self.models.clear()
         self.elements.clear()
         self.groups.clear()
         self.views.clear()
+        self.referenced_models.clear()
         self.referenced_elements.clear()
         self.referenced_groups.clear()
         del self.have_bounds[:]
@@ -260,6 +279,16 @@ class LayoutChecker(Minifyer):
                 self.in_shape = True
                 self.have_bounds.append(False)
                 self.have_color.append(False)
+                if 'model' in attrs:
+                    if 'state' in attrs:
+                        self.handleError('Element %s has both state and model' % (name, ))
+                    if attrs['model'] not in self.referenced_models:
+                        self.referenced_models[attrs['model']] = self.formatLocation()
+                elif 'state' in attrs:
+                    try:
+                        long(attrs['state'])
+                    except:
+                        self.handleError('Element %s attribute state "%s" is not an integer' % (name, attrs['state']))
             elif 'text' == name:
                 if 'string' not in attrs:
                     self.handleError('Element bounds missing attribute string')
@@ -277,33 +306,18 @@ class LayoutChecker(Minifyer):
                 self.ignored_depth = 1
         elif self.in_group or self.in_view:
             self.checkGroupViewItem(name, attrs)
+        elif 'model' == name:
+            self.checkName(name, attrs, self.models)
+            self.ignored_depth = 1
         elif 'element' == name:
-            if 'name' not in attrs:
-                self.handleError('Element element missing attribute name')
-            else:
-                if attrs['name'] in self.elements:
-                    self.handleError('Element element has duplicate name (previous %s)' % (self.elements[attrs['name']], ))
-                else:
-                    self.elements[attrs['name']] = self.formatLocation()
+            self.checkName(name, attrs, self.elements)
             self.in_element = True
         elif 'group' == name:
-            if 'name' not in attrs:
-                self.handleError('Element group missing attribute name')
-            else:
-                if attrs['name'] in self.groups:
-                    self.handleError('Element group has duplicate name (previous %s)' % (self.groups[attrs['name']], ))
-                else:
-                    self.groups[attrs['name']] = self.formatLocation()
+            self.checkName(name, attrs, self.groups)
             self.in_group = True
             self.have_bounds.append(False)
         elif 'view' == name:
-            if 'name' not in attrs:
-                self.handleError('Element view missing attribute name')
-            else:
-                if attrs['name'] in self.views:
-                    self.handleError('Element view has duplicate name (previous %s)' % (self.views[attrs['name']], ))
-                else:
-                    self.views[attrs['name']] = self.formatLocation()
+            self.checkName(name, attrs, self.views)
             self.in_view = True
             self.have_bounds.append(False)
         elif 'script' == name:
@@ -332,12 +346,9 @@ class LayoutChecker(Minifyer):
             self.in_view = False
             self.have_bounds.pop()
         elif self.in_layout:
-            for element in self.referenced_elements:
-                if element not in self.elements:
-                    self.handleError('Element "%s" not found (first referenced at %s)' % (element, self.referenced_elements[element]))
-            for group in self.referenced_groups:
-                if group not in self.groups:
-                    self.handleError('Group "%s" not found (first referenced at %s)' % (group, self.referenced_groups[group]))
+            self.checkReferences('Model', self.referenced_models, self.models)
+            self.checkReferences('Element', self.referenced_elements, self.elements)
+            self.checkReferences('Group', self.referenced_groups, self.groups)
             self.in_layout = False
         super(LayoutChecker, self).endElement(name)
 
