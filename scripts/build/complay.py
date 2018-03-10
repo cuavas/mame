@@ -266,7 +266,7 @@ class LayoutChecker(Minifyer):
                 self.checkBounds(attrs)
             elif 'color' == name:
                 if self.have_color[-1]:
-                    self.handleError('Duplicate bounds element')
+                    pass # self.handleError('Duplicate color element')
                 else:
                     self.have_color[-1] = True
                 self.checkColorChannel(attrs, 'red')

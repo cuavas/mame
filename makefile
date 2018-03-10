@@ -1581,7 +1581,7 @@ $(GENDIR)/version.cpp: $(GENDIR)/git_desc
 endif
 
 
-$(GENDIR)/%.lh: $(SRC)/%.lay scripts/build/complay.py | $(GEN_FOLDERS)
+$(GENDIR)/%.lh: $(SRC)/%.lay | $(GEN_FOLDERS)
 	@echo Compressing $<...
 	$(SILENT)$(PYTHON) scripts/build/complay.py $< $@ layout_$(basename $(notdir $<))
 
