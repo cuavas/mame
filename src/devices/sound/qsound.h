@@ -66,7 +66,7 @@ private:
 
 DECLARE_DEVICE_TYPE(QSOUND, qsound_device)
 
-#if !defined(QSOUND_LLE) // && 0
+#if !defined(QSOUND_LLE) && 0
 #include "qsoundhle.h"
 #define qsound_device qsound_hle_device
 #define QSOUND QSOUND_HLE
