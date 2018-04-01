@@ -39,26 +39,36 @@
 		<sharedfeat name="release" value="MVS,AES" />
 		<sharedfeat name="compatibility" value="MVS,AES" />
 		<part name="cart" interface="neo_cart">
-			<dataarea name="maincpu" width="16" endianness="big" size="0x100000">
+			<feature name="prog" value="NEO-MVS PROG-NAM" />
+			<feature name="prog.J1" value="0" />
+			<feature name="prog.J2" value="1" />
+			<feature name="prog.J3" value="1" />
+			<feature name="prog.J4" value="0" />
+			<feature name="cha" value="NEO-MVS CHA-32" />
+			<feature name="cha.J1" value="1" />
+			<feature name="cha.J2" value="0" />
+			<feature name="cha.J3" value="1" />
+			<feature name="cha.J4" value="0" />
+			<dataarea name="p" width="16" endianness="big" size="0x080000">
 				<rom loadflag="load16_word_swap" name="001-p1.p1" offset="0x000000" size="0x080000" crc="cc9fc951" sha1="92f4e6ddeeb825077d92dbb70b50afea985f15c0" />   <!-- MB834200 -->
 			</dataarea>
-			<dataarea name="fixed" size="0x040000">
+			<dataarea name="s" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="001-s1.s1" crc="7988ba51" sha1="bc2f661f381b06b34ac2fa215dd5689d3bf84832" />   <!-- MB831000 -->
 			</dataarea>
-			<dataarea name="audiocpu" size="0x040000">
+			<dataarea name="m1" size="0x040000">
 				<rom offset="0x000000" size="0x040000" name="001-m1.m1" crc="ba874463" sha1="a83514f4b20301f84a98699900e2593f1c1b8846" />   <!-- MB832000 -->
 			</dataarea>
-			<dataarea name="ymsnd" size="0x80000">
+			<dataarea name="v1" size="0x080000">
 				<!-- AES has different label, data is the same: 001-v1.v1 -->
 				<rom name="001-v11.v11" offset="0x000000" size="0x080000" crc="a7c3d5e5" sha1="e3efc86940f91c53b7724c4566cfc21ea1a7a465" /> <!-- MB834200 -->
 			</dataarea>
-			<dataarea name="ymsnd.deltat" size="0x180000">
+			<dataarea name="v2" size="0x180000">
 				<!-- AES has different label, data is the same: 001-v2.v21 -->
 				<rom name="001-v21.v21" offset="0x000000" size="0x080000" crc="55e670b3" sha1="a047049646a90b6db2d1882264df9256aa5a85e5" /> <!-- MB834200 -->
 				<rom name="001-v22.v22" offset="0x080000" size="0x080000" crc="ab0d8368" sha1="404114db9f3295929080b87a5d0106b40da6223a" /> <!-- MB834000 -->
 				<rom name="001-v23.v23" offset="0x100000" size="0x080000" crc="df468e28" sha1="4e5d4a709a4737a87bba4083aeb788f657862f1a" /> <!-- MB834000 -->
 			</dataarea>
-			<dataarea name="sprites" size="0x300000">
+			<dataarea name="c" size="0x300000">
 				<rom loadflag="load16_byte" name="001-c1.c1" offset="0x000000" size="0x080000" crc="32ea98e1" sha1="c2fb3fb7dd14523a4b4b7fbdb81f44cb4cc48239" />    <!-- MB834200 -->
 				<rom loadflag="load16_byte" name="001-c2.c2" offset="0x000001" size="0x080000" crc="cbc4064c" sha1="224c970fd060d841fd430c946ef609bb57b6d78c" />    <!-- MB834200 -->
 				<rom loadflag="load16_byte" name="001-c3.c3" offset="0x100000" size="0x080000" crc="0151054c" sha1="f24fb501a7845f64833f4e5a461bcf9dc3262557" />    <!-- MB834200 -->
@@ -88,25 +98,37 @@
 		<sharedfeat name="release" value="MVS" />
 		<sharedfeat name="compatibility" value="MVS,AES" />
 		<part name="cart" interface="neo_cart">
-			<dataarea name="maincpu" width="16" endianness="big" size="0x100000">
+			<feature name="prog" value="NEO-MVS PROG-EP" />
+			<feature name="prog.J1" value="0" />
+			<feature name="prog.J2" value="1" />
+			<feature name="prog.J3" value="0" />
+			<feature name="prog.J4" value="1" />
+			<feature name="prog.J5" value="0" />
+			<feature name="prog.J6" value="1" />
+			<feature name="cha" value="NEO-MVS CHA-32" />
+			<feature name="cha.J1" value="1" />
+			<feature name="cha.J2" value="0" />
+			<feature name="cha.J3" value="1" />
+			<feature name="cha.J4" value="0" />
+			<dataarea name="p" width="16" endianness="big" size="0x080000">
 				<rom loadflag="load16_word_swap" name="002-pg.p1" offset="0x000000" size="0x080000" crc="c100b5f5" sha1="4cea9f29ad67288c3eccfa4cf961ee9782e49165" />   <!-- MB834200 -->
 			</dataarea>
-			<dataarea name="fixed" size="0x040000">
+			<dataarea name="s" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="002-s1.s1" crc="1a7fd0c6" sha1="3fc701b7afddab369ddf9dedfbc5e1aaf80b8af3" />   <!-- MB831000 -->
 			</dataarea>
-			<dataarea name="audiocpu" size="0x040000">
+			<dataarea name="m1" size="0x040000">
 				<rom offset="0x000000" size="0x040000" name="002-m1.m1" crc="4ecaa4ee" sha1="50abfb8eed6cb4887393089f9ccc76f306ef69b5" />   <!-- MB832000 -->
 			</dataarea>
-			<dataarea name="ymsnd" size="0x200000">
+			<dataarea name="v1" size="0x200000">
 				<rom name="002-v11.v11" offset="0x000000" size="0x080000" crc="b7b925bd" sha1="644c92fa90e74998e73714f74b1e0680ee372a07" /> <!-- MB834000 -->
 				<rom name="002-v12.v12" offset="0x080000" size="0x080000" crc="329f26fc" sha1="2c8009edc88c6b26f7be5beb2b8d260aac394ee1" /> <!-- MB834000 -->
 				<rom name="002-v13.v13" offset="0x100000" size="0x080000" crc="0c39f3c8" sha1="db8f8670639601215707d918d4fb93221460446a" /> <!-- MB834000 -->
 				<rom name="002-v14.v14" offset="0x180000" size="0x080000" crc="c7e11c38" sha1="5abf2a7877e0162c758a4dcf09f183930fa7ef24" /> <!-- MB834000 -->
 			</dataarea>
-			<dataarea name="ymsnd.deltat" size="0x80000">
+			<dataarea name="v2" size="0x080000">
 				<rom name="002-v21.v21" offset="0x000000" size="0x080000" crc="04a733d1" sha1="84159368c0f6de2c3b8121227201cd3422455cf6" /> <!-- MB834000 -->
 			</dataarea>
-			<dataarea name="sprites" size="0x300000">
+			<dataarea name="c" size="0x300000">
 				<rom loadflag="load16_byte" name="002-c1.c1" offset="0x000000" size="0x080000" crc="aaff2a45" sha1="c91ee72d1d74514df8ec44fca703409d92158ae3" />    <!-- MB834200 -->
 				<rom loadflag="load16_byte" name="002-c2.c2" offset="0x000001" size="0x080000" crc="3ba0f7e4" sha1="f023b134b9c7994f477867307d2732026033501d" />    <!-- MB834200 -->
 				<rom loadflag="load16_byte" name="002-c3.c3" offset="0x100000" size="0x080000" crc="96f0fdfa" sha1="9f779a1ae46aeda54d69382b074392ade687f62f" />    <!-- MB834200 -->
@@ -175,28 +197,40 @@
 		<sharedfeat name="release" value="MVS,AES" />
 		<sharedfeat name="compatibility" value="MVS,AES" />
 		<part name="cart" interface="neo_cart">
-			<dataarea name="maincpu" width="16" endianness="big" size="0x100000">
+			<feature name="prog" value="NEO-MVS PROG-EP" />
+			<feature name="prog.J1" value="0" />
+			<feature name="prog.J2" value="1" />
+			<feature name="prog.J3" value="0" />
+			<feature name="prog.J4" value="1" />
+			<feature name="prog.J5" value="0" />
+			<feature name="prog.J6" value="1" />
+			<feature name="cha" value="NEO-MVS CHA-32" />
+			<feature name="cha.J1" value="1" />
+			<feature name="cha.J2" value="0" />
+			<feature name="cha.J3" value="1" />
+			<feature name="cha.J4" value="0" />
+			<dataarea name="p" width="16" endianness="big" size="0x100000">
 				<rom loadflag="load16_word_swap" name="003-p1.p1" offset="0x000000" size="0x080000" crc="f75549ba" sha1="3f7bdf5e2964e921fe1dd87c51a79a1a501fc73f" />   <!-- TC534200 -->
 				<rom loadflag="load16_word_swap" name="003-p2.p2" offset="0x080000" size="0x080000" crc="b7809a8f" sha1="1604c889592c9610668bff296de48a0d6906156d" />   <!-- TC534200 -->
 			</dataarea>
-			<dataarea name="fixed" size="0x040000">
+			<dataarea name="s" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="003-s1.s1" crc="7b3eb9b1" sha1="39cd8bad9f8bfdeb8ac681b5b79ae5aa81c8dd5f" />   <!-- TC531000 -->
 			</dataarea>
-			<dataarea name="audiocpu" size="0x020000">
+			<dataarea name="m1" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="003-m1.m1" crc="4cc545e6" sha1="8e014b8cab3e5b3995756a4ea52ce49c36866377" />   <!-- TC531001 -->
 			</dataarea>
-			<dataarea name="ymsnd" size="0x80000">
+			<dataarea name="v1" size="0x080000">
 				<!-- AES has different label, data is the same (also found on MVS): 003-v1.v11 -->
 				<rom name="003-v11.v11" offset="0x000000" size="0x080000" crc="ff97f1cb" sha1="defa249d46ae220f7bfa70746f5202bbbcc3e5fe" /> <!-- TC534000 -->
 			</dataarea>
-			<dataarea name="ymsnd.deltat" size="0x200000">
+			<dataarea name="v2" size="0x200000">
 				<!-- AES has different label, data is the same (also found on MVS): 003-v2.v21 -->
 				<rom name="003-v21.v21" offset="0x000000" size="0x080000" crc="d34960c6" sha1="36d5877d5e42aab943f4d693159f4f3ad8b0addc" /> <!-- TC534000 -->
 				<rom name="003-v22.v22" offset="0x080000" size="0x080000" crc="9a5f58d4" sha1="2b580595e1820430a36f06fd3e0e0b8f7d686889" /> <!-- TC534000 -->
 				<rom name="003-v23.v23" offset="0x100000" size="0x080000" crc="30f53e54" sha1="22461f88a56d272b78dbc23204c0c6816200532b" /> <!-- TC534000 -->
 				<rom name="003-v24.v24" offset="0x180000" size="0x080000" crc="5ba0f501" sha1="ca02937a611a2c50c9e4b54f8fd4eaea09259894" /> <!-- TC534000 -->
 			</dataarea>
-			<dataarea name="sprites" size="0x400000">
+			<dataarea name="c" size="0x400000">
 				<rom loadflag="load16_byte" name="003-c1.c1" offset="0x000000" size="0x080000" crc="0315fbaf" sha1="583c9253219c1026d81ee5e0cf5568683adc2633" />    <!-- TC534200 -->
 				<rom loadflag="load16_byte" name="003-c2.c2" offset="0x000001" size="0x080000" crc="b4c15d59" sha1="b0d8ec967f9b8e5216301c10b2d36912abce6515" />    <!-- TC534200 -->
 				<rom loadflag="load16_byte" name="003-c3.c3" offset="0x100000" size="0x080000" crc="8ce3e8da" sha1="bc6c49b27d498f75a0d1a8c4d0cca75e140b9efc" />    <!-- TC534200 -->
@@ -228,25 +262,37 @@
 		<sharedfeat name="release" value="MVS,AES" />
 		<sharedfeat name="compatibility" value="MVS,AES" />
 		<part name="cart" interface="neo_cart">
-			<dataarea name="maincpu" width="16" endianness="big" size="0x100000">
+			<feature name="prog" value="NEO-MVS PROG-EP" />
+			<feature name="prog.J1" value="0" />
+			<feature name="prog.J2" value="1" />
+			<feature name="prog.J3" value="0" />
+			<feature name="prog.J4" value="1" />
+			<feature name="prog.J5" value="0" />
+			<feature name="prog.J6" value="1" />
+			<feature name="cha" value="NEO-MVS CHA-32" />
+			<feature name="cha.J1" value="1" />
+			<feature name="cha.J2" value="0" />
+			<feature name="cha.J3" value="1" />
+			<feature name="cha.J4" value="0" />
+			<dataarea name="p" width="16" endianness="big" size="0x080000">
 				<rom loadflag="load16_word_swap" name="004-p1.p1" offset="0x000000" size="0x080000" crc="fc6f53db" sha1="64a62ca4c8fb68954e06121399c9402278bd0467" />   <!-- TC534200 -->
 			</dataarea>
-			<dataarea name="fixed" size="0x040000">
+			<dataarea name="s" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="004-s1.s1" crc="2bd05a06" sha1="876deadd4645373d82a503154eeddf18f440d743" />   <!-- TC531000 -->
 			</dataarea>
-			<dataarea name="audiocpu" size="0x020000">
+			<dataarea name="m1" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="004-m1.m1" crc="c71fbb3b" sha1="59c58665b53da61352359d191a0569de5dd1f4b3" />   <!-- TC531001 -->
 			</dataarea>
-			<dataarea name="ymsnd" size="0x100000">
+			<dataarea name="v1" size="0x100000">
 				<rom name="004-v11.v11" offset="0x000000" size="0x080000" crc="b2fb2153" sha1="36e0cc8927b11105de40188af46f6cf532794c10" /> <!-- CXK384001 -->
 				<rom name="004-v12.v12" offset="0x080000" size="0x080000" crc="8503317b" sha1="ab22f1aba1e977ab234a4f1d73dc6ed789dbeb85" /> <!-- CXK384001 -->
 			</dataarea>
-			<dataarea name="ymsnd.deltat" size="0x180000">
+			<dataarea name="v2" size="0x180000">
 				<rom name="004-v21.v21" offset="0x000000" size="0x080000" crc="4999fb27" sha1="2d4926a220ea21bdd5e816bb16f985fff089500a" /> <!-- CXK384001 -->
 				<rom name="004-v22.v22" offset="0x080000" size="0x080000" crc="776fa2a2" sha1="e7d5a362ab7806b7b009700a435c815a20e8ec68" /> <!-- CXK384001 -->
 				<rom name="004-v23.v23" offset="0x100000" size="0x080000" crc="b3e7eeea" sha1="4d1e97f380702a3a06e7f954b4caddd9c4119d8f" /> <!-- CXK384001 -->
 			</dataarea>
-			<dataarea name="sprites" size="0x200000">
+			<dataarea name="c" size="0x200000">
 				<rom loadflag="load16_byte" name="004-c1.c1" offset="0x000000" size="0x080000" crc="f1ae16bc" sha1="df68feed4dcba1e1566032b01ebb7b478a1792bf" />    <!-- MB834200 -->
 				<rom loadflag="load16_byte" name="004-c2.c2" offset="0x000001" size="0x080000" crc="bdc13520" sha1="2bc4c996d019a4c539f6c3188ef18089e54b7efa" />    <!-- MB834200 -->
 				<rom loadflag="load16_byte" name="004-c3.c3" offset="0x100000" size="0x080000" crc="9c571a37" sha1="21388aeb92bb8e15a55a063701ca9df79e292127" />    <!-- MB834200 -->
@@ -274,23 +320,35 @@
 		<sharedfeat name="release" value="MVS" />
 		<sharedfeat name="compatibility" value="MVS,AES" />
 		<part name="cart" interface="neo_cart">
-			<dataarea name="maincpu" width="16" endianness="big" size="0x100000">
+			<feature name="prog" value="NEO-MVS PROG-EP" />
+			<feature name="prog.J1" value="0" />
+			<feature name="prog.J2" value="1" />
+			<feature name="prog.J3" value="0" />
+			<feature name="prog.J4" value="1" />
+			<feature name="prog.J5" value="0" />
+			<feature name="prog.J6" value="1" />
+			<feature name="cha" value="NEO-MVS CHA-32" />
+			<feature name="cha.J1" value="1" />
+			<feature name="cha.J2" value="0" />
+			<feature name="cha.J3" value="1" />
+			<feature name="cha.J4" value="0" />
+			<dataarea name="p" width="16" endianness="big" size="0x80000">
 				<rom loadflag="load16_word_swap" name="005-pg1.p1" offset="0x000000" size="0x080000" crc="bd0a492d" sha1="d043d3710cf2b0d2b3798008e65e4c7c3ead1af3" />  <!-- MB834200 -->
 			</dataarea>
-			<dataarea name="fixed" size="0x040000">
+			<dataarea name="s" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="005-s1.s1" crc="1c5369a2" sha1="db0dba0a7dced6c9ca929c5abda491b05d84199c" />   <!-- MB831000 -->
 			</dataarea>
-			<dataarea name="audiocpu" size="0x040000">
+			<dataarea name="m1" size="0x040000">
 				<rom offset="0x000000" size="0x040000" name="005-m1.m1" crc="26259f0f" sha1="4f3e500093d61585048767dbd9fa09b3911a05d6" />   <!-- MB832000 -->
 			</dataarea>
-			<dataarea name="ymsnd" size="0x80000">
+			<dataarea name="v1" size="0x080000">
 				<rom name="005-v11.v11" offset="0x000000" size="0x080000" crc="cc0455fd" sha1="a8ff4270e7705e263d25ff0b301f503bccea7e59" /> <!-- MB834000 -->
 			</dataarea>
-			<dataarea name="ymsnd.deltat" size="0x100000">
+			<dataarea name="v2" size="0x100000">
 				<rom name="005-v21.v21" offset="0x000000" size="0x080000" crc="f94ab5b7" sha1="2c16985102e3585e08622d8c54ac5c60425b9ff8" /> <!-- MB834000 -->
 				<rom name="005-v22.v22" offset="0x080000" size="0x080000" crc="232cfd04" sha1="61b66a9decbbd1f500a8c186615e7fd077c6861e" /> <!-- MB834000 -->
 			</dataarea>
-			<dataarea name="sprites" size="0x300000">
+			<dataarea name="c" size="0x300000">
 				<rom loadflag="load16_byte" name="005-c1.c1" offset="0x000000" size="0x080000" crc="806aee34" sha1="3c32a0edbbddb694495b510c13979c44b83de8bc" />    <!-- MB834200 -->
 				<rom loadflag="load16_byte" name="005-c2.c2" offset="0x000001" size="0x080000" crc="34aa9a86" sha1="cec97e1ff7f91158040c629ba75742db82c4ae5e" />    <!-- MB834200 -->
 				<rom loadflag="load16_byte" name="005-c3.c3" offset="0x100000" size="0x080000" crc="c4c2b926" sha1="478bfafca21f5a1338808251a06ab405e6a9e65f" />    <!-- MB834200 -->
@@ -357,30 +415,42 @@
 		<sharedfeat name="release" value="MVS,AES" />
 		<sharedfeat name="compatibility" value="MVS,AES" />
 		<part name="cart" interface="neo_cart">
-			<dataarea name="maincpu" width="16" endianness="big" size="0x100000">
+			<feature name="prog" value="NEO-MVS PROG-HERO" />
+			<feature name="prog.J1" value="1" />
+			<feature name="prog.J2" value="0" />
+			<feature name="prog.J3" value="0" />
+			<feature name="prog.J4" value="1" />
+			<feature name="prog.J5" value="0" />
+			<feature name="prog.J6" value="1" />
+			<feature name="cha" value="NEO-MVS CHA-32" />
+			<feature name="cha.J1" value="1" />
+			<feature name="cha.J2" value="0" />
+			<feature name="cha.J3" value="1" />
+			<feature name="cha.J4" value="0" />
+			<dataarea name="p" width="16" endianness="big" size="0x080000">
 				<rom loadflag="load16_word_swap" name="006-p1.p1" offset="0x000000" size="0x080000" crc="d4aaf597" sha1="34d35b71adb5bd06f4f1b50ffd9c58ab9c440a84" />   <!-- MB834200 -->
 			</dataarea>
-			<dataarea name="mcu" size="0x2000">
+			<dataarea name="com" size="0x02000">
 				<!-- dumped from a prototype with external ROM, not 100% confirmed as being the same on a final, or other games (lbowling, trally) -->
 				<rom offset="0x000000" size="0x02000" name="rhcom.bin" crc="e5cd6306" sha1="f6bbb8ae562804d67e137290c765c3589fa334c0" /> <!-- Hitachi HD6301V1 MCU -->
 			</dataarea>
-			<dataarea name="fixed" size="0x040000">
+			<dataarea name="s" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="006-s1.s1" crc="eb5189f0" sha1="0239c342ea62e73140a2306052f226226461a478" />   <!-- TC531000 -->
 			</dataarea>
-			<dataarea name="audiocpu" size="0x040000">
+			<dataarea name="m1" size="0x040000">
 				<rom offset="0x000000" size="0x040000" name="006-m1.m1" crc="92e7b4fe" sha1="d240056cd632f92bdfaa5e0492c09aa9bd7b0471" />   <!-- MB832000 -->
 			</dataarea>
-			<dataarea name="ymsnd" size="0x100000">
+			<dataarea name="v1" size="0x100000">
 				<rom name="006-v11.v11" offset="0x000000" size="0x080000" crc="cdf74a42" sha1="a17106cc3f9e5c5d52b4def861c0545a98151da2" /> <!-- MB834000 -->
 				<rom name="006-v12.v12" offset="0x080000" size="0x080000" crc="e2fd2371" sha1="cc95297bee7ffbdcb24ac4daeb5307cb39a52067" /> <!-- MB834000 -->
 			</dataarea>
-			<dataarea name="ymsnd.deltat" size="0x200000">
+			<dataarea name="v2" size="0x200000">
 				<rom name="006-v21.v21" offset="0x000000" size="0x080000" crc="94092bce" sha1="1a2906271fe6bc396898a756153629a5862930eb" /> <!-- MB834000 -->
 				<rom name="006-v22.v22" offset="0x080000" size="0x080000" crc="4e2cd7c3" sha1="72fb215a4f208a22a764e801186d1643d3d840ca" /> <!-- MB834000 -->
 				<rom name="006-v23.v23" offset="0x100000" size="0x080000" crc="069c71ed" sha1="f450e9f60cd6ef846dbc77993159ec6157fb64e7" /> <!-- MB834000 -->
 				<rom name="006-v24.v24" offset="0x180000" size="0x080000" crc="89fbb825" sha1="656a97c6a8832dab3a5e1577d9cd257b561cc356" /> <!-- MB834000 -->
 			</dataarea>
-			<dataarea name="sprites" size="0x200000">
+			<dataarea name="c" size="0x200000">
 				<rom loadflag="load16_byte" name="006-c1.c1" offset="0x000000" size="0x080000" crc="4a5c7f78" sha1="f8f1e6b7841c74368210d52a84307bb28f722a2d" />    <!-- CXK384000 -->
 				<rom loadflag="load16_byte" name="006-c2.c2" offset="0x000001" size="0x080000" crc="e0b70ece" sha1="e2b750e43cdddcea29d1c9c943a3628117a16a1b" />    <!-- CXK384000 -->
 				<rom loadflag="load16_byte" name="006-c3.c3" offset="0x100000" size="0x080000" crc="8acff765" sha1="11fe89b9d112d0658c9ddf40d928584de6ea9202" />    <!-- CXK384000 -->
@@ -454,21 +524,29 @@
 		<sharedfeat name="release" value="MVS,AES" />
 		<sharedfeat name="compatibility" value="MVS,AES" />
 		<part name="cart" interface="neo_cart">
-			<dataarea name="maincpu" width="16" endianness="big" size="0x100000">
+			<feature name="prog" value="NEO-MVS PROG42G" />
+			<feature name="prog.NO WAIT" value="1" />
+			<feature name="prog.1 WAIT" value="0" />
+			<feature name="prog.1M" value="0" />
+			<feature name="prog.5M" value="1" />
+			<feature name="prog.8M" value="0" />
+			<feature name="prog.4M.5M" value="1" />
+			<feature name="cha" value="NEO-MVS CHA42G" />
+			<dataarea name="p" width="16" endianness="big" size="0x0a0000">
 				<rom loadflag="load16_word_swap" name="007-p1.p1" offset="0x000000" size="0x080000" crc="5b266f47" sha1="8afbf995989f47ad93fea1f31a884afc7228b53a" />   <!-- TC534200 -->
 				<rom loadflag="load16_word_swap" name="007-p2.p2" offset="0x080000" size="0x020000" crc="eb9c1044" sha1="65d3416dcd96663bc4e7cefe90ecb7c1eafb2dda" />   <!-- TC531024 -->
 			</dataarea>
-			<dataarea name="fixed" size="0x040000">
+			<dataarea name="s" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="007-s1.s1" crc="85ec9acf" sha1="39a11974438ad36a2cc84307151b31474c3c5518" />   <!-- TC531000 -->
 			</dataarea>
-			<dataarea name="audiocpu" size="0x020000">
+			<dataarea name="m1" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="007-m1.m1" crc="28dfe2cd" sha1="1a1a99fb917c6c8db591e3be695ce03f843ee1df" />   <!-- TC531001 -->
 			</dataarea>
-			<dataarea name="ymsnd" size="0x200000">
+			<dataarea name="v" size="0x200000">
 				<rom name="007-v1.v1" offset="0x000000" size="0x100000" crc="cd5db931" sha1="b59f9f2df29f49470312a6cd20f5669b6aaf51ff" />   <!-- TC538200 -->
 				<rom name="007-v2.v2" offset="0x100000" size="0x100000" crc="63e9b574" sha1="1ade4cd0b15c84dd4a0fb7f7abf0885eef3a3f71" />   <!-- TC538200 -->
 			</dataarea>
-			<dataarea name="sprites" size="0x300000">
+			<dataarea name="c" size="0x300000">
 				<rom loadflag="load16_byte" name="007-c1.c1" offset="0x000000" size="0x100000" crc="8fba8ff3" sha1="1a682292e99eb91b0edb9771c44bc5e762867e98" />    <!-- TC538200 -->
 				<rom loadflag="load16_byte" name="007-c2.c2" offset="0x000001" size="0x100000" crc="4dad2945" sha1="ac85a146276537fed124bda892bb93ff549f1d93" />    <!-- TC538200 -->
 				<rom loadflag="load16_byte" name="007-c3.c3" offset="0x200000" size="0x080000" crc="68c2994e" sha1="4f8dfc6e5188942e03b853a2c9f0ea6138dec791" />    <!-- TC534200 -->
@@ -541,24 +619,36 @@
 		<sharedfeat name="release" value="MVS" />
 		<sharedfeat name="compatibility" value="MVS,AES" />
 		<part name="cart" interface="neo_cart">
-			<dataarea name="maincpu" width="16" endianness="big" size="0x100000">
+			<feature name="prog" value="NEO-MVS PROG-EP" />
+			<feature name="prog.J1" value="0" />
+			<feature name="prog.J2" value="1" />
+			<feature name="prog.J3" value="0" />
+			<feature name="prog.J4" value="1" />
+			<feature name="prog.J5" value="0" />
+			<feature name="prog.J6" value="1" />
+			<feature name="cha" value="NEO-MVS CHA-32" />
+			<feature name="cha.J1" value="1" />
+			<feature name="cha.J2" value="0" />
+			<feature name="cha.J3" value="1" />
+			<feature name="cha.J4" value="0" />
+			<dataarea name="p" width="16" endianness="big" size="0x080000">
 				<rom loadflag="load16_word_swap" name="009-p1.p1" offset="0x000000" size="0x080000" crc="b45fcfbf" sha1="3872147dda2d1ba905d35f4571065d87b1958b4a" />   <!-- TC534200 -->
 			</dataarea>
-			<dataarea name="fixed" size="0x040000">
+			<dataarea name="s" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="009-s1.s1" crc="d49afee8" sha1="77615f12edf08ae8f1353f7a056a8f3a50d3ebdc" />   <!-- TC531000 -->
 			</dataarea>
-			<dataarea name="audiocpu" size="0x020000">
+			<dataarea name="m1" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="009-m1.m1" crc="b5819863" sha1="6f2309d51531052dbf7d712993c9e35649db0d84" />   <!-- TC531001 -->
 			</dataarea>
-			<dataarea name="ymsnd" size="0x180000">
+			<dataarea name="v1" size="0x180000">
 				<rom name="009-v11.v11" offset="0x000000" size="0x080000" crc="cf32a59c" sha1="af5b7fcd8a4aff1307c0a1d937e5f0460c32de79" /> <!-- TC534000 -->
 				<rom name="009-v12.v12" offset="0x080000" size="0x080000" crc="7b3588b7" sha1="a4e6d9d4113ff4ce48b371f65e9187d551821d3b" /> <!-- TC534000 -->
 				<rom name="009-v13.v13" offset="0x100000" size="0x080000" crc="505a01b5" sha1="9426a4f5b31e16f74e72e61951c189a878f211c5" /> <!-- TC534000 -->
 			</dataarea>
-			<dataarea name="ymsnd.deltat" size="0x80000">
+			<dataarea name="v2" size="0x80000">
 				<rom name="009-v21.v21" offset="0x000000" size="0x080000" crc="365f9011" sha1="aebd292214ab280b05ee9e759b7e9a681a099c4a" /> <!-- TC534000 -->
 			</dataarea>
-			<dataarea name="sprites" size="0x300000">
+			<dataarea name="c" size="0x300000">
 				<rom loadflag="load16_byte" name="009-c1.c1" offset="0x000000" size="0x080000" crc="33cc838e" sha1="c445c891c0ba4190aa0b472786150620e76df5b4" />    <!-- TC534200 -->
 				<rom loadflag="load16_byte" name="009-c2.c2" offset="0x000001" size="0x080000" crc="26877feb" sha1="8f48097fb8e4757f50b6d86219122fbf4b6f87ef" />    <!-- TC534200 -->
 				<rom loadflag="load16_byte" name="009-c3.c3" offset="0x100000" size="0x080000" crc="3b60a05d" sha1="0a165a17af4834876fcd634599cd2208adc9248f" />    <!-- TC534200 -->
@@ -625,25 +715,37 @@
 		<sharedfeat name="release" value="MVS" />   <!-- Unknown if it was also released on AES -->
 		<sharedfeat name="compatibility" value="MVS,AES" />
 		<part name="cart" interface="neo_cart">
-			<dataarea name="maincpu" width="16" endianness="big" size="0x100000">
+			<feature name="prog" value="NEO-MVS PROG-EP" />
+			<feature name="prog.J1" value="0" />
+			<feature name="prog.J2" value="1" />
+			<feature name="prog.J3" value="0" />
+			<feature name="prog.J4" value="1" />
+			<feature name="prog.J5" value="0" />
+			<feature name="prog.J6" value="1" />
+			<feature name="cha" value="NEO-MVS CHA-32" />
+			<feature name="cha.J1" value="1" />
+			<feature name="cha.J2" value="0" />
+			<feature name="cha.J3" value="1" />
+			<feature name="cha.J4" value="0" />
+			<dataarea name="p" width="16" endianness="big" size="0x080000">
 				<rom loadflag="load16_word_swap" name="010-p1.p1" offset="0x000000" size="0x080000" crc="69a6b42d" sha1="6e7cb089de83f1d22cc4a87db5b1a94bf76fb1e8" />   <!-- TC534200 -->
 			</dataarea>
-			<dataarea name="fixed" size="0x040000">
+			<dataarea name="s" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="010-s1.s1" crc="79a35264" sha1="c2819a82adbe1f5e489496e0e03477863a5b7665" />   <!-- TC531000 -->
 			</dataarea>
-			<dataarea name="audiocpu" size="0x020000">
+			<dataarea name="m1" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="010-m1.m1" crc="8be3a078" sha1="054ec6a061fcc88df1ecbb0a01611a31f37a7709" />   <!-- TC531001 -->
 			</dataarea>
-			<dataarea name="ymsnd" size="0x200000">
+			<dataarea name="v1" size="0x200000">
 				<rom name="010-v11.v11" offset="0x000000" size="0x080000" crc="90224d22" sha1="5443ee6f90d80d43194cb4b4f0e08851a59e7784" /> <!-- TC534000 -->
 				<rom name="010-v12.v12" offset="0x080000" size="0x080000" crc="a0cf1834" sha1="8df57a7941bdae7e446a6056039adb012cdde246" /> <!-- TC534000 -->
 				<rom name="010-v13.v13" offset="0x100000" size="0x080000" crc="ae38bc84" sha1="c0937b4f89b8b26c8a0e747b234f44ad6a3bf2ba" /> <!-- TC534000 -->
 				<rom name="010-v14.v14" offset="0x180000" size="0x080000" crc="70899bd2" sha1="8cf01144f0bcf59f09777175ae6b71846b09f3a1" /> <!-- TC534000 -->
 			</dataarea>
-			<dataarea name="ymsnd.deltat" size="0x80000">
+			<dataarea name="v2" size="0x80000">
 				<rom name="010-v21.v21" offset="0x000000" size="0x080000" crc="586f4cb2" sha1="588460031d84c308e3353ecf714db9986425c21c" /> <!-- TC534000 -->
 			</dataarea>
-			<dataarea name="sprites" size="0x300000">
+			<dataarea name="c" size="0x300000">
 				<rom loadflag="load16_byte" name="010-c1.c1" offset="0x000000" size="0x080000" crc="8bba5113" sha1="70f0926409ab265da4b8632500d1d32d63cf77cf" />    <!-- TC534200 -->
 				<rom loadflag="load16_byte" name="010-c2.c2" offset="0x000001" size="0x080000" crc="cbf66432" sha1="cc529640c475d08330e116ea9c5e5a28b7cd13db" />    <!-- TC534200 -->
 				<rom loadflag="load16_byte" name="010-c3.c3" offset="0x100000" size="0x080000" crc="e4f86efc" sha1="fa60863d8a7ed4f21d30f91eb1936d0b8329db7a" />    <!-- TC534200 -->
@@ -673,24 +775,34 @@
 		<sharedfeat name="release" value="MVS,AES" />
 		<sharedfeat name="compatibility" value="MVS,AES" />
 		<part name="cart" interface="neo_cart">
-			<dataarea name="maincpu" width="16" endianness="big" size="0x100000">
+			<feature name="prog" value="NEO-MVS PROG-8MB" />
+			<feature name="prog.J1" value="1" />
+			<feature name="prog.J2" value="0" />
+			<feature name="prog.J3" value="1" />
+			<feature name="prog.J4" value="0" />
+			<feature name="cha" value="NEO-MVS CHA-8M" />
+			<feature name="cha.J1" value="1" />
+			<feature name="cha.J2" value="0" />
+			<feature name="cha.J3" value="1" />
+			<feature name="cha.J4" value="0" />
+			<dataarea name="p" width="16" endianness="big" size="0x0a0000">
 				<rom loadflag="load16_word_swap" name="011-p1.p1" offset="0x000000" size="0x080000" crc="c7f944b5" sha1="da7560e09187c68f1d9f7656218497b4464c56c9" />   <!-- MB834200 -->
 				<rom loadflag="load16_word_swap" name="sp2.p2" offset="0x080000" size="0x020000" crc="811a4faf" sha1="8169dfaf79f52d80ecec402ce1b1ab9cafb7ebdd" />  <!-- TC531024 -->
 			</dataarea>
-			<dataarea name="fixed" size="0x040000">
+			<dataarea name="s" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="011-s1.s1" crc="ec5fdb96" sha1="8003028025ac7bf531e568add6ba66c02d0b7e84" />   <!-- MB831000 -->
 			</dataarea>
-			<dataarea name="audiocpu" size="0x040000">
+			<dataarea name="m1" size="0x040000">
 				<rom offset="0x000000" size="0x040000" name="011-m1.m1" crc="ca661f1b" sha1="4e3cb57db716ec48487c1b070c3a55a5faf40856" />   <!-- MB832000 -->
 			</dataarea>
-			<dataarea name="ymsnd" size="0x180000">
+			<dataarea name="v1" size="0x180000">
 				<rom name="011-v11.v11" offset="0x000000" size="0x100000" crc="5c674d5c" sha1="d7b9beddeb247b584cea9ca6c43ec6869809b673" /> <!-- MB838000 -->
 				<rom name="011-v12.v12" offset="0x100000" size="0x080000" crc="9f513d5a" sha1="37b04962f0b8e2a74abd35c407337a6151dc4e95" /> <!-- MB834000 -->
 			</dataarea>
-			<dataarea name="ymsnd.deltat" size="0x80000">
+			<dataarea name="v2" size="0x80000">
 				<rom name="011-v21.v21" offset="0x000000" size="0x080000" crc="426cd040" sha1="b2b45189837c8287223c2b8bd4df9525b72a3f16" /> <!-- MB834000 -->
 			</dataarea>
-			<dataarea name="sprites" size="0x400000">
+			<dataarea name="c" size="0x400000">
 				<rom loadflag="load16_byte" name="011-c1.c1" offset="0x000000" size="0x100000" crc="cae7be57" sha1="43b35b349594535689c358d9f324adda55e5281a" />    <!-- MB838200 -->
 				<rom loadflag="load16_byte" name="011-c2.c2" offset="0x000001" size="0x100000" crc="9e29d986" sha1="b417763bad1acf76116cd56f4203c2d2677e22e5" />    <!-- MB838200 -->
 				<rom loadflag="load16_byte" name="011-c3.c3" offset="0x200000" size="0x100000" crc="14832ff2" sha1="1179792d773d97d5e45e7d8f009051d362d72e24" />    <!-- MB838200 -->
@@ -728,20 +840,28 @@
 		<sharedfeat name="release" value="MVS,AES" />
 		<sharedfeat name="compatibility" value="MVS,AES" />
 		<part name="cart" interface="neo_cart">
-			<dataarea name="maincpu" width="16" endianness="big" size="0x100000">
+			<feature name="prog" value="NEO-MVS PROG42G-1" />
+			<feature name="prog.NO WAIT" value="1" />
+			<feature name="prog.1 WAIT" value="0" />
+			<feature name="prog.1M" value="0" />
+			<feature name="prog.5M" value="1" />
+			<feature name="prog.8M" value="0" />
+			<feature name="prog.4M.5M" value="1" />
+			<feature name="cha" value="NEO-MVS CHA42G-1" />
+			<dataarea name="p" width="16" endianness="big" size="0x080000">
 				<rom loadflag="load16_word_swap" name="014-p1.p1" offset="0x000000" size="0x080000" crc="6f1699c8" sha1="87206f67a619dede7959230f9ff3701b8b78957a" />   <!-- CXK384500 -->
 			</dataarea>
-			<dataarea name="fixed" size="0x040000">
+			<dataarea name="s" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="014-s1.s1" crc="99419733" sha1="b2524af8704941acc72282aa1d62fd4c93e3e822" />   <!-- CXK381000 -->
 			</dataarea>
-			<dataarea name="audiocpu" size="0x020000">
+			<dataarea name="m1" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="014-m1.m1" crc="b6683092" sha1="623ec7ec2915fb077bf65b4a16c815e071c25259" />   <!-- CXK381003A -->
 			</dataarea>
-			<dataarea name="ymsnd" size="0x200000">
+			<dataarea name="v" size="0x200000">
 				<rom name="014-v1.v1" offset="0x000000" size="0x100000" crc="25419296" sha1="c9fc04987c4e0875d276e1a0fb671740b6f548ad" />   <!-- CXK388000 -->
 				<rom name="014-v2.v2" offset="0x100000" size="0x100000" crc="0de53d5e" sha1="467f6040da3dfb1974785e95e14c3f608a93720a" />   <!-- CXK388000 -->
 			</dataarea>
-			<dataarea name="sprites" size="0x400000">
+			<dataarea name="c" size="0x400000">
 				<rom loadflag="load16_byte" name="014-c1.c1" offset="0x000000" size="0x100000" crc="5e4381bf" sha1="d429a5e09dafd2fb99495658b3652eecbf58f91b" />    <!-- CXK388000 -->
 				<rom loadflag="load16_byte" name="014-c2.c2" offset="0x000001" size="0x100000" crc="69ba4e18" sha1="b3369190c47771a790c7adffa958ff55d90e758b" />    <!-- CXK388000 -->
 				<rom loadflag="load16_byte" name="014-c3.c3" offset="0x200000" size="0x100000" crc="890327d5" sha1="47f97bf120a8480758e1f3bb8982be4c5325c036" />    <!-- CXK388000 -->
@@ -775,21 +895,29 @@
 		<sharedfeat name="release" value="MVS?" />
 		<sharedfeat name="compatibility" value="MVS,AES" />
 		<part name="cart" interface="neo_cart">
-			<dataarea name="maincpu" width="16" endianness="big" size="0x100000">
+			<feature name="prog" value="NEO-MVS PROG42G-1" />
+			<feature name="prog.NO WAIT" value="1" />
+			<feature name="prog.1 WAIT" value="0" />
+			<feature name="prog.1M" value="0" />
+			<feature name="prog.5M" value="1" />
+			<feature name="prog.8M" value="0" />
+			<feature name="prog.4M.5M" value="1" />
+			<feature name="cha" value="NEO-MVS CHA42G-1" />
+			<dataarea name="p" width="16" endianness="big" size="0x0a0000">
 				<rom loadflag="load16_word_swap" name="016-p1.p1" offset="0x000000" size="0x080000" crc="1b818731" sha1="b98b1b33c0301fd79aac908f6b635dd00d1cb08d" />   <!-- TC534200 -->
 				<rom loadflag="load16_word_swap" name="016-p2.p2" offset="0x080000" size="0x020000" crc="12afdc2b" sha1="3a95f5910cbb9f17e63ddece995c6e120fa2f622" />   <!-- TC531024 -->
 			</dataarea>
-			<dataarea name="fixed" size="0x040000">
+			<dataarea name="s" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="016-s1.s1" crc="1a2eeeb3" sha1="8d2b96d395020197bc59294b6b0c8d62b1d8d4dd" />   <!-- TC531000 -->
 			</dataarea>
-			<dataarea name="audiocpu" size="0x020000">
+			<dataarea name="m1" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="016-m1.m1" crc="9da9ca10" sha1="88b915827d529f39c365d3e41197d5461e07a085" />   <!-- TC531001 -->
 			</dataarea>
-			<dataarea name="ymsnd" size="0x200000">
+			<dataarea name="v" size="0x200000">
 				<rom name="016-v1.v1" offset="0x000000" size="0x100000" crc="86c0a502" sha1="7fe2db0c64aefdd14d6c36f7fcd6442591e9a014" />   <!-- TC538200 -->
 				<rom name="016-v2.v2" offset="0x100000" size="0x100000" crc="5bc23ec5" sha1="f4ff5d20587469daa026d5c812739335ce53cfdf" />   <!-- TC538200 -->
 			</dataarea>
-			<dataarea name="sprites" size="0x400000">
+			<dataarea name="c" size="0x400000">
 				<rom loadflag="load16_byte" name="016-c1.c1" offset="0x000000" size="0x100000" crc="71471c25" sha1="bc8e3fee56b33ef2bac5b4b852339d2fbcd09b7c" />    <!-- TC538200 -->
 				<rom loadflag="load16_byte" name="016-c2.c2" offset="0x000001" size="0x100000" crc="320db048" sha1="d6b43834de6f5442e23ca8fb26b3a36e96790d8d" />    <!-- TC538200 -->
 				<rom loadflag="load16_byte" name="016-c3.c3" offset="0x200000" size="0x100000" crc="98de7995" sha1="e33edf4d36c82196d2b474e37be180a05976f558" />    <!-- TC538200 -->
@@ -850,21 +978,29 @@
 		<sharedfeat name="release" value="MVS,AES" />
 		<sharedfeat name="compatibility" value="MVS,AES" />
 		<part name="cart" interface="neo_cart">
-			<dataarea name="maincpu" width="16" endianness="big" size="0x100000">
+			<feature name="prog" value="NEO-MVS PROG42G" />
+			<feature name="prog.NO WAIT" value="1" />
+			<feature name="prog.1 WAIT" value="0" />
+			<feature name="prog.1M" value="0" />
+			<feature name="prog.5M" value="1" />
+			<feature name="prog.8M" value="0" />
+			<feature name="prog.4M.5M" value="1" />
+			<feature name="cha" value="NEO-MVS CHA42G" />
+			<dataarea name="p" width="16" endianness="big" size="0x0a0000">
 				<rom loadflag="load16_word_swap" name="017-p1.p1" offset="0x000000" size="0x080000" crc="f8a63983" sha1="7a10ecb2f0fd8315641374c065d2602107b09e72" />   <!-- TC534200 -->
 				<rom loadflag="load16_word_swap" name="017-p2.p2" offset="0x080000" size="0x020000" crc="3024bbb3" sha1="88892e1292dd60f35a76f9a22e623d4f0f9693cc" />   <!-- TC531024 -->
 			</dataarea>
-			<dataarea name="fixed" size="0x040000">
+			<dataarea name="s" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="017-s1.s1" crc="b246204d" sha1="73dce64c61fb5bb7e836a8e60f081bb77d80d281" />   <!-- TC531000 -->
 			</dataarea>
-			<dataarea name="audiocpu" size="0x020000">
+			<dataarea name="m1" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="017-m1.m1" crc="9b4f34c6" sha1="7f3a51f47fcbaa598f5c76bc66e2c53c8dfd852d" />   <!-- TC531001 -->
 			</dataarea>
-			<dataarea name="ymsnd" size="0x200000">
+			<dataarea name="v" size="0x200000">
 				<rom name="017-v1.v1" offset="0x000000" size="0x100000" crc="23663295" sha1="9374a5d9f3de8e6a97c11f07d8b4485ac9d55edb" />   <!-- TC538200 -->
 				<rom name="017-v2.v2" offset="0x100000" size="0x100000" crc="f61e6765" sha1="1c9b287996947319eb3d288c3d82932cf01039db" />   <!-- TC538200 -->
 			</dataarea>
-			<dataarea name="sprites" size="0x400000">
+			<dataarea name="c" size="0x400000">
 				<rom loadflag="load16_byte" name="017-c1.c1" offset="0x000000" size="0x100000" crc="b4eb82a1" sha1="79879e2ea78c07d04c88dc9a1ad59604b7a078be" />    <!-- TC538200 -->
 				<rom loadflag="load16_byte" name="017-c2.c2" offset="0x000001" size="0x100000" crc="d55c550d" sha1="6110f693aa23710939c04153cf5af26493e4a03f" />    <!-- TC538200 -->
 				<rom loadflag="load16_byte" name="017-c3.c3" offset="0x200000" size="0x100000" crc="ed51ef65" sha1="e8a8d86e24454948e51a75c883bc6e4091cbf820" />    <!-- TC538200 -->
@@ -909,8 +1045,11 @@
 	ID-0018
 	. NGM-018
 	NEO-MVS PROG42G-1 / NEO-MVS CHA42G-1
-	also found on (seen several times; CHA and PROG board are 'manually patched up' with wires and resistors)
 	NEO-MVS PROG42G / NEO-MVS CHA42G
+	PROG boards with HN62408PD96 V ROMs have noise suppression components populated (PROG42G-1) or patched in (PROG42G)
+	CHA boards with HN62321APS68 M1 ROMs have noise suppression components populated (CHA42G-1) or patched in (CHA42G)
+	PROG42G boards with HN62408PD96 V ROMs also have patch wires on the V ROM enables
+	noise suppression componentes are not populated on PROG42G-1 boards with TC538200P V ROMs or CHA42G-1 boards with TC531001CP M1 ROMs
 	. NGH-018
 	NEO-AEG PROG42G / NEO-AEG CHA42G
 	. prototype
@@ -927,20 +1066,28 @@
 		<sharedfeat name="release" value="MVS,AES" />
 		<sharedfeat name="compatibility" value="MVS,AES" />
 		<part name="cart" interface="neo_cart">
-			<dataarea name="maincpu" width="16" endianness="big" size="0x100000">
+			<feature name="prog" value="NEO-MVS PROG42G-1" />
+			<feature name="prog.NO WAIT" value="1" />
+			<feature name="prog.1 WAIT" value="0" />
+			<feature name="prog.1M" value="0" />
+			<feature name="prog.5M" value="1" />
+			<feature name="prog.8M" value="0" />
+			<feature name="prog.4M.5M" value="1" />
+			<feature name="cha" value="NEO-MVS CHA42G-1" />
+			<dataarea name="p" width="16" endianness="big" size="0x080000">
 				<rom loadflag="load16_word_swap" name="018-p1.p1" offset="0x000000" size="0x080000" crc="4092c8db" sha1="df194a4ad2c35e0e18bc053ff9284183444a4666" />   <!-- HN62434 -->
 			</dataarea>
-			<dataarea name="fixed" size="0x040000">
+			<dataarea name="s" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="018-s1.s1" crc="6799ea0d" sha1="ec75ef9dfdcb0b123574fc6d81ebaaadfba32fb5" />   <!-- HN62321 -->
 			</dataarea>
-			<dataarea name="audiocpu" size="0x020000">
+			<dataarea name="m1" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="018-m1.m1" crc="0c939ee2" sha1="57d580d3279e66b9fe66bbcc68529d3384a926ff" />   <!-- HN62321A -->
 			</dataarea>
-			<dataarea name="ymsnd" size="0x200000">
+			<dataarea name="v" size="0x200000">
 				<rom name="018-v1.v1" offset="0x000000" size="0x100000" crc="508c9ffc" sha1="cd3a97a233a4585f8507116aba85884623cccdc4" />   <!-- HN62408 -->
 				<rom name="018-v2.v2" offset="0x100000" size="0x100000" crc="854ef277" sha1="4b3083b9c80620064cb44e812a787a700e32a6f3" />   <!-- HN62408 -->
 			</dataarea>
-			<dataarea name="sprites" size="0x400000">
+			<dataarea name="c" size="0x400000">
 				<rom loadflag="load16_byte" name="018-c1.c1" offset="0x000000" size="0x100000" crc="25a25e9b" sha1="3cf02d0662e190678d0530d7b7d3f425209adf83" />    <!-- HN62408 -->
 				<rom loadflag="load16_byte" name="018-c2.c2" offset="0x000001" size="0x100000" crc="d4378876" sha1="45659aa1755d96b992c977042186e47fff68bba9" />    <!-- HN62408 -->
 				<rom loadflag="load16_byte" name="018-c3.c3" offset="0x200000" size="0x100000" crc="862b60da" sha1="e2303eb1609f1050f0b4f46693a15e37deb176fb" />    <!-- HN62408 -->
@@ -1075,26 +1222,39 @@
 		<sharedfeat name="release" value="MVS,AES" />
 		<sharedfeat name="compatibility" value="MVS,AES" />
 		<part name="cart" interface="neo_cart">
-			<dataarea name="maincpu" width="16" endianness="big" size="0x100000">
+			<feature name="prog" value="NEO-MVS PROG-HERO" />
+			<feature name="prog.J1" value="1" />
+			<feature name="prog.J2" value="0" />
+			<feature name="prog.J3" value="0" />
+			<feature name="prog.J4" value="1" />
+			<feature name="prog.J5" value="0" />
+			<feature name="prog.J6" value="1" />
+			<feature name="cha" value="NEO-MVS CHA-32" />
+			<feature name="cha.J1" value="1" />
+			<feature name="cha.J2" value="0" />
+			<feature name="cha.J3" value="1" />
+			<feature name="cha.J4" value="0" />
+			<dataarea name="p" width="16" endianness="big" size="0x080000">
 				<rom loadflag="load16_word_swap" name="019-p1.p1" offset="0x000000" size="0x080000" crc="a2de8445" sha1="893d7ae72b4644123469de143fa35fac1cbcd61e" />   <!-- TC534200 -->
 			</dataarea>
-			<dataarea name="mcu" size="0x1000">
-				<!-- <rom name="hd6301v1p.com", 0x0000, 0x1000, NO_DUMP /> -->  <!-- Hitachi HD6301V1 MCU -->
+			<dataarea name="com" size="0x02000">
+				<!-- dumped from a prototype ridingh with external ROM, not 100% confirmed as being the same on a final, or other games (lbowling, trally) -->
+				<rom offset="0x000000" size="0x02000" name="rhcom.bin" crc="e5cd6306" sha1="f6bbb8ae562804d67e137290c765c3589fa334c0" /> <!-- Hitachi HD6301V1 MCU -->
 			</dataarea>
-			<dataarea name="fixed" size="0x040000">
+			<dataarea name="s" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="019-s1.s1" crc="5fcdc0ed" sha1="86415077e7adc3ba6153eeb4fb0c62cf36e903fa" />   <!-- TC531000 -->
 			</dataarea>
-			<dataarea name="audiocpu" size="0x020000">
+			<dataarea name="m1" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="019-m1.m1" crc="d568c17d" sha1="a2e318ed6ad1809c79f3f0853d75e0dd1a2f275c" />   <!-- TC531001 -->
 			</dataarea>
-			<dataarea name="ymsnd" size="0x100000">
+			<dataarea name="v1" size="0x100000">
 				<rom name="019-v11.v11" offset="0x000000" size="0x080000" crc="0fb74872" sha1="38c555926c77576d63472bc075210c42e9ce13a3" /> <!-- TC534000 -->
 				<rom name="019-v12.v12" offset="0x080000" size="0x080000" crc="029faa57" sha1="7bbaa87e38929ab1e32df5f6a2ec0fd5001e7cdb" /> <!-- TC534000 -->
 			</dataarea>
-			<dataarea name="ymsnd.deltat" size="0x80000">
+			<dataarea name="v2" size="0x80000">
 				<rom name="019-v21.v21" offset="0x000000" size="0x080000" crc="2efd5ada" sha1="8ba70f5f665d566824333075227d9bce1253b8d8" /> <!-- TC534000 -->
 			</dataarea>
-			<dataarea name="sprites" size="0x100000">
+			<dataarea name="c" size="0x100000">
 				<rom loadflag="load16_byte" name="019-c1.c1" offset="0x000000" size="0x080000" crc="4ccdef18" sha1="5011e30ec235d0b0a5a513a11d4275777e61acdb" />    <!-- TC534200 -->
 				<rom loadflag="load16_byte" name="019-c2.c2" offset="0x000001" size="0x080000" crc="d4dd0802" sha1="82069752028c118d42384a95befde45844f0f247" />    <!-- TC534200 -->
 			</dataarea>
@@ -1120,24 +1280,36 @@
 		<sharedfeat name="release" value="MVS,AES" />
 		<sharedfeat name="compatibility" value="MVS,AES" />
 		<part name="cart" interface="neo_cart">
-			<dataarea name="maincpu" width="16" endianness="big" size="0x100000">
+			<feature name="prog" value="NEO-MVS PROG8M42" />
+			<feature name="prog.NO WAIT" value="1" />
+			<feature name="prog.1 WAIT" value="0" />
+			<feature name="prog.1M" value="0" />
+			<feature name="prog.5Ma" value="1" />
+			<feature name="prog.4M.8M" value="0" />
+			<feature name="prog.5Mb" value="1" />
+			<feature name="cha" value="NEO-MVS CHA-8M" />
+			<feature name="cha.J1" value="1" />
+			<feature name="cha.J2" value="0" />
+			<feature name="cha.J3" value="1" />
+			<feature name="cha.J4" value="0" />
+			<dataarea name="p" width="16" endianness="big" size="0x0a0000">
 				<rom loadflag="load16_word_swap" name="020-p1.p1" offset="0x000000" size="0x080000" crc="e6f2fe64" sha1="50ab82517e077727d97668a4df2b9b96d2e78ab6" />   <!-- TC534200 -->
 				<rom loadflag="load16_word_swap" name="020-p2.p2" offset="0x080000" size="0x020000" crc="edcb22ac" sha1="505d2db38ae999b7d436e8f2ff56b81796d62b54" />   <!-- TC531024 -->
 			</dataarea>
-			<dataarea name="fixed" size="0x040000">
+			<dataarea name="s" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="020-s1.s1" crc="a6d83d53" sha1="9a8c092f89521cc0b27a385aa72e29cbaca926c5" />   <!-- TC531000 -->
 			</dataarea>
-			<dataarea name="audiocpu" size="0x020000">
+			<dataarea name="m1" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="020-m1.m1" crc="48409377" sha1="0e212d2c76856a90b2c2fdff675239525972ac43" />   <!-- TC531001 -->
 			</dataarea>
-			<dataarea name="ymsnd" size="0x180000">
+			<dataarea name="v1" size="0x180000">
 				<rom name="020-v11.v11" offset="0x000000" size="0x100000" crc="1b526c8b" sha1="2801868d2badcf8aaf5d490e010e4049d81d7bc1" /> <!-- TC538200 -->
 				<rom name="020-v12.v12" offset="0x100000" size="0x080000" crc="4a9e6f03" sha1="d3ac11f333b03d8a318921bdaefb14598e289a14" /> <!-- TC534200 -->
 			</dataarea>
-			<dataarea name="ymsnd.deltat" size="0x80000">
+			<dataarea name="v2" size="0x80000">
 				<rom name="020-v21.v21" offset="0x000000" size="0x080000" crc="7abf113d" sha1="5b2a0e70f2eaf4638b44702dacd4cb17838fb1d5" /> <!-- TC534200 -->
 			</dataarea>
-			<dataarea name="sprites" size="0x400000">
+			<dataarea name="c" size="0x400000">
 				<rom loadflag="load16_byte" name="020-c1.c1" offset="0x000000" size="0x100000" crc="bd6fe78e" sha1="50b704862cd79d64fa488e621b079f6e413c33bc" />    <!-- TC538200 -->
 				<rom loadflag="load16_byte" name="020-c2.c2" offset="0x000001" size="0x100000" crc="5f4a925c" sha1="71c5ef8141234daaa7025427a6c65e79766973a5" />    <!-- TC538200 -->
 				<rom loadflag="load16_byte" name="020-c3.c3" offset="0x200000" size="0x100000" crc="d1e42fd0" sha1="f0d476aebbdc2ce008f5f0783be86d295b24aa44" />    <!-- TC538200 -->
@@ -1199,22 +1371,34 @@
 		<sharedfeat name="release" value="MVS,AES" />
 		<sharedfeat name="compatibility" value="MVS,AES" />
 		<part name="cart" interface="neo_cart">
-			<dataarea name="maincpu" width="16" endianness="big" size="0x100000">
+			<feature name="prog" value="NEO-MVS PROG-EP" />
+			<feature name="prog.J1" value="0" />
+			<feature name="prog.J2" value="1" />
+			<feature name="prog.J3" value="0" />
+			<feature name="prog.J4" value="1" />
+			<feature name="prog.J5" value="0" />
+			<feature name="prog.J6" value="1" />
+			<feature name="cha" value="NEO-MVS CHA-32" />
+			<feature name="cha.J1" value="1" />
+			<feature name="cha.J2" value="0" />
+			<feature name="cha.J3" value="1" />
+			<feature name="cha.J4" value="0" />
+			<dataarea name="p" width="16" endianness="big" size="0x080000">
 				<rom loadflag="load16_word_swap" name="021-p1.p1" offset="0x000000" size="0x080000" crc="39c3478f" sha1="06ebe54c9c4e14c5c31e770013d58b7162359ecc" />   <!-- MB834200 -->
 			</dataarea>
-			<dataarea name="fixed" size="0x040000">
+			<dataarea name="s" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="021-s1.s1" crc="6956d778" sha1="e3757776d60dc07d8e07c9ca61b223b14732f860" />   <!-- MB831000 -->
 			</dataarea>
-			<dataarea name="audiocpu" size="0x040000">
+			<dataarea name="m1" size="0x040000">
 				<rom offset="0x000000" size="0x040000" name="021-m1.m1" crc="5a4be5e8" sha1="552f025ce0d51c25f42e1a81cf0d08376ca5475d" />   <!-- MB832000 -->
 			</dataarea>
-			<dataarea name="ymsnd" size="0x80000">
+			<dataarea name="v1" size="0x80000">
 				<rom name="021-v11.v11" offset="0x000000" size="0x080000" crc="66c1e5c4" sha1="7e85420021d4c39c36ed75a1cec567c5610ffce0" /> <!-- MB834000 -->
 			</dataarea>
-			<dataarea name="ymsnd.deltat" size="0x80000">
+			<dataarea name="v2" size="0x80000">
 				<rom name="021-v21.v21" offset="0x000000" size="0x080000" crc="8ed20a86" sha1="d15cba5eac19ea56fdd4877541f1bb3eb755ebba" /> <!-- MB834000 -->
 			</dataarea>
-			<dataarea name="sprites" size="0x100000">
+			<dataarea name="c" size="0x100000">
 				<rom loadflag="load16_byte" name="021-c1.c1" offset="0x000000" size="0x080000" crc="509250ec" sha1="d6ddb16d8222088f153a85a905bcb99541a5f2cf" />    <!-- MB834200 -->
 				<rom loadflag="load16_byte" name="021-c2.c2" offset="0x000001" size="0x080000" crc="09ed5258" sha1="6bf50cd10236e29146b49e714a0e0ebcfe30a682" />    <!-- MB834200 -->
 			</dataarea>
@@ -1240,20 +1424,35 @@
 		<sharedfeat name="release" value="MVS,AES" />
 		<sharedfeat name="compatibility" value="MVS,AES" />
 		<part name="cart" interface="neo_cart">
-			<dataarea name="maincpu" width="16" endianness="big" size="0x100000">
+			<feature name="prog" value="NEO-MVS PROG8M42" />
+			<feature name="prog.NO WAIT" value="0" />
+			<feature name="prog.1 WAIT" value="1" />
+			<feature name="prog.1M" value="0" />
+			<feature name="prog.5Ma" value="0" />
+			<feature name="prog.4M.8M" value="1" />
+			<feature name="prog.5Mb" value="0" />
+			<feature name="cha" value="NEO-MVS CHA-8M" />
+			<feature name="cha.J1" value="1" />
+			<feature name="cha.J2" value="0" />
+			<feature name="cha.J3" value="1" />
+			<feature name="cha.J4" value="0" />
+			<dataarea name="p" width="16" endianness="big" size="0x100000">
 				<rom loadflag="load16_word_swap" name="022-p1.p1" offset="0x000000" size="0x100000" crc="6a2f6d4a" sha1="b8ca548e56f1c7abcdce415ba7329e0cf698ee13" />   <!-- TC538200 -->
 			</dataarea>
-			<dataarea name="fixed" size="0x040000">
+			<dataarea name="s" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="022-s1.s1" crc="843c3624" sha1="dbdf86c193b7c1d795f8c21f2c103c1d3e18abbe" />   <!-- TC531000 -->
 			</dataarea>
-			<dataarea name="audiocpu" size="0x020000">
+			<dataarea name="m1" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="022-m1.m1" crc="8e1d4ab6" sha1="deabc11ab81e7e68a3e041c03a127ae28d0d7264" />   <!-- TC531001 -->
 			</dataarea>
-			<dataarea name="ymsnd" size="0x200000">
+			<dataarea name="v1" size="0x100000">
 				<rom name="022-v11.v11" offset="0x000000" size="0x100000" crc="2cb4ad91" sha1="169ec7303c4275155a66a88cc08270c24132bb36" /> <!-- TC538200 -->
+			</dataarea>
+			<dataarea name="v2" size="0x200000">
+				<!-- FIXME: unmapped space here - how do we deal with it? -->
 				<rom name="022-v22.v22" offset="0x100000" size="0x100000" crc="65a54d13" sha1="a591fbcedca8f679dacbebcd554e3aa3fd163e92" /> <!-- TC538200 -->
 			</dataarea>
-			<dataarea name="sprites" size="0x300000">
+			<dataarea name="c" size="0x300000">
 				<rom loadflag="load16_byte" name="022-c1.c1" offset="0x000000" size="0x100000" crc="4d47a48c" sha1="6e282285be72583d828e7765b1c1695ecdc44777" />    <!-- TC538200 -->
 				<rom loadflag="load16_byte" name="022-c2.c2" offset="0x000001" size="0x100000" crc="e8c1491a" sha1="c468d2556b3de095aaa05edd1bc16d71303e9478" />    <!-- TC538200 -->
 				<rom loadflag="load16_byte" name="022-c3.c3" offset="0x200000" size="0x080000" crc="66e69753" sha1="974b823fc62236fbc23e727f25b61a805a707a9e" />    <!-- TC534200 -->
@@ -1312,19 +1511,27 @@
 		<sharedfeat name="release" value="MVS,AES" />
 		<sharedfeat name="compatibility" value="MVS,AES" />
 		<part name="cart" interface="neo_cart">
-			<dataarea name="maincpu" width="16" endianness="big" size="0x100000">
+			<feature name="prog" value="NEO-MVS PROG42G" />
+			<feature name="prog.NO WAIT" value="0" />
+			<feature name="prog.1 WAIT" value="1" />
+			<feature name="prog.1M" value="0" />
+			<feature name="prog.5M" value="0" />
+			<feature name="prog.8M" value="1" />
+			<feature name="prog.4M.5M" value="0" />
+			<feature name="cha" value="NEO-MVS CHA42G" />
+			<dataarea name="p" width="16" endianness="big" size="0x100000">
 				<rom loadflag="load16_word_swap" name="023-p1.p1" offset="0x000000" size="0x100000" crc="c488fda3" sha1="4cdf2f1837fffd720efef42f81f933bdf2ef1402" />   <!-- TC538200 -->
 			</dataarea>
-			<dataarea name="fixed" size="0x040000">
+			<dataarea name="s" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="023-s1.s1" crc="ac31818a" sha1="93c8d67a93606a2e02f12ca4cab849dc3f3de286" />   <!-- TC531000 -->
 			</dataarea>
-			<dataarea name="audiocpu" size="0x020000">
+			<dataarea name="m1" size="0x020000">
 				<rom offset="0x000000" size="0x020000" name="023-m1.m1" crc="2a2105e0" sha1="26fc13556fda2dbeb7b5b035abd994e302dc7662" />   <!-- TC531001 -->
 			</dataarea>
-			<dataarea name="ymsnd" size="0x100000">
+			<dataarea name="v" size="0x100000">
 				<rom name="023-v1.v1" offset="0x000000" size="0x100000" crc="a53e5bd3" sha1="cf115c6478ce155d889e6a5acb962339e08e024b" />   <!-- TC538200 -->
 			</dataarea>
-			<dataarea name="sprites" size="0x200000">
+			<dataarea name="c" size="0x200000">
 				<rom loadflag="load16_byte" name="023-c1.c1" offset="0x000000" size="0x100000" crc="2999535a" sha1="0deabf771039987b559edc2444eea741bd7ba861" />    <!-- TC538200 -->
 				<rom loadflag="load16_byte" name="023-c2.c2" offset="0x000001" size="0x100000" crc="876a99e6" sha1="8d1dcfc0927d7523f8be8203573192406ec654b4" />    <!-- TC538200 -->
 			</dataarea>

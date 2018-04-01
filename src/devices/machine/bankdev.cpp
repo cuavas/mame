@@ -83,7 +83,7 @@ READ64_MEMBER(address_map_bank_device::read64)
 
 void address_map_bank_device::device_config_complete()
 {
-	m_program_config = address_space_config( "program", m_endianness, m_data_width, m_addr_width );
+	m_program_config = address_space_config("program", m_endianness, m_data_width, m_addr_width);
 }
 
 void address_map_bank_device::device_start()

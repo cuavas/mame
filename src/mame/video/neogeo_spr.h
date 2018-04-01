@@ -27,7 +27,7 @@ public:
 	virtual void optimize_sprite_data();
 	virtual void set_optimized_sprite_data(uint8_t* sprdata, uint32_t mask);
 
-	virtual void draw_fixed_layer_2pixels(uint32_t*&pixel_addr, int offset, uint8_t* gfx_base, const pen_t* char_pens);
+	virtual void draw_fixed_layer_2pixels(uint32_t*&pixel_addr, int offset, uint8_t const* gfx_base, const pen_t* char_pens);
 	void draw_fixed_layer(bitmap_rgb32 &bitmap, int scanline);
 	void set_videoram_offset(uint16_t data);
 	uint16_t get_videoram_data();
@@ -46,8 +46,8 @@ public:
 	void parse_sprites(int scanline);
 	void create_sprite_line_timer();
 	void start_sprite_line_timer();
-	virtual void set_sprite_region(uint8_t* region_sprites, uint32_t region_sprites_size);
-	void set_fixed_regions(uint8_t* fix_cart, uint32_t fix_cart_size, memory_region* fix_bios);
+	virtual void set_sprite_region(uint8_t const* region_sprites, uint32_t region_sprites_size);
+	void set_fixed_regions(uint8_t const* fix_cart, uint32_t fix_cart_size, memory_region* fix_bios);
 	void set_screen(screen_device* screen);
 	void set_pens(const pen_t* pens);
 
@@ -89,9 +89,9 @@ protected:
 
 	virtual void device_start() override;
 	virtual void device_reset() override;
-	uint32_t get_region_mask(uint8_t* rgn, uint32_t rgn_size);
-	uint8_t* m_region_sprites; uint32_t m_region_sprites_size;
-	uint8_t* m_region_fixed; uint32_t m_region_fixed_size;
+	uint32_t get_region_mask(uint8_t const* rgn, uint32_t rgn_size);
+	uint8_t const* m_region_sprites; uint32_t m_region_sprites_size;
+	uint8_t const* m_region_fixed; uint32_t m_region_fixed_size;
 	memory_region* m_region_fixedbios;
 	screen_device* m_screen;
 	const pen_t   *m_pens;
@@ -103,7 +103,7 @@ class neosprite_regular_device : public neosprite_base_device
 public:
 	neosprite_regular_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock);
 	virtual void draw_pixel(int romaddr, uint32_t* dst, const pen_t *line_pens) override;
-	virtual void set_sprite_region(uint8_t* region_sprites, uint32_t region_sprites_size) override;
+	virtual void set_sprite_region(uint8_t const* region_sprites, uint32_t region_sprites_size) override;
 
 };
 
@@ -121,7 +121,7 @@ public:
 	uint8_t* m_spritegfx8;
 
 private:
-	uint32_t optimize_helper(std::vector<uint8_t> &spritegfx, uint8_t* region_sprites, uint32_t region_sprites_size);
+	uint32_t optimize_helper(std::vector<uint8_t> &spritegfx, uint8_t const* region_sprites, uint32_t region_sprites_size);
 };
 
 DECLARE_DEVICE_TYPE(NEOGEO_SPRITE_OPTIMZIED, neosprite_optimized_device)
@@ -136,8 +136,8 @@ public:
 
 	std::unique_ptr<uint16_t[]> m_videoram_buffer;
 	void buffer_vram();
-	virtual void draw_fixed_layer_2pixels(uint32_t*&pixel_addr, int offset, uint8_t* gfx_base, const pen_t* char_pens) override;
-	virtual void set_sprite_region(uint8_t* region_sprites, uint32_t region_sprites_size) override;
+	virtual void draw_fixed_layer_2pixels(uint32_t*&pixel_addr, int offset, uint8_t const* gfx_base, const pen_t* char_pens) override;
+	virtual void set_sprite_region(uint8_t const* region_sprites, uint32_t region_sprites_size) override;
 
 	protected:
 	virtual void device_start() override;

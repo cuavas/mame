@@ -2355,6 +2355,25 @@ end
 
 ---------------------------------------------------
 --
+--@src/devices/bus/neogeo/cart/cart.h,BUSES["NEOGEO_CART"] = true
+---------------------------------------------------
+
+if (BUSES["NEOGEO_CART"]~=null) then
+	files {
+		MAME_DIR .. "src/devices/bus/neogeo/cart/cart.cpp",
+		MAME_DIR .. "src/devices/bus/neogeo/cart/cart.h",
+		MAME_DIR .. "src/devices/bus/neogeo/cart/commcu.cpp",
+		MAME_DIR .. "src/devices/bus/neogeo/cart/commcu.h",
+		MAME_DIR .. "src/devices/bus/neogeo/cart/flatrom.cpp",
+		MAME_DIR .. "src/devices/bus/neogeo/cart/flatrom.h",
+		MAME_DIR .. "src/devices/bus/neogeo/cart/m1zmc.cpp",
+		MAME_DIR .. "src/devices/bus/neogeo/cart/m1zmc.h",
+	}
+end
+
+
+---------------------------------------------------
+--
 --@src/devices/bus/neogeo_ctrl/ctrl.h,BUSES["NEOGEO_CTRL"] = true
 ---------------------------------------------------
 

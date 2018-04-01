@@ -14,6 +14,7 @@
 #include "cpu/m68000/m68000.h"
 #include "cpu/z80/z80.h"
 #include "sound/2610intf.h"
+#include "machine/bankdev.h"
 #include "machine/gen_latch.h"
 #include "machine/input_merger.h"
 #include "machine/upd1990a.h"
@@ -43,6 +44,8 @@ protected:
 		: driver_device(mconfig, type, tag)
 		, m_maincpu(*this, "maincpu")
 		, m_audiocpu(*this, "audiocpu")
+		, m_p_bank(*this, "pbank")
+		, m_vector_bank(*this, "vecbank")
 		, m_ym(*this, "ymsnd")
 		, m_sprgen(*this, "spritegen")
 		, m_screen(*this, "screen")
@@ -114,6 +117,9 @@ protected:
 	// devices
 	required_device<cpu_device> m_maincpu;
 	required_device<cpu_device> m_audiocpu;
+	optional_device<address_map_bank_device> m_p_bank;
+	optional_device<address_map_bank_device> m_vector_bank;
+
 	// MVS-specific devices
 	optional_device<ym2610_device> m_ym;
 	required_device<neosprite_optimized_device> m_sprgen;

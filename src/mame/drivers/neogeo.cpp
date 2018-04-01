@@ -36,7 +36,7 @@
     Confirmed non-bugs:
 
         * Bad zooming in the Kof2003 bootlegs - this is what happens
-          if you try and use the normal bios with a pcb set, it
+          if you try and use the normal bios with a PCB set, it
           looks like the bootleggers didn't care.
         * Glitches at the edges of the screen - the real hardware
           can display 320x224 but most of the games seem designed
@@ -48,12 +48,12 @@
 *****************************************************************************
 
     The Neo-Geo Multi Video System (MVS), is an arcade system board, being
-    the first product in the Neo-Geo family, designed by Alpha Denshi(ADK)
-    and released in 1990 by SNK. It was known to the coin-op industry, and
+    the first product in the Neo-Geo family, designed by Alpha Denshi (ADK)
+    and released in 1990 by SNK.  It was known to the coin-op industry, and
     offered arcade operators the ability to put up to 6 different arcade
     titles into a single cabinet, a key economic consideration for operators
     with limited floorspace (games for the Neo-Geo are cartridge based and are
-    easily exchangeable). It comes in many different cabinets but basically
+    easily exchangeable).  It comes in many different cabinets but basically
     consists of an add on board that can be linked to a standard Jamma system.
     The system was discontinued in 2004.
     Source (modified): http://en.wikipedia.org/wiki/Neo_Geo
@@ -411,8 +411,8 @@
          VCC = 30A | 30B = VCC            VCC = 30A | 30B = VCC
          VCC = 31A | 31B = VCC            VCC = 31A | 31B = VCC
          VCC = 32A | 32B = VCC            VCC = 32A | 32B = VCC
-        CR20 = 33A | 33B = CR21      PORTADRS = 33A | 33B = 4MB
-        CR22 = 34A | 34B = CR23            NC = 34A | 34B = ROMOE
+        CR20 = 33A | 33B = CR21      PORTADRS = 33A | 33B = ROMOE
+        CR22 = 34A | 34B = CR23            NC = 34A | 34B = 4MB
         CR24 = 35A | 35B = CR25            NC = 35A | 35B = RESET
         CR26 = 36A | 36B = CR27            NC = 36A | 36B = NC
         CR28 = 37A | 37B = CR29            NC = 37A | 37B = NC
@@ -420,21 +420,21 @@
           NC = 39A | 39B = FIX00           NC = 39A | 39B = NC
           NC = 40A | 40B = FIX01           NC = 40A | 40B = NC
           NC = 41A | 41B = FIX02           NC = 41A | 41B = SDPAD0
-     SYSTEMB = 42A | 42B = FIX03      SYSTEMB = 42A | 42B = SDPAD1
+      SLOTCS = 42A | 42B = FIX03       SLOTCS = 42A | 42B = SDPAD1
         SDA0 = 43A | 43B = FIX04        SDPA8 = 43A | 43B = SDPAD2
         SDA1 = 44A | 44B = FIX05        SDPA9 = 44A | 44B = SDPAD3
         SDA2 = 45A | 45B = FIX06       SDPA10 = 45A | 45B = SDPAD4
         SDA3 = 46A | 46B = FIX07       SDPA11 = 46A | 46B = SDPAD5
         SDA4 = 47A | 47B = SDRD0       SDPMPX = 47A | 47B = SDPAD6
         SDA5 = 48A | 48B = SDRD1        SDPOE = 48A | 48B = SDPAD7
-        SDA6 = 49A | 49B = SDROM        SDRA8 = 49A | 49B = SDRA00
-        SDA7 = 50A | 50B = SDMRD        SDRA9 = 50A | 50B = SDRA01
-        SDA8 = 51A | 51B = SDDO        SDRA20 = 51A | 51B = SDRA02
-        SDA9 = 52A | 52B = SDD1        SDRA21 = 52A | 52B = SDRA03
-       SDA10 = 53A | 53B = SDD2        SDRA22 = 53A | 53B = SDRA04
-       SDA11 = 54A | 54B = SDD3        SDRA23 = 54A | 54B = SDRA05
-       SDA12 = 55A | 55B = SDD4        SDRMPX = 55A | 55B = SDRA06
-       SDA13 = 56A | 56B = SDD5         SDROE = 56A | 56B = SDRA07
+        SDA6 = 49A | 49B = SDROM        SDRA8 = 49A | 49B = SDRAD0
+        SDA7 = 50A | 50B = SDMRD        SDRA9 = 50A | 50B = SDRAD1
+        SDA8 = 51A | 51B = SDD0        SDRA20 = 51A | 51B = SDRAD2
+        SDA9 = 52A | 52B = SDD1        SDRA21 = 52A | 52B = SDRAD3
+       SDA10 = 53A | 53B = SDD2        SDRA22 = 53A | 53B = SDRAD4
+       SDA11 = 54A | 54B = SDD3        SDRA23 = 54A | 54B = SDRAD5
+       SDA12 = 55A | 55B = SDD4        SDRMPX = 55A | 55B = SDRAD6
+       SDA13 = 56A | 56B = SDD5         SDROE = 56A | 56B = SDRAD7
        SDA14 = 57A | 57B = SDD6           GND = 57A | 57B = GND
        SDA15 = 58A | 58B = SDD7           GND = 58A | 58B = GND
          GND = 59A | 59B = GND            GND = 59A | 59B = GND
@@ -509,14 +509,18 @@
 #include "emu.h"
 #include "includes/neogeo.h"
 
+#include "bus/neogeo/cart/cart.h"
 #include "machine/74259.h"
 #include "machine/nvram.h"
 #include "machine/watchdog.h"
+
 #include "softlist.h"
 #include "speaker.h"
 
 #include "irrmaze.lh"
 #include "neogeo.lh"
+
+#include <algorithm>
 
 
 #define VERBOSE     (0)
@@ -701,6 +705,7 @@ class aes_state : public aes_base_state
 public:
 	aes_state(const machine_config &mconfig, device_type type, const char *tag)
 		: aes_base_state(mconfig, type, tag)
+		, m_cartslot(*this, "cartslot")
 	{
 	}
 
@@ -712,6 +717,11 @@ protected:
 	virtual void neogeo_postload() override;
 
 	void aes_main_map(address_map &map);
+	void p_banks(address_map &map);
+	void vector_banks(address_map &map);
+
+private:
+	required_device<bus::neogeo::cart::slot_device> m_cartslot;
 };
 
 
@@ -1072,6 +1082,8 @@ READ8_MEMBER(neogeo_base_state::audio_cpu_bank_select_r)
 WRITE_LINE_MEMBER(neogeo_base_state::set_use_cart_vectors)
 {
 	m_use_cart_vectors = state;
+	if (m_vector_bank)
+		m_vector_bank->set_bank(state ? 0 : 1);
 }
 
 
@@ -1498,7 +1510,7 @@ void neogeo_base_state::set_slot_idx(int slot)
 
 void neogeo_base_state::machine_start()
 {
-	m_use_cart_vectors = 0;
+	set_use_cart_vectors(0);
 
 	create_interrupt_timers();
 
@@ -1613,7 +1625,7 @@ void mvs_state::neogeo_postload()
 
 void neogeo_base_state::machine_reset()
 {
-	// disable audiocpu nmi
+	// disable audiocpu NMI
 	m_audionmi->in_w<1>(0);
 	m_soundlatch->acknowledge_r(machine().dummy_space(), 0);
 
@@ -1682,7 +1694,6 @@ void ngarcade_base_state::neogeo_main_map(address_map &map)
 
 	map(0x000000, 0x00007f).r(this, FUNC(ngarcade_base_state::banked_vectors_r));
 	map(0x100000, 0x10ffff).mirror(0x0f0000).ram();
-	// some games have protection devices in the 0x200000 region, it appears to map to cart space, not surprising, the ROM is read here too
 	map(0x300080, 0x300081).mirror(0x01ff7e).portr("TEST");
 	map(0x300001, 0x300001).mirror(0x01fffe).w("watchdog", FUNC(watchdog_timer_device::reset_w));
 	map(0x320000, 0x320001).mirror(0x01fffe).portr("AUDIO/COIN");
@@ -1717,12 +1728,25 @@ void aes_state::aes_main_map(address_map &map)
 {
 	aes_base_main_map(map);
 
-	map(0x000000, 0x00007f).r(this, FUNC(aes_state::banked_vectors_r));
+	map(0x000000, 0x0fffff).r(m_p_bank, FUNC(address_map_bank_device::read16));
+	map(0x000000, 0x0000ff).r(this, FUNC(aes_state::banked_vectors_r));
 	map(0x100000, 0x10ffff).mirror(0x0f0000).ram();
-	// some games have protection devices in the 0x200000 region, it appears to map to cart space, not surprising, the ROM is read here too
+	map(0x200000, 0x2fffff).r(m_p_bank, FUNC(address_map_bank_device::read16));
 	map(0x800000, 0x800fff).rw(this, FUNC(aes_state::memcard_r), FUNC(aes_state::memcard_w));
 	map(0xc00000, 0xc1ffff).mirror(0x0e0000).rom().region("mainbios", 0);
+	map(0xc00000, 0xc000ff).r(this, FUNC(aes_state::banked_vectors_r));
 	map(0xd00000, 0xffffff).r(this, FUNC(aes_state::unmapped_r));
+}
+
+void aes_state::p_banks(address_map &map)
+{
+	map(0x000000, 0x0fffff).r(this, FUNC(aes_state::unmapped_r));
+}
+
+void aes_state::vector_banks(address_map &map)
+{
+	map(0x000000, 0x0000ff).r(m_p_bank, FUNC(address_map_bank_device::read16));
+	map(0x000100, 0x0001ff).rom().region("mainbios", 0);
 }
 
 
@@ -1752,11 +1776,10 @@ void neogeo_base_state::audio_map(address_map &map)
 
 void neogeo_base_state::audio_io_map(address_map &map)
 {
-	map(0x00, 0x00).mirror(0xff00).rw(m_soundlatch, FUNC(generic_latch_8_device::read), FUNC(generic_latch_8_device::clear_w));
-	map(0x04, 0x07).mirror(0xff00).rw(m_ym, FUNC(ym2610_device::read), FUNC(ym2610_device::write));
-	map(0x08, 0x08).mirror(0xff00).select(0x0010).w(this, FUNC(neogeo_base_state::audio_cpu_enable_nmi_w));
-	map(0x08, 0x0b).mirror(0x00f0).select(0xff00).r(this, FUNC(neogeo_base_state::audio_cpu_bank_select_r));
-	map(0x0c, 0x0c).mirror(0xff00).w(m_soundlatch2, FUNC(generic_latch_8_device::write));
+	map(0x00, 0x00).mirror(0xfff0).rw(m_soundlatch, FUNC(generic_latch_8_device::read), FUNC(generic_latch_8_device::clear_w));
+	map(0x04, 0x07).mirror(0xfff0).rw(m_ym, FUNC(ym2610_device::read), FUNC(ym2610_device::write));
+	map(0x08, 0x0b).mirror(0xffe0).select(0x0010).w(this, FUNC(neogeo_base_state::audio_cpu_enable_nmi_w));
+	map(0x0c, 0x0f).mirror(0xfff0).w(m_soundlatch2, FUNC(generic_latch_8_device::write));
 }
 
 
@@ -2097,11 +2120,75 @@ void aes_state::machine_start()
 {
 	aes_base_state::machine_start();
 
-	m_curr_slot = -1;
-	set_slot_idx(0);
+	// install cartridge
+	m_cartslot->install_p_rom(m_maincpu->space(AS_PROGRAM), 0x000000);
+	m_cartslot->install_port_r(m_maincpu->space(AS_PROGRAM), 0x200000);
+	m_cartslot->install_port_w(m_maincpu->space(AS_PROGRAM), 0x200000);
+	m_cartslot->install_m1_rom(m_audiocpu->space(AS_PROGRAM), 0x0000);
+	m_cartslot->install_m1_io(m_audiocpu->space(AS_IO), 0x0008);
+	m_audiocpu->space(AS_PROGRAM).unmap_readwrite(0xf800, 0xffff);
+	m_audiocpu->space(AS_PROGRAM).install_ram(0xf800, 0xffff);
 
-	// AES has no SFIX ROM and always uses the cartridge's
+	// sprite device wants naked pointers
+	u8 const *c_base, *s_base;
+	offs_t c_length, s_length;
+	offs_t c_mirror, s_mirror;
+	m_cartslot->get_c_rom_info(c_base, c_length, c_mirror);
+	m_cartslot->get_s_rom_info(s_base, s_length, s_mirror);
+	if (c_length)
+	{
+		assert(c_base);
+		m_sprgen->set_sprite_region(c_base, c_length << 2);
+	}
+	else
+	{
+		m_sprgen->set_sprite_region(m_region_sprites->base(), m_region_sprites->bytes());
+	}
+	if (s_length)
+	{
+		assert(s_base);
+		m_sprgen->set_fixed_regions(s_base, s_length, m_region_fixedbios);
+	}
+	else
+	{
+		m_sprgen->set_fixed_regions(m_region_fixed->base(), m_region_fixed->bytes(), m_region_fixedbios);
+	}
+	m_sprgen->optimize_sprite_data();
 	m_sprgen->neogeo_set_fixed_layer_source(1);
+
+	// YM2610 uses fixed region names
+	u8 const *v1_base, *v2_base;
+	offs_t v1_length, v2_length;
+	offs_t v1_mirror, v2_mirror;
+	m_cartslot->get_v1_rom_info(v1_base, v1_length, v1_mirror);
+	m_cartslot->get_v2_rom_info(v2_base, v2_length, v2_mirror);
+	if (v1_length)
+	{
+		memory_region &dest(*memregion(ym2610_device::YM2610_TAG));
+		v1_mirror = (~v1_mirror & (dest.bytes() - 1)) + 1;
+		assert(v1_base);
+		assert(!(dest.bytes() & (dest.bytes() - 1)));
+		assert(!(v1_mirror & (v1_mirror - 1)));
+
+		std::fill_n(dest.base(), dest.bytes(), 0xff);
+		for (offs_t offs = 0; dest.bytes() > offs; offs += v1_mirror)
+			std::copy_n(v1_base, v1_length, dest.base() + offs);
+	}
+	if (v2_length)
+	{
+		memory_region &dest(*memregion(ym2610_device::YM2610_DELTAT_TAG));
+		v2_mirror = (~v2_mirror & (dest.bytes() - 1)) + 1;
+		assert(v2_base);
+		assert(!(dest.bytes() & (dest.bytes() - 1)));
+		assert(!(v2_mirror & (v2_mirror - 1)));
+
+		std::fill_n(dest.base(), dest.bytes(), 0xff);
+		for (offs_t offs = 0; dest.bytes() > offs; offs += v2_mirror)
+			std::copy_n(v2_base, v2_length, dest.base() + offs);
+	}
+
+	// TODO: hack to make ridhero have a chance of working - AES doesn't even expose this line on the connector
+	m_cartslot->slotcs_w(0);
 }
 
 void aes_state::neogeo_postload()
@@ -2122,7 +2209,22 @@ MACHINE_CONFIG_START(aes_state::aes)
 
 	MCFG_NEOGEO_MEMCARD_ADD("memcard")
 
-	MCFG_NEOGEO_CARTRIDGE_ADD("cslot1", neogeo_cart, nullptr)
+	MCFG_DEVICE_ADD("cartslot", NG_CART_SLOT, 24'000'000)
+	MCFG_DEVICE_SLOT_INTERFACE(neogeo_carts, nullptr, false)
+
+	MCFG_DEVICE_ADD("pbank", ADDRESS_MAP_BANK, 12'000'000)
+	MCFG_DEVICE_PROGRAM_MAP(p_banks)
+	MCFG_ADDRESS_MAP_BANK_ENDIANNESS(ENDIANNESS_BIG)
+	MCFG_ADDRESS_MAP_BANK_DATA_WIDTH(16)
+	MCFG_ADDRESS_MAP_BANK_ADDR_WIDTH(23)
+	MCFG_ADDRESS_MAP_BANK_STRIDE(0x100000)
+
+	MCFG_DEVICE_ADD("vecbank", ADDRESS_MAP_BANK, 12'000'000)
+	MCFG_DEVICE_PROGRAM_MAP(vector_banks)
+	MCFG_ADDRESS_MAP_BANK_ENDIANNESS(ENDIANNESS_BIG)
+	MCFG_ADDRESS_MAP_BANK_DATA_WIDTH(16)
+	MCFG_ADDRESS_MAP_BANK_ADDR_WIDTH(9)
+	MCFG_ADDRESS_MAP_BANK_STRIDE(0x100)
 
 	MCFG_NEOGEO_CONTROL_PORT_ADD("ctrl1", neogeo_controls, "joy", false)
 	MCFG_NEOGEO_CONTROL_PORT_ADD("ctrl2", neogeo_controls, "joy", false)
