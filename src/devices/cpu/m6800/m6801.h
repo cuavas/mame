@@ -116,11 +116,12 @@ protected:
 	uint16_t  m_input_capture;  /* input capture        */
 	int     m_p3csr_is3_flag_read;
 	int     m_port3_latched;
+	int     m_port2_written;
 
 	uint8_t   m_trcsr, m_rmcr, m_rdr, m_tdr, m_rsr, m_tsr;
 	int     m_rxbits, m_txbits, m_txstate, m_trcsr_read_tdre, m_trcsr_read_orfe, m_trcsr_read_rdrf, m_tx, m_ext_serclock;
 	bool    m_use_ext_serclock;
-	int     m_port2_written;
+	uint8_t m_sci_tx_div, m_sci_rx_div;
 
 	int     m_latch09;
 

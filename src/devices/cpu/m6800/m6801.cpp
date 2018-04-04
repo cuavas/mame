@@ -6,15 +6,21 @@
 
 #define LOG_GENERAL (1U << 0)
 #define LOG_TX      (1U << 1)
-#define LOG_RX      (1U << 2)
-#define LOG_PORT    (1U << 3)
+#define LOG_TXTICK  (1U << 2)
+#define LOG_RX      (1U << 3)
+#define LOG_RXTICK  (1U << 4)
+#define LOG_PORT    (1U << 5)
 
-//#define VERBOSE (LOG_GENERAL | LOG_TX | LOG_RS | LOG_PORT)
+//#define VERBOSE (LOG_GENERAL | LOG_TX | LOG_RX | LOG_PORT)
 //#define LOG_OUTPUT_STREAM std::cerr
+#define VERBOSE (LOG_RX | LOG_TX)
+#define LOG_OUTPUT_STREAM std::cerr
 #include "logmacro.h"
 
 #define LOGTX(...)      LOGMASKED(LOG_TX, __VA_ARGS__)
+#define LOGTXTICK(...)  LOGMASKED(LOG_TXTICK, __VA_ARGS__)
 #define LOGRX(...)      LOGMASKED(LOG_RX, __VA_ARGS__)
+#define LOGRXTICK(...)  LOGMASKED(LOG_RXTICK, __VA_ARGS__)
 #define LOGPORT(...)    LOGMASKED(LOG_PORT, __VA_ARGS__)
 
 
@@ -105,7 +111,7 @@ enum
 #define M6801_P3CSR_IS3_ENABLE  0x40
 #define M6801_P3CSR_IS3_FLAG    0x80
 
-static const int M6801_RMCR_SS[] = { 16, 128, 1024, 4096 };
+static const int M6801_RMCR_SS[] = { 16/4, 128/4, 1024/4, 4096/4 };
 
 #define M6801_SERIAL_START      0
 #define M6801_SERIAL_STOP       9
@@ -443,7 +449,14 @@ int m6801_cpu_device::m6800_rx()
 
 void m6801_cpu_device::serial_transmit()
 {
-	LOGTX("Tx Tick\n");
+	if (m_sci_tx_div)
+	{
+		--m_sci_tx_div;
+		return;
+	}
+	m_sci_tx_div = 3;
+
+	LOGTXTICK("Tx Tick\n");
 
 	if (m_trcsr & M6801_TRCSR_TE)
 	{
@@ -525,7 +538,7 @@ void m6801_cpu_device::serial_transmit()
 
 void m6801_cpu_device::serial_receive()
 {
-	LOGRX("Rx Tick TRCSR %02x bits %u check %02x\n", m_trcsr, m_rxbits, m_trcsr & M6801_TRCSR_RE);
+	LOGRXTICK("Rx Tick TRCSR %02x bits %u check %02x\n", m_trcsr, m_rxbits, m_trcsr & M6801_TRCSR_RE);
 
 	if (m_trcsr & M6801_TRCSR_RE)
 	{
@@ -534,102 +547,105 @@ void m6801_cpu_device::serial_receive()
 			// wait for 10 bits of '1'
 			if (m6800_rx() == 1)
 			{
-				m_rxbits++;
+				if (!(m_rxbits++ & 0x03))
+					LOGRX("Received WAKE UP bit %u\n", m_rxbits);
 
-				LOGRX("Received WAKE UP bit %u\n", m_rxbits);
-
-				if (m_rxbits == 10)
+				if (m_rxbits == (10 * 4))
 				{
 					LOGRX("Receiver Wake Up\n");
 
 					m_trcsr &= ~M6801_TRCSR_WU;
 					m_rxbits = M6801_SERIAL_START;
+					m_sci_rx_div = 0;
 				}
 			}
 			else
 			{
-				LOGRX("Receiver Wake Up interrupted\n");
+				if (m_rxbits)
+					LOGRX("Receiver Wake Up interrupted\n");
 
 				m_rxbits = M6801_SERIAL_START;
+				m_sci_rx_div = 0;
 			}
 		}
-		else
+		else if (m_sci_rx_div)
 		{
-			// receive data
-			switch (m_rxbits)
+			m_sci_rx_div--;
+		}
+		else if (M6801_SERIAL_START == m_rxbits)
+		{
+			if (m6800_rx() == 0)
 			{
-			case M6801_SERIAL_START:
-				if (m6800_rx() == 0)
+				// start bit found
+				m_rxbits++;
+				m_sci_rx_div = 5;
+
+				LOGRX("Received START bit\n");
+			}
+		}
+		else if (M6801_SERIAL_STOP == m_rxbits)
+		{
+			if (m6800_rx() == 1)
+			{
+				LOGRX("Received STOP bit\n");
+
+				if (m_trcsr & M6801_TRCSR_RDRF)
 				{
-					// start bit found
-					m_rxbits++;
-
-					LOGRX("Received START bit\n");
-				}
-				break;
-
-			case M6801_SERIAL_STOP:
-				if (m6800_rx() == 1)
-				{
-					LOGRX("Received STOP bit\n");
-
-					if (m_trcsr & M6801_TRCSR_RDRF)
-					{
-						// overrun error
-						m_trcsr |= M6801_TRCSR_ORFE;
-
-						LOGRX("Receive Overrun Error\n");
-
-						CHECK_IRQ_LINES();
-					}
-					else
-					{
-						if (!(m_trcsr & M6801_TRCSR_ORFE))
-						{
-							// transfer data into receive register
-							m_rdr = m_rsr;
-
-							LOGRX("Receive Data Register: %02x\n", m_rdr);
-
-							// set RDRF flag
-							m_trcsr |= M6801_TRCSR_RDRF;
-
-							CHECK_IRQ_LINES();
-						}
-					}
-				}
-				else
-				{
-					// framing error
-					if (!(m_trcsr & M6801_TRCSR_ORFE))
-					{
-						// transfer unframed data into receive register
-						m_rdr = m_rsr;
-					}
-
+					// overrun error
 					m_trcsr |= M6801_TRCSR_ORFE;
-					m_trcsr &= ~M6801_TRCSR_RDRF;
 
-					LOGRX("Receive Framing Error\n");
+					LOGRX("Receive Overrun Error\n");
 
 					CHECK_IRQ_LINES();
 				}
+				else
+				{
+					if (!(m_trcsr & M6801_TRCSR_ORFE))
+					{
+						// transfer data into receive register
+						m_rdr = m_rsr;
 
-				m_rxbits = M6801_SERIAL_START;
-				break;
+						LOGRX("Receive Data Register: %02x\n", m_rdr);
 
-			default:
-				// shift receive register
-				m_rsr >>= 1;
+						// set RDRF flag
+						m_trcsr |= M6801_TRCSR_RDRF;
 
-				// receive bit into register
-				m_rsr |= (m6800_rx() << 7);
-
-				LOGRX("Received DATA bit %u: %u\n", m_rxbits, BIT(m_rsr, 7));
-
-				m_rxbits++;
-				break;
+						CHECK_IRQ_LINES();
+					}
+				}
 			}
+			else
+			{
+				// framing error
+				if (!(m_trcsr & M6801_TRCSR_ORFE))
+				{
+					// transfer unframed data into receive register
+					m_rdr = m_rsr;
+				}
+
+				m_trcsr |= M6801_TRCSR_ORFE;
+				m_trcsr &= ~M6801_TRCSR_RDRF;
+
+				LOGRX("Receive Framing Error\n");
+
+				CHECK_IRQ_LINES();
+			}
+
+			m_rxbits = M6801_SERIAL_START;
+			m_sci_rx_div = 1;
+		}
+		else
+		{
+			// shift receive register
+			m_rsr >>= 1;
+
+			// receive bit into register
+			m_rsr |= (m6800_rx() << 7);
+
+			LOGRX("Received DATA bit %u: %u\n", m_rxbits, BIT(m_rsr, 7));
+
+			m_rxbits++;
+			m_sci_rx_div = 3;
 		}
 	}
 }
@@ -717,10 +733,7 @@ void m6801_cpu_device::device_start()
 	save_item(NAME(m_port2_data));
 	save_item(NAME(m_port3_data));
 	save_item(NAME(m_port4_data));
-	save_item(NAME(m_port2_written));
-	save_item(NAME(m_port3_latched));
 	save_item(NAME(m_p3csr));
-	save_item(NAME(m_p3csr_is3_flag_read));
 	save_item(NAME(m_tcsr));
 	save_item(NAME(m_pending_tcsr));
 	save_item(NAME(m_irq2));
@@ -729,8 +742,9 @@ void m6801_cpu_device::device_start()
 	save_item(NAME(m_counter.d));
 	save_item(NAME(m_output_compare.d));
 	save_item(NAME(m_input_capture));
-	save_item(NAME(m_timer_over.d));
-	save_item(NAME(m_timer_next));
+	save_item(NAME(m_p3csr_is3_flag_read));
+	save_item(NAME(m_port3_latched));
+	save_item(NAME(m_port2_written));
 
 	save_item(NAME(m_trcsr));
 	save_item(NAME(m_rmcr));
@@ -745,6 +759,16 @@ void m6801_cpu_device::device_start()
 	save_item(NAME(m_trcsr_read_orfe));
 	save_item(NAME(m_trcsr_read_rdrf));
 	save_item(NAME(m_tx));
+	save_item(NAME(m_ext_serclock));
+	save_item(NAME(m_use_ext_serclock));
+	save_item(NAME(m_sci_tx_div));
+	save_item(NAME(m_sci_rx_div));
+
+	save_item(NAME(m_latch09));
+
+	save_item(NAME(m_timer_over.d));
+
+	save_item(NAME(m_timer_next));
 
 	save_item(NAME(m_sc1_state));
 }
@@ -785,6 +809,8 @@ void m6801_cpu_device::device_reset()
 	m_trcsr_read_rdrf = 0;
 	m_ext_serclock = 0;
 	m_use_ext_serclock = false;
+	m_sci_tx_div = 0;
+	m_sci_rx_div = 0;
 
 	set_rmcr(0);
 }
