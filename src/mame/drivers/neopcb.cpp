@@ -472,7 +472,6 @@ void neopcb_state::install_common()
 	m_maincpu->space(AS_PROGRAM).install_readwrite_handler(0x2fe000, 0x2fffff, read16_delegate(FUNC(pvc_prot_device::protection_r),(pvc_prot_device*)m_pvc_prot), write16_delegate(FUNC(neopcb_state::write_bankpvc),this));
 
 	// perform basic memory initialization that are usually done on-cart
-	m_curr_slot = 0;
 	m_bank_base = 0;
 	init_audio();
 	m_audiocpu->reset();

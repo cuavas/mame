@@ -131,9 +131,10 @@ public:
 
 	std::unique_ptr<uint8_t[]> m_meminternal_data;
 	void neocd(machine_config &config);
-	void neocd_audio_io_map(address_map &map);
-	void neocd_audio_map(address_map &map);
 	void neocd_main_map(address_map &map);
+	virtual void p_banks(address_map &map) override;
+	void neocd_audio_map(address_map &map);
+	void neocd_audio_io_map(address_map &map);
 
 protected:
 	virtual void machine_start() override;
@@ -333,7 +334,7 @@ WRITE16_MEMBER(ngcd_state::neocd_control_w)
 				printf("MapVectorTable? %04x %04x\n",data,mem_mask);
 
 				//m_bank_vectors->set_entry(data == 0 ? 0 : 1);
-				m_use_cart_vectors = (data == 0 ? 0 : 1);
+				m_vector_bank->set_bank(data ? 0 : 1);
 			}
 
 //extern int32_t bRunPause;
@@ -832,9 +833,6 @@ void ngcd_state::machine_start()
 {
 	aes_base_state::machine_start();
 
-	// set curr_slot to 0, so to allow checking m_slots[m_curr_slot] != nullptr
-	m_curr_slot = 0;
-
 	// initialize sprite to point to memory regions
 	m_sprgen->set_sprite_region(m_region_sprites->base(), m_region_sprites->bytes());
 	m_sprgen->set_fixed_regions(m_region_fixed->base(), m_region_fixed->bytes(), m_region_fixedbios);
@@ -888,8 +886,7 @@ void ngcd_state::neocd_main_map(address_map &map)
 {
 	aes_base_main_map(map);
 
-	map(0x000000, 0x1fffff).ram().region("maincpu", 0x00000);
-	map(0x000000, 0x00007f).r(this, FUNC(ngcd_state::banked_vectors_r)); // writes will fall through to area above
+	map(0x100000, 0x1fffff).ram();
 
 	map(0x800000, 0x803fff).rw(this, FUNC(ngcd_state::neocd_memcard_r), FUNC(ngcd_state::neocd_memcard_w));
 	map(0xc00000, 0xc7ffff).mirror(0x080000).rom().region("mainbios", 0);
@@ -899,6 +896,12 @@ void ngcd_state::neocd_main_map(address_map &map)
 	map(0xff0000, 0xff01ff).rw(this, FUNC(ngcd_state::neocd_control_r), FUNC(ngcd_state::neocd_control_w)); // CDROM / DMA
 	map(0xff0200, 0xffffff).r(this, FUNC(ngcd_state::unmapped_r));
 }
+
+void ngcd_state::p_banks(address_map &map)
+{
+	map(0x000000, 0x0fffff).ram();
+}
+
 
 
 /*************************************

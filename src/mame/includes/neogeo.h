@@ -64,8 +64,6 @@ protected:
 		, m_edge(*this, "edge")
 		, m_ctrl1(*this, "ctrl1")
 		, m_ctrl2(*this, "ctrl2")
-		, m_use_cart_vectors(0)
-		, m_use_cart_audio(0)
 		, m_slots(*this, "cslot%u", 1U)
 		, m_audionmi(*this, "audionmi")
 	{ }
@@ -88,8 +86,6 @@ protected:
 
 	virtual DECLARE_WRITE8_MEMBER(io_control_w);
 	DECLARE_WRITE_LINE_MEMBER(set_use_cart_vectors);
-	DECLARE_WRITE_LINE_MEMBER(set_use_cart_audio);
-	DECLARE_READ16_MEMBER(banked_vectors_r);
 	DECLARE_WRITE16_MEMBER(write_banksel);
 	DECLARE_WRITE16_MEMBER(write_bankprot);
 	DECLARE_WRITE16_MEMBER(write_bankprot_pvc);
@@ -105,8 +101,10 @@ protected:
 	void neogeo_stereo(machine_config &config);
 
 	void base_main_map(address_map &map);
+	virtual void audio_map(address_map &map);
 	void audio_io_map(address_map &map);
-	void audio_map(address_map &map);
+	virtual void p_banks(address_map &map);
+	void vector_banks(address_map &map);
 
 	// device overrides
 	virtual void machine_start() override;
@@ -117,8 +115,8 @@ protected:
 	// devices
 	required_device<cpu_device> m_maincpu;
 	required_device<cpu_device> m_audiocpu;
-	optional_device<address_map_bank_device> m_p_bank;
-	optional_device<address_map_bank_device> m_vector_bank;
+	required_device<address_map_bank_device> m_p_bank;
+	required_device<address_map_bank_device> m_vector_bank;
 
 	// MVS-specific devices
 	optional_device<ym2610_device> m_ym;
@@ -155,11 +153,6 @@ protected:
 	uint8_t      m_vblank_level;
 	uint8_t      m_raster_level;
 
-	int m_use_cart_vectors;
-	int m_use_cart_audio;
-
-	void set_slot_idx(int slot);
-
 	// cart slots
 	void init_cpu();
 	void init_audio();
@@ -169,8 +162,6 @@ protected:
 	uint32_t m_bank_base;
 
 	optional_device_array<neogeo_cart_slot_device, 6> m_slots;
-
-	int m_curr_slot;
 
 private:
 	void update_interrupts();
