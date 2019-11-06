@@ -20,10 +20,11 @@
 #include "debugvw.h"
 #include "natkeyboard.h"
 #include "render.h"
+#include "screen.h"
+
 #include <ctype.h>
 #include <algorithm>
 #include <fstream>
-
 
 
 /***************************************************************************

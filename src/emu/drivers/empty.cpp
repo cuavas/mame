@@ -11,6 +11,8 @@
 #include "emu.h"
 #include "emuopts.h"
 #include "render.h"
+#include "screen.h"
+
 
 //**************************************************************************
 //  DRIVER STATE

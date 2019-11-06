@@ -8,12 +8,14 @@
 ***************************************************************************/
 
 #include "emu.h"
-#include "emuopts.h"
-#include "rendutil.h"
-#include "config.h"
-#include "xmlfile.h"
 #include "crsshair.h"
 
+#include "config.h"
+#include "emuopts.h"
+#include "rendutil.h"
+#include "screen.h"
+
+#include "xmlfile.h"
 
 
 /***************************************************************************

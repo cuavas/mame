@@ -9,14 +9,15 @@
 *********************************************************************/
 
 #include "emu.h"
+#include "ui/viewgfx.h"
+
 #include "emupal.h"
-#include "ui/ui.h"
-#include "uiinput.h"
 #include "render.h"
 #include "rendfont.h"
 #include "rendutil.h"
 #include "tilemap.h"
-#include "ui/viewgfx.h"
+#include "screen.h"
+#include "uiinput.h"
 
 
 
@@ -252,8 +253,8 @@ bool ui_gfx_is_relevant(running_machine &machine)
 		ui_gfx_count_devices(machine, state);
 
 	return state.palette.devcount > 0
-		|| state.gfxset.devcount > 0
-		|| machine.tilemap().count() > 0;
+			|| state.gfxset.devcount > 0
+			|| machine.tilemap().count() > 0;
 }
 
 

@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include "discreen.h"
+
 #include <type_traits>
 #include <utility>
 
@@ -28,16 +30,6 @@ enum screen_type_enum
 	SCREEN_TYPE_VECTOR,
 	SCREEN_TYPE_LCD,
 	SCREEN_TYPE_SVG
-};
-
-// texture formats
-enum texture_format
-{
-	TEXFORMAT_UNDEFINED = 0,                            // require a format to be specified
-	TEXFORMAT_PALETTE16,                                // 16bpp palettized, no alpha
-	TEXFORMAT_RGB32,                                    // 32bpp 8-8-8 RGB
-	TEXFORMAT_ARGB32,                                   // 32bpp 8-8-8-8 ARGB
-	TEXFORMAT_YUY16                                     // 16bpp 8-8 Y/Cb, Y/Cr in sequence
 };
 
 // screen_update callback flags
@@ -168,10 +160,8 @@ typedef device_delegate<u32 (screen_device &, bitmap_rgb32 &, const rectangle &)
 
 // ======================> screen_device
 
-class screen_device : public device_t
+class screen_device : public device_t, public device_screen_interface
 {
-	friend class render_manager;
-
 public:
 	// construction/destruction
 	screen_device(const machine_config &mconfig, const char *tag, device_t *owner, u32 clock);
@@ -191,11 +181,8 @@ public:
 
 	// configuration readers
 	screen_type_enum screen_type() const { return m_type; }
-	int orientation() const { assert(configured()); return m_orientation; }
-	std::pair<unsigned, unsigned> physical_aspect() const;
 	int width() const { return m_width; }
 	int height() const { return m_height; }
-	const rectangle &visible_area() const { return m_visarea; }
 	const rectangle &cliprect() const { return m_bitmap[0].cliprect(); }
 	bool oldstyle_vblank_supplied() const { return m_oldstyle_vblank_supplied; }
 	attoseconds_t refresh_attoseconds() const { return m_refresh; }
@@ -209,9 +196,6 @@ public:
 
 	// inline configuration helpers
 	void set_type(screen_type_enum type) { assert(!configured()); m_type = type; }
-	void set_orientation(int orientation) { assert(!configured()); m_orientation = orientation; }
-	void set_physical_aspect(unsigned x, unsigned y) { assert(!configured()); m_phys_aspect = std::make_pair(x, y); }
-	void set_native_aspect() { assert(!configured()); m_phys_aspect = std::make_pair(~0U, ~0U); }
 
 	/// \brief Configure screen parameters
 	///
@@ -237,7 +221,7 @@ public:
 		m_vblank = m_refresh / vtotal * (vtotal - (vbstart - vbend));
 		m_width = htotal;
 		m_height = vtotal;
-		m_visarea.set(hbend, hbstart - 1, vbend, vbstart - 1);
+		device_screen_interface::set_visible_area(hbend, hbstart - 1, vbend, vbstart - 1);
 		return *this;
 	}
 	screen_device &set_raw(const XTAL &xtal, u16 htotal, u16 hbend, u16 hbstart, u16 vtotal, u16 vbend, u16 vbstart)
@@ -313,7 +297,7 @@ public:
 	/// \return Reference to device for method chaining.
 	screen_device &set_visarea(s16 minx, s16 maxx, s16 miny, s16 maxy)
 	{
-		m_visarea.set(minx, maxx, miny, maxy);
+		device_screen_interface::set_visible_area(minx, maxx, miny, maxy);
 		return *this;
 	}
 
@@ -327,7 +311,7 @@ public:
 	/// \sa set_visarea
 	screen_device &set_visarea_full()
 	{
-		m_visarea.set(0, m_width - 1, 0, m_height - 1);
+		device_screen_interface::set_visible_area(0, m_width - 1, 0, m_height - 1);
 		return *this;
 	}
 
@@ -373,7 +357,6 @@ public:
 	template <typename T> screen_device &set_svg_region(T &&tag) { m_svg_region.set_tag(std::forward<T>(tag)); return *this; } // default region is device tag
 
 	// information getters
-	render_container &container() const { assert(m_container != nullptr); return *m_container; }
 	bitmap_ind8 &priority() { return m_priority; }
 	device_palette_interface &palette() const { assert(m_palette != nullptr); return *m_palette; }
 	bool has_palette() const { return m_palette != nullptr; }
@@ -389,11 +372,11 @@ public:
 	int vpos() const;
 	int hpos() const;
 	DECLARE_READ_LINE_MEMBER(vblank) const { return (machine().time() < m_vblank_end_time) ? 1 : 0; }
-	DECLARE_READ_LINE_MEMBER(hblank) const { int const curpos = hpos(); return (curpos < m_visarea.left() || curpos > m_visarea.right()) ? 1 : 0; }
+	DECLARE_READ_LINE_MEMBER(hblank) const { return column_visible(hpos()) ? 0 : 1; }
 
 	// timing
 	attotime time_until_pos(int vpos, int hpos = 0) const;
-	attotime time_until_vblank_start() const { return time_until_pos(m_visarea.bottom() + 1); }
+	attotime time_until_vblank_start() const { return time_until_pos(visible_area().bottom() + 1); }
 	attotime time_until_vblank_end() const;
 	attotime time_until_update() const { return (m_video_attributes & VIDEO_UPDATE_AFTER_VBLANK) ? time_until_vblank_end() : time_until_vblank_start(); }
 	attotime scan_period() const { return attotime(0, m_scantime); }
@@ -422,6 +405,9 @@ public:
 	static constexpr int DEFAULT_FRAME_RATE = 60;
 	static const attotime DEFAULT_FRAME_PERIOD;
 
+protected:
+	virtual std::pair<unsigned, unsigned> screen_default_aspect() const noexcept override;
+
 private:
 	class svg_renderer;
 
@@ -436,7 +422,6 @@ private:
 
 	// device-level overrides
 	virtual void device_validity_check(validity_checker &valid) const override;
-	virtual void device_config_complete() override;
 	virtual void device_resolve_objects() override;
 	virtual void device_start() override;
 	virtual void device_reset() override;
@@ -445,7 +430,6 @@ private:
 	virtual void device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr) override;
 
 	// internal helpers
-	void set_container(render_container &container) { m_container = &container; }
 	void realloc_screen_bitmaps();
 	void vblank_begin();
 	void vblank_end();
@@ -459,8 +443,6 @@ private:
 
 	// inline configuration data
 	screen_type_enum    m_type;                     // type of screen
-	int                 m_orientation;              // orientation flags combined with system flags
-	std::pair<unsigned, unsigned> m_phys_aspect;    // physical aspect ratio
 	bool                m_oldstyle_vblank_supplied; // set_vblank_time call used
 	attoseconds_t       m_refresh;                  // default refresh period
 	attoseconds_t       m_vblank;                   // duration of a VBLANK
@@ -475,17 +457,14 @@ private:
 	optional_memory_region m_svg_region;            // the region in which the svg data is in
 
 	// internal state
-	render_container *  m_container;                // pointer to our container
 	std::unique_ptr<svg_renderer> m_svg; // the svg renderer
 	// dimensions
 	int                 m_max_width;                // maximum width encountered
 	int                 m_width;                    // current width (HTOTAL)
 	int                 m_height;                   // current height (VTOTAL)
-	rectangle           m_visarea;                  // current visible area (HBLANK end/start, VBLANK end/start)
 	std::vector<int>    m_scan_widths;              // current width, in samples, of each individual scanline
 
 	// textures and bitmaps
-	texture_format      m_texformat;                // texture format
 	render_texture *    m_texture[2];               // 2x textures for the screen bitmap
 	screen_bitmap       m_bitmap[2];                // 2x bitmaps for rendering
 	std::vector<bitmap_t *> m_scan_bitmaps[2];      // 2x bitmaps for each individual scanline

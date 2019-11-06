@@ -76,7 +76,7 @@ public:
 	// text generators
 	std::string warnings_string() const;
 	std::string game_info_string() const;
-	std::string get_screen_desc(screen_device &screen) const;
+	std::string get_screen_desc(device_screen_interface &screen) const;
 
 private:
 	// reference to machine

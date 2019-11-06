@@ -534,7 +534,7 @@ const rgb_t *render_texture::get_adjusted_palette(render_container &container, u
 //  render_container - constructor
 //-------------------------------------------------
 
-render_container::render_container(render_manager &manager, screen_device *screen)
+render_container::render_container(render_manager &manager, device_screen_interface *screen)
 	: m_next(nullptr)
 	, m_manager(manager)
 	, m_screen(screen)
@@ -1053,7 +1053,7 @@ int render_target::configured_view(const char *viewname, int targetindex, int nu
 	}
 
 	// if we don't have a match, default to the nth view
-	screen_device_iterator iter(m_manager.machine().root_device());
+	screen_interface_iterator iter(m_manager.machine().root_device());
 	int scrcount = iter.count();
 	if (view == nullptr && scrcount > 0)
 	{
@@ -1061,7 +1061,7 @@ int render_target::configured_view(const char *viewname, int targetindex, int nu
 		if (numtargets >= scrcount)
 		{
 			int ourindex = index() % scrcount;
-			screen_device *screen = iter.byindex(ourindex);
+			device_screen_interface *screen = iter.byindex(ourindex);
 
 			// find the first view with this screen and this screen only
 			for (view = view_by_index(viewindex = 0); view != nullptr; view = view_by_index(++viewindex))
@@ -1086,7 +1086,7 @@ int render_target::configured_view(const char *viewname, int targetindex, int nu
 				if (viewscreens.count() >= scrcount)
 				{
 					bool screen_missing(false);
-					for (screen_device &screen : iter)
+					for (device_screen_interface &screen : iter)
 					{
 						if (!viewscreens.contains(screen))
 						{
@@ -1263,9 +1263,9 @@ void render_target::compute_minimum_size(s32 &minwidth, s32 &minheight)
 		if (curitem.screen())
 		{
 			// use a hard-coded default visible area for vector screens
-			screen_device *const screen = curitem.screen();
-			const rectangle vectorvis(0, 639, 0, 479);
-			const rectangle &visarea = (screen->screen_type() == SCREEN_TYPE_VECTOR) ? vectorvis : screen->visible_area();
+			device_screen_interface *const screen = curitem.screen();
+			// FIXME: this is dumb const rectangle vectorvis(0, 639, 0, 479);
+			const rectangle &visarea = /* FIXME: this is dumb (screen->screen_type() == SCREEN_TYPE_VECTOR) ? vectorvis :*/ screen->visible_area();
 
 			// apply target orientation to the bounds
 			render_bounds bounds = curitem.bounds();
@@ -1639,7 +1639,7 @@ void render_target::load_additional_layout_files(const char *basename, bool have
 	class screen_info
 	{
 	public:
-		screen_info(screen_device const &screen)
+		screen_info(device_screen_interface const &screen)
 			: m_device(screen)
 			, m_rotated(screen.orientation() & ORIENTATION_SWAP_XY)
 			, m_physical(screen.physical_aspect())
@@ -1653,7 +1653,7 @@ void render_target::load_additional_layout_files(const char *basename, bool have
 			}
 		}
 
-		screen_device const &device() const { return m_device.get(); }
+		device_screen_interface const &device() const { return m_device.get(); }
 		bool rotated() const { return m_rotated; }
 		bool square() const { return m_physical == m_native; }
 		unsigned physical_x() const { return m_physical.first; }
@@ -1672,11 +1672,11 @@ void render_target::load_additional_layout_files(const char *basename, bool have
 		}
 
 	private:
-		std::reference_wrapper<screen_device const> m_device;
+		std::reference_wrapper<device_screen_interface const> m_device;
 		bool m_rotated;
 		std::pair<unsigned, unsigned> m_physical, m_native;
 	};
-	screen_device_iterator iter(m_manager.machine().root_device());
+	screen_interface_iterator iter(m_manager.machine().root_device());
 	std::vector<screen_info> const screens(std::begin(iter), std::end(iter));
 
 
@@ -1801,7 +1801,7 @@ void render_target::load_additional_layout_files(const char *basename, bool have
 				if (viewscreens.count() >= screens.size())
 				{
 					bool screen_missing(false);
-					for (screen_device &screen : iter)
+					for (device_screen_interface &screen : iter)
 					{
 						if (!viewscreens.contains(screen))
 						{
@@ -2950,7 +2950,7 @@ render_manager::render_manager(running_machine &machine)
 	machine.configuration().config_register("video", config_load_delegate(&render_manager::config_load, this), config_save_delegate(&render_manager::config_save, this));
 
 	// create one container per screen
-	for (screen_device &screen : screen_device_iterator(machine.root_device()))
+	for (device_screen_interface &screen : screen_interface_iterator(machine.root_device()))
 		screen.set_container(*container_alloc(&screen));
 }
 
@@ -2974,7 +2974,7 @@ render_manager::~render_manager()
 //  is_live - return if the screen is 'live'
 //-------------------------------------------------
 
-bool render_manager::is_live(screen_device &screen) const
+bool render_manager::is_live(device_screen_interface &screen) const
 {
 	// iterate over all live targets and or together their screen masks
 	for (render_target &target : m_targetlist)
@@ -3182,7 +3182,7 @@ void render_manager::resolve_tags()
 //  container_alloc - allocate a new container
 //-------------------------------------------------
 
-render_container *render_manager::container_alloc(screen_device *screen)
+render_container *render_manager::container_alloc(device_screen_interface *screen)
 {
 	auto container = global_alloc(render_container(*this, screen));
 	if (screen != nullptr)

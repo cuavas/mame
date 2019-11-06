@@ -9,9 +9,12 @@
 ***************************************************************************/
 
 #include "emu.h"
+#include "screen.h"
+
 #include "emuopts.h"
-#include "png.h"
 #include "rendutil.h"
+
+#include "png.h"
 
 #include <nanosvg/src/nanosvg.h>
 #include <nanosvg/src/nanosvgrast.h>
@@ -542,9 +545,8 @@ void screen_device::svg_renderer::rebuild_cache()
 
 screen_device::screen_device(const machine_config &mconfig, const char *tag, device_t *owner, u32 clock)
 	: device_t(mconfig, SCREEN, tag, owner, clock)
+	, device_screen_interface(mconfig, *this)
 	, m_type(SCREEN_TYPE_RASTER)
-	, m_orientation(ROT0)
-	, m_phys_aspect(0U, 0U)
 	, m_oldstyle_vblank_supplied(false)
 	, m_refresh(0)
 	, m_vblank(0)
@@ -559,12 +561,9 @@ screen_device::screen_device(const machine_config &mconfig, const char *tag, dev
 	, m_palette(*this, finder_base::DUMMY_TAG)
 	, m_video_attributes(0)
 	, m_svg_region(*this, DEVICE_SELF)
-	, m_container(nullptr)
 	, m_max_width(100)
 	, m_width(100)
 	, m_height(100)
-	, m_visarea(0, 99, 0, 99)
-	, m_texformat()
 	, m_curbitmap(0)
 	, m_curtexture(0)
 	, m_changed(true)
@@ -636,9 +635,9 @@ void screen_device::allocate_scan_bitmaps()
     if (m_video_attributes & VIDEO_VARIABLE_WIDTH)
     {
         const bool screen16 = !m_screen_update_ind16.isnull();
-        s32 effwidth = std::max(m_max_width, m_visarea.right() + 1);
+        s32 effwidth = std::max(m_max_width, visible_area().right() + 1);
         const s32 old_height = (s32)m_scan_widths.size();
-        s32 effheight = std::max(m_height, m_visarea.bottom() + 1);
+        s32 effheight = std::max(m_height, visible_area().bottom() + 1);
         if (old_height < effheight)
         {
 			for (int i = old_height; i < effheight; i++)
@@ -685,7 +684,7 @@ void screen_device::device_validity_check(validity_checker &valid) const
 	// sanity check display area
 	if (m_type != SCREEN_TYPE_VECTOR && m_type != SCREEN_TYPE_SVG)
 	{
-		if (m_visarea.empty() || m_visarea.right() >= m_width || m_visarea.bottom() >= m_height)
+		if (visible_area().empty() || visible_area().right() >= m_width || visible_area().bottom() >= m_height)
 			osd_printf_error("Invalid display area\n");
 
 		// sanity check screen formats
@@ -719,58 +718,20 @@ void screen_device::device_validity_check(validity_checker &valid) const
 
 
 //-------------------------------------------------
-//  device_config_complete - finalise static
-//  configuration
-//-------------------------------------------------
-
-void screen_device::device_config_complete()
-{
-	// combine orientation with machine orientation
-	m_orientation = orientation_add(m_orientation, mconfig().gamedrv().flags & machine_flags::MASK_ORIENTATION);
-}
-
-
-//-------------------------------------------------
 //  physical_aspect - determine the physical
 //  aspect ratio to be used for rendering
 //-------------------------------------------------
 
-std::pair<unsigned, unsigned> screen_device::physical_aspect() const
+std::pair<unsigned, unsigned> screen_device::screen_default_aspect() const noexcept
 {
-	assert(configured());
-
-	std::pair<unsigned, unsigned> phys_aspect = m_phys_aspect;
-
-	// physical aspect ratio unconfigured
-	if (!phys_aspect.first || !phys_aspect.second)
+	switch (m_type)
 	{
-		switch (m_type)
-		{
-		case SCREEN_TYPE_RASTER:
-		case SCREEN_TYPE_VECTOR:
-			phys_aspect = std::make_pair(4, 3); // assume standard CRT
-			break;
-		case SCREEN_TYPE_LCD:
-		case SCREEN_TYPE_SVG:
-			phys_aspect = std::make_pair(~0U, ~0U); // assume square pixels
-			break;
-		case SCREEN_TYPE_INVALID:
-		default:
-			throw emu_fatalerror("%s: invalid screen type configured\n", tag());
-		}
+	case SCREEN_TYPE_RASTER:
+	case SCREEN_TYPE_VECTOR:
+		return std::make_pair(4, 3); // assume standard CRT
+	default:
+		return device_screen_interface::screen_default_aspect();
 	}
-
-	// square pixels?
-	if ((~0U == phys_aspect.first) && (~0U == phys_aspect.second))
-	{
-		phys_aspect.first = visible_area().width();
-		phys_aspect.second = visible_area().height();
-	}
-
-	// always keep this in reduced form
-	util::reduce_fraction(phys_aspect.first, phys_aspect.second);
-
-	return phys_aspect;
 }
 
 
@@ -818,7 +779,7 @@ void screen_device::device_start()
 			// The OSD picks up the size before start is called, so this only affect the info display if it's called up in-game
 			m_width = m_svg->width();
 			m_height = m_svg->height();
-			m_visarea.set(0, m_width - 1, 0, m_height - 1);
+			device_screen_interface::set_visible_area(0, m_width - 1, 0, m_height - 1);
 		}
 	}
 
@@ -842,12 +803,12 @@ void screen_device::device_start()
 
 	// configure the default cliparea
 	render_container::user_settings settings;
-	m_container->get_user_settings(settings);
+	container().get_user_settings(settings);
 	settings.m_xoffset = m_xoffset;
 	settings.m_yoffset = m_yoffset;
 	settings.m_xscale = m_xscale;
 	settings.m_yscale = m_yscale;
-	m_container->set_user_settings(settings);
+	container().set_user_settings(settings);
 
 	// allocate the VBLANK timers
 	m_vblank_begin_timer = timer_alloc(TID_VBLANK_START);
@@ -861,7 +822,7 @@ void screen_device::device_start()
 		m_scanline_timer = timer_alloc(TID_SCANLINE);
 
 	// configure the screen with the default parameters
-	configure(m_width, m_height, m_visarea, m_refresh);
+	configure(m_width, m_height, visible_area(), m_refresh);
 
 	// reset VBLANK timing
 	m_vblank_start_time = attotime::zero;
@@ -889,10 +850,6 @@ void screen_device::device_start()
 	// register items for saving
 	save_item(NAME(m_width));
 	save_item(NAME(m_height));
-	save_item(NAME(m_visarea.min_x));
-	save_item(NAME(m_visarea.min_y));
-	save_item(NAME(m_visarea.max_x));
-	save_item(NAME(m_visarea.max_y));
 	save_item(NAME(m_last_partial_scan));
 	save_item(NAME(m_frame_period));
 	save_item(NAME(m_brightness));
@@ -989,8 +946,8 @@ void screen_device::device_timer(emu_timer &timer, device_timer_id id, int param
 
 			// compute the next visible scanline
 			param++;
-			if (param > m_visarea.bottom())
-				param = m_visarea.top();
+			if (param > visible_area().bottom())
+				param = visible_area().top();
 			m_scanline_timer->adjust(time_until_pos(param), param);
 			break;
 	}
@@ -1018,7 +975,7 @@ void screen_device::configure(int width, int height, const rectangle &visarea, a
 	m_max_width = std::max(m_max_width, width);
 	m_width = width;
 	m_height = height;
-	m_visarea = visarea;
+	device_screen_interface::set_visible_area(visarea.min_x, visarea.max_x, visarea.min_y, visarea.max_y);
 
 	// reallocate bitmap(s) if necessary
     realloc_screen_bitmaps();
@@ -1080,7 +1037,7 @@ void screen_device::reset_origin(int beamy, int beamx)
 
 	// if we are resetting relative to (visarea.bottom() + 1, 0) == VBLANK start,
 	// call the VBLANK start timer now; otherwise, adjust it for the future
-	if (beamy == ((m_visarea.bottom() + 1) % m_height) && beamx == 0)
+	if (beamy == ((visible_area().bottom() + 1) % m_height) && beamx == 0)
 		vblank_begin();
 	else
 		m_vblank_begin_timer->adjust(time_until_vblank_start());
@@ -1099,7 +1056,7 @@ void screen_device::update_scan_bitmap_size(int y)
 		return;
 
 	// determine effective size to allocate
-	s32 effwidth = std::max(m_max_width, m_visarea.right() + 1);
+	s32 effwidth = std::max(m_max_width, visible_area().right() + 1);
 
 	if (m_scan_widths[y] == effwidth)
 		return;
@@ -1122,8 +1079,8 @@ void screen_device::realloc_screen_bitmaps()
 
 	// determine effective size to allocate
 	const bool per_scanline = (m_video_attributes & VIDEO_VARIABLE_WIDTH);
-	s32 effwidth = std::max(per_scanline ? m_max_width : m_width, m_visarea.right() + 1);
-	s32 effheight = std::max(m_height, m_visarea.bottom() + 1);
+	s32 effwidth = std::max(per_scanline ? m_max_width : m_width, visible_area().right() + 1);
+	s32 effheight = std::max(m_height, visible_area().bottom() + 1);
 
 	// reize all registered screen bitmaps
 	for (auto &item : m_auto_bitmap_list)
@@ -1135,8 +1092,8 @@ void screen_device::realloc_screen_bitmaps()
 		m_bitmap[0].set_palette(m_palette->palette());
 		m_bitmap[1].set_palette(m_palette->palette());
 	}
-	m_texture[0]->set_bitmap(m_bitmap[0], m_visarea, m_bitmap[0].texformat());
-	m_texture[1]->set_bitmap(m_bitmap[1], m_visarea, m_bitmap[1].texformat());
+	m_texture[0]->set_bitmap(m_bitmap[0], visible_area(), m_bitmap[0].texformat());
+	m_texture[1]->set_bitmap(m_bitmap[1], visible_area(), m_bitmap[1].texformat());
 
     allocate_scan_bitmaps();
 }
@@ -1201,7 +1158,7 @@ bool screen_device::update_partial(int scanline)
 	}
 
 	// set the range of scanlines to render
-	rectangle clip(m_visarea);
+	rectangle clip(visible_area());
 	clip.sety((std::max)(clip.top(), m_last_partial_scan), (std::min)(clip.bottom(), scanline));
 
 	// skip if entirely outside of visible area
@@ -1292,9 +1249,9 @@ void screen_device::update_now()
 
 	int current_vpos = vpos();
 	int current_hpos = hpos();
-	rectangle clip = m_visarea;
+	rectangle clip = visible_area();
 
-	LOG_PARTIAL_UPDATES(("update_now(): Y=%d, X=%d, last partial %d, partial hpos %d  (vis %d %d)\n", current_vpos, current_hpos, m_last_partial_scan, m_partial_scan_hpos, m_visarea.right(), m_visarea.bottom()));
+	LOG_PARTIAL_UPDATES(("update_now(): Y=%d, X=%d, last partial %d, partial hpos %d  (vis %d %d)\n", current_vpos, current_hpos, m_last_partial_scan, m_partial_scan_hpos, visible_area().right(), visible_area().bottom()));
 
 	// start off by doing a partial update up to the line before us, in case that was necessary
 	if (current_vpos > m_last_partial_scan)
@@ -1347,7 +1304,7 @@ void screen_device::update_now()
 	}
 
 	// now draw this partial scanline
-	clip = m_visarea;
+	clip = visible_area();
 
 	clip.set((std::max)(clip.left(), m_partial_scan_hpos),
 			 (std::min)(clip.right(), current_hpos),
@@ -1394,7 +1351,7 @@ void screen_device::update_now()
 		m_last_partial_scan = current_vpos;
 
 		// if we completed the line, mark it so
-		if (current_hpos >= m_visarea.right())
+		if (current_hpos >= visible_area().right())
 		{
 			m_partial_scan_hpos = 0;
 			m_last_partial_scan = current_vpos + 1;
@@ -1533,7 +1490,7 @@ int screen_device::vpos() const
 	vpos = delta / m_scantime;
 
 	// adjust for the fact that VBLANK starts at the bottom of the visible area
-	return (m_visarea.bottom() + 1 + vpos) % m_height;
+	return (visible_area().bottom() + 1 + vpos) % m_height;
 }
 
 
@@ -1573,7 +1530,7 @@ attotime screen_device::time_until_pos(int vpos, int hpos) const
 	assert(hpos >= 0);
 
 	// since we measure time relative to VBLANK, compute the scanline offset from VBLANK
-	vpos += m_height - (m_visarea.bottom() + 1);
+	vpos += m_height - (visible_area().bottom() + 1);
 	vpos %= m_height;
 
 	// compute the delta for the given X,Y position
@@ -1708,7 +1665,7 @@ void screen_device::create_composited_bitmap()
 	if (!curbitmap.valid())
 		return;
 
-	s32 dstwidth = std::max(m_max_width, m_visarea.right() + 1);
+	s32 dstwidth = std::max(m_max_width, visible_area().right() + 1);
 	int dstheight = curbitmap.height();
 
 	switch (curbitmap.format())
@@ -1768,7 +1725,7 @@ bool screen_device::update_quads()
 				{
 					create_composited_bitmap();
 				}
-				m_texture[m_curbitmap]->set_bitmap(m_bitmap[m_curbitmap], m_visarea, m_bitmap[m_curbitmap].texformat());
+				m_texture[m_curbitmap]->set_bitmap(m_bitmap[m_curbitmap], visible_area(), m_bitmap[m_curbitmap].texformat());
 				m_curtexture = m_curbitmap;
 				m_curbitmap = 1 - m_curbitmap;
 			}
@@ -1777,8 +1734,8 @@ bool screen_device::update_quads()
 			rgb_t color = m_color - rgb_t(0, 0xff - m_brightness, 0xff - m_brightness, 0xff - m_brightness);
 
 			// create an empty container with a single quad
-			m_container->empty();
-			m_container->add_quad(0.0f, 0.0f, 1.0f, 1.0f, color, m_texture[m_curtexture], PRIMFLAG_BLENDMODE(BLENDMODE_NONE) | PRIMFLAG_SCREENTEX(1));
+			container().empty();
+			container().add_quad(0.0f, 0.0f, 1.0f, 1.0f, color, m_texture[m_curtexture], PRIMFLAG_BLENDMODE(BLENDMODE_NONE) | PRIMFLAG_SCREENTEX(1));
 		}
 	}
 
@@ -1867,10 +1824,10 @@ void screen_device::finalize_burnin()
 
 	// compute the scaled visible region
 	rectangle scaledvis(
-			m_visarea.left() * m_burnin.width() / m_width,
-			m_visarea.right() * m_burnin.width() / m_width,
-			m_visarea.top() * m_burnin.height() / m_height,
-			m_visarea.bottom() * m_burnin.height() / m_height);
+			visible_area().left() * m_burnin.width() / m_width,
+			visible_area().right() * m_burnin.width() / m_width,
+			visible_area().top() * m_burnin.height() / m_height,
+			visible_area().bottom() * m_burnin.height() / m_height);
 
 	// wrap a bitmap around the memregion we care about
 	bitmap_argb32 finalmap(scaledvis.width(), scaledvis.height());
@@ -1948,7 +1905,7 @@ void screen_device::load_effect_overlay(const char *filename)
 	emu_file file(machine().options().art_path(), OPEN_FLAG_READ);
 	render_load_png(m_screen_overlay_bitmap, file, nullptr, fullname.c_str());
 	if (m_screen_overlay_bitmap.valid())
-		m_container->set_overlay(&m_screen_overlay_bitmap);
+		container().set_overlay(&m_screen_overlay_bitmap);
 	else
 		osd_printf_warning("Unable to load effect PNG file '%s'\n", fullname);
 }

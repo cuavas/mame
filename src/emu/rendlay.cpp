@@ -386,7 +386,7 @@ private:
 			try_insert("deviceshortname", device().shortname());
 			util::ovectorstream tmp;
 			unsigned i(0U);
-			for (screen_device const &screen : screen_device_iterator(machine().root_device()))
+			for (device_screen_interface const &screen : screen_interface_iterator(machine().root_device()))
 			{
 				std::pair<u64, u64> const physaspect(screen.physical_aspect());
 				s64 const w(screen.visible_area().width()), h(screen.visible_area().height());
@@ -3319,7 +3319,7 @@ layout_view::item::item(
 	// fetch common data
 	int index = env.get_attribute_int(itemnode, "index", -1);
 	if (index != -1)
-		m_screen = screen_device_iterator(env.machine().root_device()).byindex(index);
+		m_screen = screen_interface_iterator(env.machine().root_device()).byindex(index);
 	for (u32 mask = m_input_mask; (mask != 0) && (~mask & 1); mask >>= 1)
 		m_input_shift++;
 	if (m_have_output && m_element)
@@ -3331,7 +3331,7 @@ layout_view::item::item(
 		if (itemnode.has_attribute("tag"))
 		{
 			char const *const tag(env.get_attribute_string(itemnode, "tag", ""));
-			m_screen = dynamic_cast<screen_device *>(env.device().subdevice(tag));
+			m_screen = dynamic_cast<device_screen_interface *>(env.device().subdevice(tag));
 			if (!m_screen)
 				throw layout_reference_error(util::string_format("invalid screen tag '%d'", tag));
 		}

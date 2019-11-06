@@ -9,12 +9,14 @@
 *********************************************************************/
 
 #include "emu.h"
+#include "ui/cheatopt.h"
+
 #include "cheat.h"
 #include "mame.h"
+#include "screen.h"
 
 #include "ui/ui.h"
 #include "ui/menu.h"
-#include "ui/cheatopt.h"
 
 
 namespace ui {

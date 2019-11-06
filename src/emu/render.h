@@ -46,7 +46,7 @@
 #ifndef MAME_EMU_RENDER_H
 #define MAME_EMU_RENDER_H
 
-#include "screen.h"
+#include "discreen.h"
 
 #include <math.h>
 #include <array>
@@ -224,7 +224,7 @@ struct render_texinfo
 
 // ======================> render_screen_list
 
-// a render_screen_list is a list of screen_devices
+// a render_screen_list is a list of device_screen_interface
 class render_screen_list
 {
 	// screen list item
@@ -235,11 +235,11 @@ class render_screen_list
 
 	public:
 		// construction/destruction
-		item(screen_device &screen) : m_screen(screen) { }
+		item(device_screen_interface &screen) : m_screen(screen) { }
 
 		// state
-		item *              m_next = nullptr;   // next screen in list
-		screen_device &     m_screen;           // reference to screen device
+		item *                      m_next = nullptr;   // next screen in list
+		device_screen_interface &   m_screen;           // reference to screen device
 	};
 
 public:
@@ -247,11 +247,11 @@ public:
 	int count() const { return m_list.count(); }
 
 	// operations
-	void add(screen_device &screen) { m_list.append(*global_alloc(item(screen))); }
+	void add(device_screen_interface &screen) { m_list.append(*global_alloc(item(screen))); }
 	void reset() { m_list.reset(); }
 
 	// query
-	int contains(screen_device &screen) const
+	int contains(device_screen_interface &screen) const
 	{
 		int count = 0;
 		for (item *curitem = m_list.first(); curitem; curitem = curitem->m_next)
@@ -476,7 +476,7 @@ class render_container
 	friend class render_target;
 
 	// construction/destruction
-	render_container(render_manager &manager, screen_device *screen = nullptr);
+	render_container(render_manager &manager, device_screen_interface *screen = nullptr);
 	~render_container();
 
 public:
@@ -499,7 +499,7 @@ public:
 
 	// getters
 	render_container *next() const { return m_next; }
-	screen_device *screen() const { return m_screen; }
+	device_screen_interface *screen() const { return m_screen; }
 	render_manager &manager() const { return m_manager; }
 	render_texture *overlay() const { return m_overlaytexture; }
 	int orientation() const { return m_user.m_orientation; }
@@ -572,17 +572,17 @@ private:
 	void update_palette();
 
 	// internal state
-	render_container *      m_next;                 // the next container in the list
-	render_manager &        m_manager;              // reference back to the owning manager
-	simple_list<item>       m_itemlist;             // head of the item list
-	fixed_allocator<item>   m_item_allocator;       // free container items
-	screen_device *         m_screen;               // the screen device
-	user_settings           m_user;                 // user settings
-	bitmap_argb32 *         m_overlaybitmap;        // overlay bitmap
-	render_texture *        m_overlaytexture;       // overlay texture
-	std::unique_ptr<palette_client> m_palclient;    // client to the screen palette
-	std::vector<rgb_t>      m_bcglookup;            // copy of screen palette with bcg adjustment
-	rgb_t                   m_bcglookup256[0x400];  // lookup table for brightness/contrast/gamma
+	render_container *          m_next;                 // the next container in the list
+	render_manager &            m_manager;              // reference back to the owning manager
+	simple_list<item>           m_itemlist;             // head of the item list
+	fixed_allocator<item>       m_item_allocator;       // free container items
+	device_screen_interface *   m_screen;               // the screen device
+	user_settings               m_user;                 // user settings
+	bitmap_argb32 *             m_overlaybitmap;        // overlay bitmap
+	render_texture *            m_overlaytexture;       // overlay texture
+	std::unique_ptr<palette_client> m_palclient;        // client to the screen palette
+	std::vector<rgb_t>          m_bcglookup;            // copy of screen palette with bcg adjustment
+	rgb_t                       m_bcglookup256[0x400];  // lookup table for brightness/contrast/gamma
 };
 
 
@@ -798,7 +798,7 @@ public:
 
 		// getters
 		layout_element *element() const { return m_element; }
-		screen_device *screen() { return m_screen; }
+		device_screen_interface *screen() { return m_screen; }
 		const render_bounds &bounds() const { return m_bounds; }
 		const render_color &color() const { return m_color; }
 		int blend_mode() const { return m_blend_mode; }
@@ -823,21 +823,21 @@ public:
 		static int get_blend_mode(environment &env, util::xml::data_node const &itemnode);
 
 		// internal state
-		layout_element *const   m_element;          // pointer to the associated element (non-screens only)
-		output_finder<>         m_output;           // associated output
-		bool const              m_have_output;      // whether we actually have an output
-		std::string const       m_input_tag;        // input tag of this item
-		ioport_port *           m_input_port;       // input port of this item
-		ioport_field const *    m_input_field;      // input port field of this item
-		ioport_value const      m_input_mask;       // input mask of this item
-		u8                      m_input_shift;      // input mask rightshift for raw (trailing 0s)
-		bool const              m_input_raw;        // get raw data from input port
-		screen_device *         m_screen;           // pointer to screen
-		int                     m_orientation;      // orientation of this item
-		render_bounds           m_bounds;           // bounds of the item
-		render_bounds const     m_rawbounds;        // raw (original) bounds of the item
-		render_color            m_color;            // color of the item
-		int                     m_blend_mode;       // blending mode to use when drawing
+		layout_element *const       m_element;          // pointer to the associated element (non-screens only)
+		output_finder<>             m_output;           // associated output
+		bool const                  m_have_output;      // whether we actually have an output
+		std::string const           m_input_tag;        // input tag of this item
+		ioport_port *               m_input_port;       // input port of this item
+		ioport_field const *        m_input_field;      // input port field of this item
+		ioport_value const          m_input_mask;       // input mask of this item
+		u8                          m_input_shift;      // input mask rightshift for raw (trailing 0s)
+		bool const                  m_input_raw;        // get raw data from input port
+		device_screen_interface *   m_screen;           // pointer to screen
+		int                         m_orientation;      // orientation of this item
+		render_bounds               m_bounds;           // bounds of the item
+		render_bounds const         m_rawbounds;        // raw (original) bounds of the item
+		render_color                m_color;            // color of the item
+		int                         m_blend_mode;       // blending mode to use when drawing
 	};
 	using item_list = std::list<item>;
 
@@ -1100,7 +1100,7 @@ public:
 	running_machine &machine() const { return m_machine; }
 
 	// global queries
-	bool is_live(screen_device &screen) const;
+	bool is_live(device_screen_interface &screen) const;
 	float max_update_rate() const;
 
 	// targets
@@ -1135,7 +1135,7 @@ public:
 
 private:
 	// containers
-	render_container *container_alloc(screen_device *screen = nullptr);
+	render_container *container_alloc(device_screen_interface *screen = nullptr);
 	void container_free(render_container *container);
 
 	// config callbacks

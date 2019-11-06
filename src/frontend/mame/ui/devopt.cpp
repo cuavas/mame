@@ -9,9 +9,12 @@
 *********************************************************************/
 
 #include "emu.h"
-#include "ui/ui.h"
 #include "ui/devopt.h"
+
+#include "ui/ui.h"
+
 #include "romload.h"
+#include "screen.h"
 
 
 namespace ui {

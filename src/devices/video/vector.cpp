@@ -42,9 +42,11 @@
  **************************************************************************** */
 
 #include "emu.h"
+#include "vector.h"
+
 #include "emuopts.h"
 #include "rendutil.h"
-#include "vector.h"
+#include "screen.h"
 
 
 #define VECTOR_WIDTH_DENOM 512

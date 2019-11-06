@@ -15,6 +15,7 @@
 #include "crsshair.h"
 #include "rendersw.hxx"
 #include "output.h"
+#include "screen.h"
 
 #include "aviio.h"
 #include "png.h"

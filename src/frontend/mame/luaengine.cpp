@@ -8,9 +8,9 @@
 
 ***************************************************************************/
 
-#include <thread>
-#include <lua.hpp>
 #include "emu.h"
+#include "luaengine.h"
+
 #include "mame.h"
 #include "debugger.h"
 #include "debug/debugcon.h"
@@ -20,12 +20,17 @@
 #include "emuopts.h"
 #include "ui/ui.h"
 #include "ui/pluginopt.h"
-#include "luaengine.h"
 #include "natkeyboard.h"
 #include "uiinput.h"
 #include "pluginopts.h"
 #include "softlist.h"
 #include "inputdev.h"
+#include "screen.h"
+
+#include <lua.hpp>
+
+#include <thread>
+
 
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wshift-count-overflow"

@@ -9,14 +9,15 @@
 ***************************************************************************/
 
 #include "emu.h"
-
 #include "ui/info.h"
+
 #include "ui/ui.h"
 
 #include "drivenum.h"
-#include "romload.h"
-#include "softlist.h"
 #include "emuopts.h"
+#include "romload.h"
+#include "screen.h"
+#include "softlist.h"
 
 
 namespace ui {
@@ -412,10 +413,10 @@ std::string machine_info::game_info_string() const
 //  a given screen
 //-------------------------------------------------
 
-std::string machine_info::get_screen_desc(screen_device &screen) const
+std::string machine_info::get_screen_desc(device_screen_interface &screen) const
 {
-	if (screen_device_iterator(m_machine.root_device()).count() > 1)
-		return string_format(_("Screen '%1$s'"), screen.tag());
+	if (screen_interface_iterator(m_machine.root_device()).count() > 1)
+		return string_format(_("Screen '%1$s'"), screen.device().tag());
 	else
 		return _("Screen");
 }
