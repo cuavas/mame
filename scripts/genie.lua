@@ -480,7 +480,7 @@ language "C++"
 
 flags {
 	"StaticRuntime",
-	"Cpp17",
+	"Cpp20",
 }
 
 configuration { "vs20*" }
@@ -753,11 +753,11 @@ end
 
 local version = str_to_version(_OPTIONS["gcc_version"])
 	buildoptions_cpp {
-		"-std=c++17",
+		"-std=c++20",
 	}
 
 	buildoptions_objcpp {
-		"-std=c++17",
+		"-std=c++20",
 	}
 -- this speeds it up a bit by piping between the preprocessor/compiler/assembler
 	buildoptions {
@@ -1179,7 +1179,7 @@ configuration { "asmjs" }
 		"-s USE_SDL_TTF=2",
 	}
 	buildoptions_cpp {
-		"-std=c++17",
+		"-std=c++20",
 		"-s EXCEPTION_CATCHING_ALLOWED=\"['_ZN15running_machine17start_all_devicesEv','_ZN12cli_frontend7executeEiPPc','_ZN8chd_file11open_commonEb','_ZN8chd_file13read_metadataEjjRNSt3__212basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEE','_ZN8chd_file13read_metadataEjjRNSt3__26vectorIhNS0_9allocatorIhEEEE','_ZNK19netlist_mame_device19base_validity_checkER16validity_checker']\"",
 	}
 	linkoptions {
@@ -1239,7 +1239,7 @@ configuration { "android*" }
 		"-Wno-incompatible-ms-struct",
 	}
 	buildoptions_cpp {
-		"-std=c++17",
+		"-std=c++20",
 		"-Wno-extern-c-compat",
 		"-Wno-tautological-constant-out-of-range-compare",
 		"-Wno-tautological-pointer-compare",
