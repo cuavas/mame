@@ -480,7 +480,6 @@ language "C++"
 
 flags {
 	"StaticRuntime",
-	"Cpp20",
 }
 
 configuration { "vs20*" }
@@ -489,6 +488,7 @@ configuration { "vs20*" }
 	}
 	buildoptions_cpp {
 		"/Zc:__cplusplus",
+		"/std:c++20",
 	}
 	flags {
 		"ExtraWarnings",
