@@ -13,7 +13,7 @@
 -- Dynamic recompiler objects
 --------------------------------------------------
 
-DRC_CPUS = { "ADSP21062", "DSP16", "DSPP", "E1", "MB86235", "MIPS3", "POWERPC", "SH", "SWP30", "UNSP" }
+DRC_CPUS = { "ADSP21062", "DSP16", "DSPP", "E1", "MB86235", "MIPS3", "POWERPC", "SH", "SWP30", "UNSP", "DRCTESTER" }
 CPU_INCLUDE_DRC = false
 for i, v in ipairs(DRC_CPUS) do
 	if (CPUS[v]~=null) then
@@ -4353,4 +4353,17 @@ end
 if opt_tool(CPUS, "EDSP") then
 	table.insert(disasm_files , MAME_DIR .. "src/devices/cpu/edsp/edspdasm.cpp")
 	table.insert(disasm_files , MAME_DIR .. "src/devices/cpu/edsp/edspdasm.h")
+end
+
+--------------------------------------------------
+-- DRC Tester CPU
+--@src/devices/cpu/drctester/drctester.h,CPUS["DRCTESTER"] = true
+--------------------------------------------------
+
+if CPUS["DRCTESTER"] then
+	files {
+		MAME_DIR .. "src/devices/cpu/drctester/drctester.h",
+		MAME_DIR .. "src/devices/cpu/drctester/drctesterhelper.cpp",
+		MAME_DIR .. "src/devices/cpu/drctester/drctester.cpp",
+	}
 end

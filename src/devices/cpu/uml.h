@@ -417,6 +417,11 @@ namespace uml {
 		constexpr u8 numparams() const { return m_numparams; }
 		const parameter &param(int index) const { assert(index < m_numparams); return m_param[index]; }
 
+		static char const *get_name(uint32_t opcode) { return s_opcode_info_table[opcode].mnemonic; }
+		static u8 const get_outflags(uint32_t opcode) { return s_opcode_info_table[opcode].outflags; }
+		static u8 const get_modflags(uint32_t opcode) { return s_opcode_info_table[opcode].modflags; }
+		static u8 const get_conditional(uint32_t opcode) { return s_opcode_info_table[opcode].condition; }
+
 		// setters
 		void set_flags(u8 flags) { m_flags = flags; }
 		void set_mapvar(int paramnum, u32 value) { assert(paramnum < m_numparams); assert(m_param[paramnum].is_mapvar()); m_param[paramnum] = value; }
@@ -612,13 +617,15 @@ namespace uml {
 		void fdcopyi(parameter dst, parameter src) { configure(OP_FCOPYI, 8, dst, src); }
 		void icopyfd(parameter dst, parameter src) { configure(OP_ICOPYF, 8, dst, src); }
 
-	private:
+	public:
 		// internal configuration
 		void configure(opcode_t op, u8 size, condition_t cond = COND_ALWAYS);
 		void configure(opcode_t op, u8 size, parameter p0, condition_t cond = COND_ALWAYS);
 		void configure(opcode_t op, u8 size, parameter p0, parameter p1, condition_t cond = COND_ALWAYS);
 		void configure(opcode_t op, u8 size, parameter p0, parameter p1, parameter p2, condition_t cond = COND_ALWAYS);
 		void configure(opcode_t op, u8 size, parameter p0, parameter p1, parameter p2, parameter p3, condition_t cond = COND_ALWAYS);
+
+	private:
 
 		// opcode validation and simplification
 		void validate();

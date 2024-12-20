@@ -30623,6 +30623,9 @@ dominobv2
 @source:misc/dorachan.cpp
 dorachan
 
+@source:misc/drctester.cpp
+drctester
+
 @source:misc/drdmania.cpp
 drdmania
 
