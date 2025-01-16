@@ -2343,6 +2343,39 @@ TEST_MAPVAR_RECOVER(block, uml::M1, 1234, 1);
 		UML_DREAD(block, mem(&m_state->testval), 16, SIZE_QWORD, SPACE_PROGRAM);
 		UML_CALLC(block, cfunc_print_val64, &m_state->testval);
 	}
+	else if (step == 79)
+	{
+		uml::code_handle *subroutine = nullptr;
+		alloc_handle(*m_drcuml, subroutine, "subroutine");
+		int label = 1, exit;
+
+		UML_MAPVAR(block, M0, 0);
+		UML_MOV(block, I0, M0);
+		UML_CALLH(block, *subroutine);
+		UML_MAPVAR(block, M0, 1);
+		UML_MOV(block, I1, M0);
+		UML_MAPVAR(block, M0, 2);
+		UML_JMP(block, exit = label++);
+
+		UML_HANDLE(block, *subroutine);
+		UML_MOV(block, I2, M0);
+		UML_RECOVER(block, I3, M0);
+		UML_RET(block);
+
+		UML_LABEL(block, exit);
+		UML_MOV(block, I4, M0);
+
+		UML_DMOV(block, mem(&m_state->testval), I0);
+		UML_CALLC(block, cfunc_print_val64, &m_state->testval); // 0
+		UML_DMOV(block, mem(&m_state->testval), I1);
+		UML_CALLC(block, cfunc_print_val64, &m_state->testval); // 1
+		UML_DMOV(block, mem(&m_state->testval), I2);
+		UML_CALLC(block, cfunc_print_val64, &m_state->testval); // 2
+		UML_DMOV(block, mem(&m_state->testval), I3);
+		UML_CALLC(block, cfunc_print_val64, &m_state->testval); // 0
+		UML_DMOV(block, mem(&m_state->testval), I4);
+		UML_CALLC(block, cfunc_print_val64, &m_state->testval); // 2
+	}
 	else
 	{
 
