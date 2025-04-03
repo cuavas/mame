@@ -2748,6 +2748,26 @@ TEST_MAPVAR_RECOVER(block, uml::M2, 4, 5, 6);
 		UML_DREAD(block, mem(&m_state->testval), 16, SIZE_QWORD, SPACE_PROGRAM);
 		UML_CALLC(block, cfunc_print_val64, &m_state->testval);
 	}
+	else if (step == 83)
+	{
+		UML_DMOV(block, I8, 0x1234567'89abcdef0);
+		UML_DMOV(block, I9, 0x1234567'89abcdef0);
+		UML_AND(block, I8, I8, 0xffffff00);
+		UML_OR(block, I9, I9, 1);
+
+		UML_DMOV(block, mem(&m_state->testval), I8);
+		UML_CALLC(block, cfunc_print_val64, &m_state->testval);
+		UML_DMOV(block, mem(&m_state->testval), I9);
+		UML_CALLC(block, cfunc_print_val64, &m_state->testval);
+
+		UML_MOV(block, I1, 5);
+		UML_OR(block, I8, I8, I1);
+
+		UML_DMOV(block, mem(&m_state->testval), I8);
+		UML_CALLC(block, cfunc_print_val64, &m_state->testval);
+		UML_DMOV(block, mem(&m_state->testval), I9);
+		UML_CALLC(block, cfunc_print_val64, &m_state->testval);
+	}
 	else
 	{
 
