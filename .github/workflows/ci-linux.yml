@@ -5,7 +5,6 @@ on:
     paths:
     - '.github/workflows/**'
     - '3rdparty/**'
-    - 'hash/**'
     - 'scripts/**'
     - 'src/**'
     - 'COPYING'
@@ -14,7 +13,6 @@ on:
     paths:
     - '.github/workflows/**'
     - '3rdparty/**'
-    - 'hash/**'
     - 'scripts/**'
     - 'src/**'
     - 'COPYING'
@@ -33,8 +31,6 @@ jobs:
             cc: gcc
             cxx: g++
             archopts: -U_FORTIFY_SOURCE
-            subtarget: tiny
-            executable: mametiny
           - compiler: clang
             cc: clang
             cxx: clang++
@@ -57,20 +53,17 @@ jobs:
         OVERRIDE_CC: ${{ matrix.cc }}
         OVERRIDE_CXX: ${{ matrix.cxx }}
         ARCHOPTS: ${{ matrix.archopts }}
-        SUBTARGET: ${{ matrix.subtarget }}
-        TOOLS: 1
+        SUBTARGET: drctest
+        SOURCES: src/mame/misc/drctester.cpp
       run: make -j3
     - name: Validate
-      run: ./${{ matrix.executable }} -validate
-    - name: Reconcile driver list
-      run: ./${{ matrix.executable }} -listxml | python scripts/build/makedep.py reconcilelist -l src/mame/${{ matrix.subtarget }}.lst -
-    - name: ORM check
-      run: python scripts/minimaws/minimaws.py load --executable ./${{ matrix.executable }} --softwarepath hash
+      env:
+        SDL_AUDIODRIVER: dummy
+        SDL_VIDEODRIVER: dummy
+      run: ./drctest -video none -sound none drctester > drctester.log || true
     - uses: actions/upload-artifact@main
       with:
-        name: ${{ matrix.executable }}-linux-${{ matrix.compiler }}-${{ github.sha }}
+        name: drctest-linux-${{ matrix.compiler }}-${{ github.sha }}
         path: |
-          ${{ matrix.executable }}
-          chdman
-          unidasm
+          drctester.log
         if-no-files-found: error

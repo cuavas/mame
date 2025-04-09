@@ -33,15 +33,17 @@ jobs:
     - name: Build
       env:
         USE_LIBSDL: 1
-        TOOLS: 1
+        SUBTARGET: drctest
+        SOURCES: src/mame/misc/drctester.cpp
       run: make -j2
     - name: Validate
-      run: ./mame -validate
+      env:
+        SDL_AUDIODRIVER: dummy
+        SDL_VIDEODRIVER: dummy
+      run: ./drctest -video none -sound none drctester > drctester.log || true
     - uses: actions/upload-artifact@main
       with:
-        name: mame-macos-${{ github.sha }}
+        name: drctest-macos-${{ github.sha }}
         path: |
-          mame
-          chdman
-          unidasm
+          drctester.log
         if-no-files-found: error

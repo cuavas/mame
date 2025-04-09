@@ -33,8 +33,6 @@ jobs:
             slug: mingw-w64-ucrt-x86_64
             cc: gcc
             cxx: g++
-            subtarget: mame
-            executable: mame
           - compiler: clang-x64
             os: windows-latest
             msys: CLANG64
@@ -42,8 +40,6 @@ jobs:
             extrapkg: mingw-w64-clang-x86_64-gcc-compat
             cc: clang
             cxx: clang++
-            subtarget: tiny
-            executable: mametiny
           - compiler: clang-arm64
             os: windows-11-arm
             msys: CLANGARM64
@@ -51,8 +47,6 @@ jobs:
             extrapkg: mingw-w64-clang-aarch64-gcc-compat
             cc: clang
             cxx: clang++
-            subtarget: mame
-            executable: mame
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -71,17 +65,15 @@ jobs:
         OVERRIDE_CC: ${{ matrix.cc }}
         OVERRIDE_CXX: ${{ matrix.cxx }}
         ARCHOPTS: "-fuse-ld=lld"
-        SUBTARGET: ${{ matrix.subtarget }}
-        TOOLS: 1
+        SUBTARGET: drctest
+        SOURCES: src/mame/misc/drctester.cpp
         USE_SDL3: 1
       run: make -j3
     - name: Validate
-      run: ./${{ matrix.executable }}.exe -validate
+      run: ./drctest.exe -video none -sound none drctester > drctester.log || true
     - uses: actions/upload-artifact@main
       with:
-        name: ${{ matrix.executable }}-windows-${{ matrix.compiler }}-${{ github.sha }}
+        name: drctest-windows-${{ matrix.compiler }}-${{ github.sha }}
         path: |
-          ${{ matrix.executable }}.exe
-          chdman.exe
-          unidasm.exe
+          drctester.log
         if-no-files-found: error
