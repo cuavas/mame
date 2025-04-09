@@ -5,10 +5,12 @@
 
 #include "corefloat.h"
 
+#include <cassert>
 
-constexpr uint64_t CACHE_SIZE = (64 * 1024 * 1024);
 
-DEFINE_DEVICE_TYPE(DRCTESTER, drctester_cpu_device, "drctester", "DRC Tester CPU")
+constexpr uint64_t CACHE_SIZE = (128 * 1024 * 1024);
+
+DEFINE_DEVICE_TYPE(DRCTESTER, drctester_cpu_device, "drctestcpu", "DRC Tester CPU")
 
 drctester_cpu_device::drctester_cpu_device(const machine_config &mconfig, const char *tag, device_t *owner, u32 clock)
 	: cpu_device(mconfig, DRCTESTER, tag, owner, clock)
@@ -21,6 +23,7 @@ drctester_cpu_device::drctester_cpu_device(const machine_config &mconfig, const 
 	, m_out_of_cycles(nullptr)
 	, m_testhandle(nullptr)
 	, m_cache_dirty(false)
+	, m_large_float(16'777'213.0f)
 {
 }
 
@@ -98,6 +101,19 @@ std::unique_ptr<util::disasm_interface> drctester_cpu_device::create_disassemble
 void drctester_cpu_device::internal_map(address_map &map)
 {
 	map(0x0000, 0x00ff).ram();
+
+	map(0x1000, 0x1003).rw(FUNC(drctester_cpu_device::fe_check_r), FUNC(drctester_cpu_device::fe_check_w));
+}
+
+uint32_t drctester_cpu_device::fe_check_r(address_space &space, offs_t offset)
+{
+	cfunc_fe_check(*this);
+	return space.unmap();
+}
+
+void drctester_cpu_device::fe_check_w(offs_t offset, uint32_t data)
+{
+	cfunc_fe_check(*this);
 }
 
 void drctester_cpu_device::execute_run()
@@ -121,6 +137,7 @@ void drctester_cpu_device::execute_run()
 		if (execute_result == EXECUTE_MISSING_CODE)
 		{
 			code_flush_cache();
+			m_labelnum = 0;
 			code_compile_block(m_state->pc);
 		}
 		else if (execute_result == EXECUTE_UNMAPPED_CODE)
@@ -146,8 +163,7 @@ void drctester_cpu_device::code_flush_cache()
 		static_generate_nocode_handler();
 		static_generate_out_of_cycles();
 	}
-
-	catch (drcuml_block::abort_compilation &)
+	catch (const drcuml_block::abort_compilation &)
 	{
 		fatalerror("Unable to generate drctester code\n");
 		fflush(stdout);
@@ -156,13 +172,26 @@ void drctester_cpu_device::code_flush_cache()
 
 void drctester_cpu_device::code_compile_block(uint32_t pc)
 {
-	drcuml_block &block(m_drcuml->begin_block(4096*8*std::size(FLAG_COMBOS)));
+	bool succeeded = false;
+	while (!succeeded)
+	{
+		try
+		{
+			drcuml_block &block(m_drcuml->begin_block(8192*8*std::size(FLAG_COMBOS)));
 
-	UML_HASH(block, 0, pc);
-	generate_tests(block, m_state->test_step++);
-	UML_HASHJMP(block, 0, pc+0x10, *m_nocode);
+			UML_HASH(block, 0, pc);
+			generate_tests(block, m_state->test_step);
+			UML_HASHJMP(block, 0, pc+0x10, *m_nocode);
 
-	block.end();
+			block.end();
+			m_state->test_step++;
+			succeeded = true;
+		}
+		catch (const drcuml_block::abort_compilation &)
+		{
+			code_flush_cache();
+		}
+	}
 }
 
 static inline void alloc_handle(drcuml_state &drcuml, uml::code_handle *&handleptr, const char *name)
@@ -223,6 +252,13 @@ void drctester_cpu_device::static_generate_out_of_cycles()
 	block.end();
 }
 
+void drctester_cpu_device::cfunc_fe_check(drctester_cpu_device &that)
+{
+	assert((that.m_large_float + 0.5f) == 16'777'214.0f);
+	assert((that.m_large_float - 0.5f) == 16'777'212.0f);
+	assert((0.5f - that.m_large_float) == -16'777'212.0f);
+}
+
 static void cfunc_exit(void *param)
 {
 	exit(1);
@@ -237,7 +273,7 @@ static void cfunc_print_val32(void *param)
 static void cfunc_print_val64(void *param)
 {
 	uint64_t *val = (uint64_t*)param;
-	printf("cfunc_print_val %016llx\n", *val);
+	printf("cfunc_print_val %016llx\n", (unsigned long long)*val);
 }
 
 void cfunc_dump_machine_state(void *param)
@@ -248,10 +284,10 @@ void cfunc_dump_machine_state(void *param)
 	printf("\t%02x %02x %08x\n", input->flags, input->fmod, input->exp);
 
 	for (int i = 0; i < std::size(input->r); i++)
-		printf("\treg  %d %08llx\n", i, input->r[i].d);
+		printf("\treg  %d %08llx\n", i, (unsigned long long)input->r[i].d);
 
 	for (int i = 0; i < std::size(input->f); i++)
-		printf("\tfreg %d %08llx %lf\n", i, d2u(input->f[i].d), input->f[i].d);
+		printf("\tfreg %d %08llx %lf\n", i, (unsigned long long)d2u(input->f[i].d), input->f[i].d);
 
 	printf("\n");
 }
@@ -303,15 +339,28 @@ TEST_ENTRY_3(block, uml::OP_ADD, 8, 0x0000000000000000, 0, 0, 0, uml::FLAG_Z);
 	else if (step == 4)
 	{
 
-TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x7fffffff, 0x12345678, 0x6dcba987, 0,      0);
+TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x7fffffff, 0x12345678, 0x6dcba987, 0,           0);
 TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x7fffffff, 0x12345678, 0x6dcba986, uml::FLAG_C, 0);
-TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x80000000, 0x12345678, 0x6dcba988, 0,   uml::FLAG_V | uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x80000000, 0x12345678, 0x6dcba988, 0,           uml::FLAG_V | uml::FLAG_S);
 TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x80000000, 0x12345678, 0x6dcba987, uml::FLAG_C, uml::FLAG_V | uml::FLAG_S);
-TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0xffffffff, 0x92345678, 0x6dcba987, 0,   uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0xffffffff, 0x92345678, 0x6dcba987, 0,           uml::FLAG_S);
 TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0xffffffff, 0x92345678, 0x6dcba986, uml::FLAG_C, uml::FLAG_S);
-TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x00000000, 0x92345678, 0x6dcba988, 0,   uml::FLAG_C | uml::FLAG_Z);
+TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x00000000, 0x92345678, 0x6dcba988, 0,           uml::FLAG_C | uml::FLAG_Z);
 TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x00000000, 0x92345678, 0x6dcba987, uml::FLAG_C, uml::FLAG_C | uml::FLAG_Z);
 TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x12345678, 0x12345678, 0xffffffff, uml::FLAG_C, uml::FLAG_C);
+TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x07654321, 0x87654321, 0x7fffffff, uml::FLAG_C, uml::FLAG_C);
+TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x80000000, 0x00000000, 0x7fffffff, uml::FLAG_C, uml::FLAG_V | uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x80000001, 0x00000000, 0x80000000, uml::FLAG_C, uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x00000000, 0x00000000, 0xffffffff, uml::FLAG_C, uml::FLAG_C | uml::FLAG_Z);
+TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0xffffffff, 0x7fffffff, 0x7fffffff, uml::FLAG_C, uml::FLAG_V | uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x00000000, 0x7fffffff, 0x80000000, uml::FLAG_C, uml::FLAG_C | uml::FLAG_Z);
+TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x7fffffff, 0x7fffffff, 0xffffffff, uml::FLAG_C, uml::FLAG_C);
+TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x00000000, 0x80000000, 0x7fffffff, uml::FLAG_C, uml::FLAG_C | uml::FLAG_Z);
+TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x00000001, 0x80000000, 0x80000000, uml::FLAG_C, uml::FLAG_C | uml::FLAG_V);
+TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x80000000, 0x80000000, 0xffffffff, uml::FLAG_C, uml::FLAG_C | uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x7fffffff, 0xffffffff, 0x7fffffff, uml::FLAG_C, uml::FLAG_C);
+TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x80000000, 0xffffffff, 0x80000000, uml::FLAG_C, uml::FLAG_C | uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0xffffffff, 0xffffffff, 0xffffffff, uml::FLAG_C, uml::FLAG_C | uml::FLAG_S);
 TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x00000001, 0, 0, uml::FLAG_C, 0);
 TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x00000000, 0, 0, 0, uml::FLAG_Z);
 
@@ -319,15 +368,28 @@ TEST_ENTRY_3(block, uml::OP_ADDC, 4, 0x00000000, 0, 0, 0, uml::FLAG_Z);
 	else if (step == 5)
 	{
 
-TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x7fffffffffffffff, 0x0123456789abcdef, 0x7edcba9876543210, 0,      0);
+TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x7fffffffffffffff, 0x0123456789abcdef, 0x7edcba9876543210, 0,           0);
 TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x7fffffffffffffff, 0x0123456789abcdef, 0x7edcba987654320f, uml::FLAG_C, 0);
-TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x8000000000000000, 0x0123456789abcdef, 0x7edcba9876543211, 0,      uml::FLAG_V | uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x8000000000000000, 0x0123456789abcdef, 0x7edcba9876543211, 0,           uml::FLAG_V | uml::FLAG_S);
 TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x8000000000000000, 0x0123456789abcdef, 0x7edcba9876543210, uml::FLAG_C, uml::FLAG_V | uml::FLAG_S);
-TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0xffffffffffffffff, 0x8123456789abcdef, 0x7edcba9876543210, 0,      uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0xffffffffffffffff, 0x8123456789abcdef, 0x7edcba9876543210, 0,           uml::FLAG_S);
 TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0xffffffffffffffff, 0x8123456789abcdef, 0x7edcba987654320f, uml::FLAG_C, uml::FLAG_S);
-TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x0000000000000000, 0x8123456789abcdef, 0x7edcba9876543211, 0,      uml::FLAG_C | uml::FLAG_Z);
+TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x0000000000000000, 0x8123456789abcdef, 0x7edcba9876543211, 0,           uml::FLAG_C | uml::FLAG_Z);
 TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x0000000000000000, 0x8123456789abcdef, 0x7edcba9876543210, uml::FLAG_C, uml::FLAG_C | uml::FLAG_Z);
 TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x123456789abcdef0, 0x123456789abcdef0, 0xffffffffffffffff, uml::FLAG_C, uml::FLAG_C);
+TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x7edcba9876543210, 0xfedcba9876543210, 0x7fffffffffffffff, uml::FLAG_C, uml::FLAG_C);
+TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x8000000000000000, 0x0000000000000000, 0x7fffffffffffffff, uml::FLAG_C, uml::FLAG_V | uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x8000000000000001, 0x0000000000000000, 0x8000000000000000, uml::FLAG_C, uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x0000000000000000, 0x0000000000000000, 0xffffffffffffffff, uml::FLAG_C, uml::FLAG_C | uml::FLAG_Z);
+TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0xffffffffffffffff, 0x7fffffffffffffff, 0x7fffffffffffffff, uml::FLAG_C, uml::FLAG_V | uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x0000000000000000, 0x7fffffffffffffff, 0x8000000000000000, uml::FLAG_C, uml::FLAG_C | uml::FLAG_Z);
+TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x7fffffffffffffff, 0x7fffffffffffffff, 0xffffffffffffffff, uml::FLAG_C, uml::FLAG_C);
+TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x0000000000000000, 0x8000000000000000, 0x7fffffffffffffff, uml::FLAG_C, uml::FLAG_C | uml::FLAG_Z);
+TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x0000000000000001, 0x8000000000000000, 0x8000000000000000, uml::FLAG_C, uml::FLAG_C | uml::FLAG_V);
+TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x8000000000000000, 0x8000000000000000, 0xffffffffffffffff, uml::FLAG_C, uml::FLAG_C | uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x7fffffffffffffff, 0xffffffffffffffff, 0x7fffffffffffffff, uml::FLAG_C, uml::FLAG_C);
+TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x8000000000000000, 0xffffffffffffffff, 0x8000000000000000, uml::FLAG_C, uml::FLAG_C | uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, uml::FLAG_C, uml::FLAG_C | uml::FLAG_S);
 TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x0000000000000001, 0, 0, uml::FLAG_C, 0);
 TEST_ENTRY_3(block, uml::OP_ADDC, 8, 0x0000000000000000, 0, 0, 0, uml::FLAG_Z);
 
@@ -411,6 +473,7 @@ TEST_ENTRY_4_DOUBLE(block, uml::OP_MULU, 4, 0xffffffff, 0x00000000, 0x11111111, 
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULU, 4, 0x00000000, 0x00000000, 0x11111111, 0x00000000, 0, uml::FLAG_Z);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULU, 4, 0xea61d951, 0x37c048d0, 0x77777777, 0x77777777, 0, uml::FLAG_V);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULU, 4, 0x32323233, 0xcdcdcdcc, 0xcdcdcdcd, 0xffffffff, 0, uml::FLAG_V | uml::FLAG_S);
+TEST_ENTRY_4_DOUBLE(block, uml::OP_MULU, 4, 0xcdcdcdcd, 0x00000000, 0xcdcdcdcd, 1, 0, 0);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULU, 4, 0x00000000, 0x00000000, 0, 0, 0, uml::FLAG_Z);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULU, 4, 0x00000000, 0x00000000, 1, 0, 0, uml::FLAG_Z);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULU, 4, 0x000005b8, 0x00000b70, 0xffffffffaaaaaaab, 0x00001128, 0, uml::FLAG_V);
@@ -424,6 +487,7 @@ TEST_ENTRY_4_DOUBLE(block, uml::OP_MULU, 8, 0xffffffffffffffff, 0x00000000000000
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULU, 8, 0x0000000000000000, 0x0000000000000000, 0x1111111111111111, 0x0000000000000000, 0, uml::FLAG_Z);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULU, 8, 0x0c83fb72ea61d951, 0x37c048d159e26af3, 0x7777777777777777, 0x7777777777777777, 0, uml::FLAG_V);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULU, 8, 0x3232323232323233, 0xcdcdcdcdcdcdcdcc, 0xcdcdcdcdcdcdcdcd, 0xffffffffffffffff, 0, uml::FLAG_V | uml::FLAG_S);
+TEST_ENTRY_4_DOUBLE(block, uml::OP_MULU, 8, 0xcdcdcdcdcdcdcdcd, 0x0000000000000000, 0xcdcdcdcdcdcdcdcd, 1, 0, 0);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULU, 8, 0x0000000000000000, 0x0000000000000000, 0, 0, 0, uml::FLAG_Z);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULU, 8, 0x0000000000000000, 0x0000000000000000, 1, 0, 0, uml::FLAG_Z);
 
@@ -436,6 +500,7 @@ TEST_ENTRY_4_DOUBLE(block, uml::OP_MULS, 4, 0xffffffff, 0x00000000, 0x11111111, 
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULS, 4, 0x00000000, 0x00000000, 0x11111111, 0x00000000, 0, uml::FLAG_Z);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULS, 4, 0x9e26af38, 0xc83fb72e, 0x77777777, 0x88888888, 0, uml::FLAG_V | uml::FLAG_S);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULS, 4, 0x32323233, 0x00000000, 0xcdcdcdcd, 0xffffffff, 0, 0);
+TEST_ENTRY_4_DOUBLE(block, uml::OP_MULS, 4, 0xcdcdcdcd, 0xffffffff, 0xcdcdcdcd, 1, 0, uml::FLAG_S);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULS, 4, 0x00000000, 0x00000000, 0, 0, 0, uml::FLAG_Z);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULS, 4, 0x00000000, 0x00000000, 1, 0, 0, uml::FLAG_Z);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULS, 4, 0x000005b8, 0xfffffa48, 0xffffffffaaaaaaab, 0x00001128, 0, uml::FLAG_S | uml::FLAG_V);
@@ -450,6 +515,7 @@ TEST_ENTRY_4_DOUBLE(block, uml::OP_MULS, 8, 0xffffffffffffffff, 0x00000000000000
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULS, 8, 0x0000000000000000, 0x0000000000000000, 0x1111111111111111, 0x0000000000000000, 0, uml::FLAG_Z);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULS, 8, 0x7c048d159e26af38, 0xc83fb72ea61d950c, 0x7777777777777777, 0x8888888888888888, 0, uml::FLAG_V | uml::FLAG_S);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULS, 8, 0x3232323232323233, 0x0000000000000000, 0xcdcdcdcdcdcdcdcd, 0xffffffffffffffff, 0, 0);
+TEST_ENTRY_4_DOUBLE(block, uml::OP_MULS, 8, 0xcdcdcdcdcdcdcdcd, 0xffffffffffffffff, 0xcdcdcdcdcdcdcdcd, 1, 0, uml::FLAG_S);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULS, 8, 0x0000000000000000, 0x0000000000000000, 0, 0, 0, uml::FLAG_Z);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_MULS, 8, 0x0000000000000000, 0x0000000000000000, 1, 0, 0, uml::FLAG_Z);
 
@@ -461,8 +527,8 @@ TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVU, 4, 0x02702702, 0x00000003, 0x11111111, 
 TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVU, 4, 0x00000000, 0x11111111, 0x11111111, 0x11111112, 0, uml::FLAG_Z);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVU, 4, 0x7fffffff, 0x00000000, 0xfffffffe, 0x00000002, 0, 0);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVU, 4, 0xfffffffe, 0x00000000, 0xfffffffe, 0x00000001, 0, uml::FLAG_S);
-TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVU, 4, UNDEFINED, UNDEFINED, 0xffffffff, 0x00000000, 0, uml::FLAG_V);
-TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVU, 4, UNDEFINED, UNDEFINED, 0x00000000, 0x00000000, 0, uml::FLAG_V);
+TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVU, 4, std::nullopt, std::nullopt, 0xffffffff, 0x00000000, 0, uml::FLAG_V);
+TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVU, 4, std::nullopt, std::nullopt, 0x00000000, 0x00000000, 0, uml::FLAG_V);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVU, 4, 0x00000000, 0x00000000, 0x00000000, 0x11111112, 0, uml::FLAG_Z);
 
 	}
@@ -473,8 +539,8 @@ TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVU, 8, 0x0270270270270270, 0x00000000000000
 TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVU, 8, 0x0000000000000000, 0x1111111111111111, 0x1111111111111111, 0x1111111111111112, 0, uml::FLAG_Z);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVU, 8, 0x7fffffffffffffff, 0x0000000000000000, 0xfffffffffffffffe, 0x0000000000000002, 0, 0);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVU, 8, 0xfffffffffffffffe, 0x0000000000000000, 0xfffffffffffffffe, 0x0000000000000001, 0, uml::FLAG_S);
-TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVU, 8, UNDEFINED, UNDEFINED, 0xffffffffffffffff, 0x0000000000000000, 0, uml::FLAG_V);
-TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVU, 8, UNDEFINED, UNDEFINED, 0x0000000000000000, 0x0000000000000000, 0, uml::FLAG_V);
+TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVU, 8, std::nullopt, std::nullopt, 0xffffffffffffffff, 0x0000000000000000, 0, uml::FLAG_V);
+TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVU, 8, std::nullopt, std::nullopt, 0x0000000000000000, 0x0000000000000000, 0, uml::FLAG_V);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVU, 8, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x1111111111111112, 0, uml::FLAG_Z);
 
 	}
@@ -484,8 +550,8 @@ TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVU, 8, 0x0000000000000000, 0x00000000000000
 TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVS, 4, 0x02702702, 0x00000003, 0x11111111, 0x00000007, 0, 0);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVS, 4, 0x00000000, 0x11111111, 0x11111111, 0x11111112, 0, uml::FLAG_Z);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVS, 4, 0xffffffff, 0x00000000, 0xfffffffe, 0x00000002, 0, uml::FLAG_S);
-TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVS, 4, UNDEFINED, UNDEFINED, 0xffffffff, 0x00000000, 0, uml::FLAG_V);
-TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVS, 4, UNDEFINED, UNDEFINED, 0x00000000, 0x00000000, 0, uml::FLAG_V);
+TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVS, 4, std::nullopt, std::nullopt, 0xffffffff, 0x00000000, 0, uml::FLAG_V);
+TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVS, 4, std::nullopt, std::nullopt, 0x00000000, 0x00000000, 0, uml::FLAG_V);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVS, 4, 0x00000000, 0x00000000, 0x00000000, 0x11111112, 0, uml::FLAG_Z);
 
 	}
@@ -495,8 +561,8 @@ TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVS, 4, 0x00000000, 0x00000000, 0x00000000, 
 TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVS, 8, 0x0270270270270270, 0x0000000000000001, 0x1111111111111111, 0x0000000000000007, 0, 0);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVS, 8, 0x0000000000000000, 0x1111111111111111, 0x1111111111111111, 0x1111111111111112, 0, uml::FLAG_Z);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVS, 8, 0xffffffffffffffff, 0x0000000000000000, 0xfffffffffffffffe, 0x0000000000000002, 0, uml::FLAG_S);
-TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVS, 8, UNDEFINED, UNDEFINED, 0xffffffffffffffff, 0x0000000000000000, 0, uml::FLAG_V);
-TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVS, 8, UNDEFINED, UNDEFINED, 0x0000000000000000, 0x0000000000000000, 0, uml::FLAG_V);
+TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVS, 8, std::nullopt, std::nullopt, 0xffffffffffffffff, 0x0000000000000000, 0, uml::FLAG_V);
+TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVS, 8, std::nullopt, std::nullopt, 0x0000000000000000, 0x0000000000000000, 0, uml::FLAG_V);
 TEST_ENTRY_4_DOUBLE(block, uml::OP_DIVS, 8, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x1111111111111112, 0, uml::FLAG_Z);
 
 	}
@@ -508,6 +574,7 @@ TEST_ENTRY_4_SINGLE(block, uml::OP_MULU, 4, 0xffffffff, 0x11111111, 0x0000000f, 
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULU, 4, 0x00000000, 0x11111111, 0x00000000, 0, uml::FLAG_Z);
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULU, 4, 0xea61d951, 0x77777777, 0x77777777, 0, uml::FLAG_V);
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULU, 4, 0x32323233, 0xcdcdcdcd, 0xffffffff, 0, uml::FLAG_V | uml::FLAG_S);
+TEST_ENTRY_4_SINGLE(block, uml::OP_MULU, 4, 0xcdcdcdcd, 0xcdcdcdcd, 0x00000001, 0, 0);
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULU, 4, 0x00000000, 0x00000000, 0x00000000, 0, uml::FLAG_Z);
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULU, 4, 0x00000000, 0xffffffff, 0x00000000, 0, uml::FLAG_Z);
 
@@ -520,6 +587,7 @@ TEST_ENTRY_4_SINGLE(block, uml::OP_MULU, 8, 0xffffffffffffffff, 0x11111111111111
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULU, 8, 0x0000000000000000, 0x1111111111111111, 0x0000000000000000, 0, uml::FLAG_Z);
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULU, 8, 0x0c83fb72ea61d951, 0x7777777777777777, 0x7777777777777777, 0, uml::FLAG_V);
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULU, 8, 0x3232323232323233, 0xcdcdcdcdcdcdcdcd, 0xffffffffffffffff, 0, uml::FLAG_V | uml::FLAG_S);
+TEST_ENTRY_4_SINGLE(block, uml::OP_MULU, 8, 0xcdcdcdcdcdcdcdcd, 0xcdcdcdcdcdcdcdcd, 0x0000000000000001, 0, 0);
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULU, 8, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0, uml::FLAG_Z);
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULU, 8, 0x0000000000000000, 0xffffffffffffffff, 0x0000000000000000, 0, uml::FLAG_Z);
 
@@ -532,6 +600,7 @@ TEST_ENTRY_4_SINGLE(block, uml::OP_MULS, 4, 0xffffffff, 0x11111111, 0x0000000f, 
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULS, 4, 0x00000000, 0x11111111, 0x00000000, 0, uml::FLAG_Z);
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULS, 4, 0x9e26af38, 0x77777777, 0x88888888, 0, uml::FLAG_V | uml::FLAG_S);
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULS, 4, 0x32323233, 0xcdcdcdcd, 0xffffffff, 0, 0);
+TEST_ENTRY_4_SINGLE(block, uml::OP_MULS, 4, 0xcdcdcdcd, 0xcdcdcdcd, 0x00000001, 0, uml::FLAG_S);
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULS, 4, 0x00000000, 0x00000000, 0x00000000, 0, uml::FLAG_Z);
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULS, 4, 0x00000000, 0xffffffff, 0x00000000, 0, uml::FLAG_Z);
 
@@ -544,6 +613,7 @@ TEST_ENTRY_4_SINGLE(block, uml::OP_MULS, 8, 0xffffffffffffffff, 0x11111111111111
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULS, 8, 0x0000000000000000, 0x1111111111111111, 0x0000000000000000, 0, uml::FLAG_Z);
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULS, 8, 0x7c048d159e26af38, 0x7777777777777777, 0x8888888888888888, 0, uml::FLAG_V | uml::FLAG_S);
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULS, 8, 0x3232323232323233, 0xcdcdcdcdcdcdcdcd, 0xffffffffffffffff, 0, 0);
+TEST_ENTRY_4_SINGLE(block, uml::OP_MULS, 8, 0xcdcdcdcdcdcdcdcd, 0xcdcdcdcdcdcdcdcd, 0x0000000000000001, 0, uml::FLAG_S);
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULS, 8, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0, uml::FLAG_Z);
 TEST_ENTRY_4_SINGLE(block, uml::OP_MULS, 8, 0x0000000000000000, 0xffffffffffffffff, 0x0000000000000000, 0, uml::FLAG_Z);
 
@@ -555,8 +625,8 @@ TEST_ENTRY_4_SINGLE(block, uml::OP_DIVU, 4, 0x02702702, 0x11111111, 0x00000007, 
 TEST_ENTRY_4_SINGLE(block, uml::OP_DIVU, 4, 0x00000000, 0x11111111, 0x11111112, 0, uml::FLAG_Z);
 TEST_ENTRY_4_SINGLE(block, uml::OP_DIVU, 4, 0x7fffffff, 0xfffffffe, 0x00000002, 0, 0);
 TEST_ENTRY_4_SINGLE(block, uml::OP_DIVU, 4, 0xfffffffe, 0xfffffffe, 0x00000001, 0, uml::FLAG_S);
-TEST_ENTRY_4_SINGLE(block, uml::OP_DIVU, 4, UNDEFINED, 0xffffffff, 0x00000000, 0, uml::FLAG_V);
-TEST_ENTRY_4_SINGLE(block, uml::OP_DIVU, 4, UNDEFINED, 0x00000000, 0x00000000, 0, uml::FLAG_V);
+TEST_ENTRY_4_SINGLE(block, uml::OP_DIVU, 4, std::nullopt, 0xffffffff, 0x00000000, 0, uml::FLAG_V);
+TEST_ENTRY_4_SINGLE(block, uml::OP_DIVU, 4, std::nullopt, 0x00000000, 0x00000000, 0, uml::FLAG_V);
 TEST_ENTRY_4_SINGLE(block, uml::OP_DIVU, 4, 0x00000000, 0x00000000, 0x11111112, 0, uml::FLAG_Z);
 
 	}
@@ -567,8 +637,8 @@ TEST_ENTRY_4_SINGLE(block, uml::OP_DIVU, 8, 0x0270270270270270, 0x11111111111111
 TEST_ENTRY_4_SINGLE(block, uml::OP_DIVU, 8, 0x0000000000000000, 0x1111111111111111, 0x1111111111111112, 0, uml::FLAG_Z);
 TEST_ENTRY_4_SINGLE(block, uml::OP_DIVU, 8, 0x7fffffffffffffff, 0xfffffffffffffffe, 0x0000000000000002, 0, 0);
 TEST_ENTRY_4_SINGLE(block, uml::OP_DIVU, 8, 0xfffffffffffffffe, 0xfffffffffffffffe, 0x0000000000000001, 0, uml::FLAG_S);
-TEST_ENTRY_4_SINGLE(block, uml::OP_DIVU, 8, UNDEFINED, 0xffffffffffffffff, 0x0000000000000000, 0, uml::FLAG_V);
-TEST_ENTRY_4_SINGLE(block, uml::OP_DIVU, 8, UNDEFINED, 0x0000000000000000, 0x0000000000000000, 0, uml::FLAG_V);
+TEST_ENTRY_4_SINGLE(block, uml::OP_DIVU, 8, std::nullopt, 0xffffffffffffffff, 0x0000000000000000, 0, uml::FLAG_V);
+TEST_ENTRY_4_SINGLE(block, uml::OP_DIVU, 8, std::nullopt, 0x0000000000000000, 0x0000000000000000, 0, uml::FLAG_V);
 TEST_ENTRY_4_SINGLE(block, uml::OP_DIVU, 8, 0x0000000000000000, 0x0000000000000000, 0x1111111111111112, 0, uml::FLAG_Z);
 
 	}
@@ -578,8 +648,8 @@ TEST_ENTRY_4_SINGLE(block, uml::OP_DIVU, 8, 0x0000000000000000, 0x00000000000000
 TEST_ENTRY_4_SINGLE(block, uml::OP_DIVS, 4, 0x02702702, 0x11111111, 0x00000007, 0, 0);
 TEST_ENTRY_4_SINGLE(block, uml::OP_DIVS, 4, 0x00000000, 0x11111111, 0x11111112, 0, uml::FLAG_Z);
 TEST_ENTRY_4_SINGLE(block, uml::OP_DIVS, 4, 0xffffffff, 0xfffffffe, 0x00000002, 0, uml::FLAG_S);
-TEST_ENTRY_4_SINGLE(block, uml::OP_DIVS, 4, UNDEFINED, 0xffffffff, 0x00000000, 0, uml::FLAG_V);
-TEST_ENTRY_4_SINGLE(block, uml::OP_DIVS, 4, UNDEFINED, 0x00000000, 0x00000000, 0, uml::FLAG_V);
+TEST_ENTRY_4_SINGLE(block, uml::OP_DIVS, 4, std::nullopt, 0xffffffff, 0x00000000, 0, uml::FLAG_V);
+TEST_ENTRY_4_SINGLE(block, uml::OP_DIVS, 4, std::nullopt, 0x00000000, 0x00000000, 0, uml::FLAG_V);
 TEST_ENTRY_4_SINGLE(block, uml::OP_DIVS, 4, 0x00000000, 0x00000000, 0x11111112, 0, uml::FLAG_Z);
 
 	}
@@ -589,8 +659,8 @@ TEST_ENTRY_4_SINGLE(block, uml::OP_DIVS, 4, 0x00000000, 0x00000000, 0x11111112, 
 TEST_ENTRY_4_SINGLE(block, uml::OP_DIVS, 8, 0x0270270270270270, 0x1111111111111111, 0x0000000000000007, 0, 0);
 TEST_ENTRY_4_SINGLE(block, uml::OP_DIVS, 8, 0x0000000000000000, 0x1111111111111111, 0x1111111111111112, 0, uml::FLAG_Z);
 TEST_ENTRY_4_SINGLE(block, uml::OP_DIVS, 8, 0xffffffffffffffff, 0xfffffffffffffffe, 0x0000000000000002, 0, uml::FLAG_S);
-TEST_ENTRY_4_SINGLE(block, uml::OP_DIVS, 8, UNDEFINED, 0xffffffffffffffff, 0x0000000000000000, 0, uml::FLAG_V);
-TEST_ENTRY_4_SINGLE(block, uml::OP_DIVS, 8, UNDEFINED, 0x0000000000000000, 0x0000000000000000, 0, uml::FLAG_V);
+TEST_ENTRY_4_SINGLE(block, uml::OP_DIVS, 8, std::nullopt, 0xffffffffffffffff, 0x0000000000000000, 0, uml::FLAG_V);
+TEST_ENTRY_4_SINGLE(block, uml::OP_DIVS, 8, std::nullopt, 0x0000000000000000, 0x0000000000000000, 0, uml::FLAG_V);
 TEST_ENTRY_4_SINGLE(block, uml::OP_DIVS, 8, 0x0000000000000000, 0x0000000000000000, 0x1111111111111112, 0, uml::FLAG_Z);
 
 
@@ -646,12 +716,20 @@ TEST_ENTRY_3(block, uml::OP_MULSLW, 8, 0x0000000000000000, 0x8000000000000000, 0
 
 TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 4, 0, 0, 0, 0);
 TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 4, 1, 0, 0, uml::FLAG_C);
-TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 8, 0 << 5, 5, 0, 0);
+TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 8, ~(uint32_t(1) << 5), 4, 0, uml::FLAG_C);
+TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 8, ~(uint32_t(1) << 5), 5, 0, 0);
+TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 8, ~(uint32_t(1) << 5), 6, 0, uml::FLAG_C);
+TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 8, 1 << 5, 4, 0, 0);
 TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 8, 1 << 5, 5, 0, uml::FLAG_C);
+TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 8, 1 << 5, 6, 0, 0);
 TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 4, 0, 0, 0, 0);
 TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 4, 1, 0, 0, uml::FLAG_C);
-TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 8, uint64_t(0) << 60, 60, 0, 0);
+TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 8, ~(uint64_t(1) << 59), 60, 0, uml::FLAG_C);
+TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 8, ~(uint64_t(1) << 60), 60, 0, 0);
+TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 8, ~(uint64_t(1) << 61), 60, 0, uml::FLAG_C);
+TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 8, uint64_t(1) << 60, 59, 0, 0);
 TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 8, uint64_t(1) << 60, 60, 0, uml::FLAG_C);
+TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 8, uint64_t(1) << 60, 61, 0, 0);
 TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 8, 1, 64, 0, uml::FLAG_C);
 TEST_ENTRY_2_NORET(block, uml::OP_CARRY, 8, 0, 64, 0, 0);
 
@@ -850,8 +928,11 @@ TEST_ENTRY_3(block, uml::OP_ROR, 8, 0x1234567890abcdee, 0x1234567890abcdee, 64, 
 	{
 
 TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x2468acf0, 0x12345678, 1, 0, 0);
+TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x34567809, 0x12345678, 8, 0, 0);
 TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x2468acf0, 0x12345678, 65, 0, 0);
 TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x00000000, 0x00000000, 1, 0, uml::FLAG_Z);
+TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x00000000, 0x00000000, 3, 0, uml::FLAG_Z);
+TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x00000000, 0x00000000, 64, 0, uml::FLAG_Z);
 TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x00000000, 0x00000000, 65, 0, uml::FLAG_Z);
 TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x00000000, 0x80000000, 1, 0, uml::FLAG_Z | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x00000000, 0x80000000, 65, 0, uml::FLAG_Z | uml::FLAG_C);
@@ -859,9 +940,12 @@ TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0xfffffffe, 0x7fffffff, 1, 0, uml::FLAG_S);
 TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0xfffffffe, 0x7fffffff, 65, 0, uml::FLAG_S);
 TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0xfffffffe, 0xffffffff, 1, 0, uml::FLAG_S | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0xfffffffe, 0xffffffff, 65, 0, uml::FLAG_S | uml::FLAG_C);
-TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x2468acf0, 0x12345678, 1, 0, 0);
-TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x2468acf0, 0x12345678, 65, 0, 0);
+TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x2468acf1, 0x12345678, 1, uml::FLAG_C, 0);
+TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x34567889, 0x12345678, 8, uml::FLAG_C, 0);
+TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x2468acf1, 0x12345678, 65, uml::FLAG_C, 0);
 TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x00000001, 0x00000000, 1, uml::FLAG_C, 0);
+TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x00000004, 0x00000000, 3, uml::FLAG_C, 0);
+TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x00000000, 0x00000000, 64, uml::FLAG_C, uml::FLAG_Z | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x00000001, 0x00000000, 65, uml::FLAG_C, 0);
 TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x00000001, 0x80000000, 1, uml::FLAG_C, uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0x00000001, 0x80000000, 65, uml::FLAG_C, uml::FLAG_C);
@@ -869,11 +953,14 @@ TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0xffffffff, 0x7fffffff, 1, uml::FLAG_C, uml
 TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0xffffffff, 0x7fffffff, 65, uml::FLAG_C, uml::FLAG_S);
 TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0xffffffff, 0xffffffff, 1, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0xffffffff, 0xffffffff, 65, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
-TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0xffffffff, 0xffffffff, 0, uml::FLAG_C, uml::FLAG_S);
-TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0xffffffff, 0xffffffff, 64, uml::FLAG_C, uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0xffffffff, 0xffffffff, 0, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
+TEST_ENTRY_3(block, uml::OP_ROLC, 4, 0xffffffff, 0xffffffff, 64, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x2468acf121579bde, 0x1234567890abcdef, 1, 0, 0);
+TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x34567890abcdef09, 0x1234567890abcdef, 8, 0, 0);
 TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x2468acf121579bde, 0x1234567890abcdef, 65, 0, 0);
 TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x0000000000000000, 0x0000000000000000, 1, 0, uml::FLAG_Z);
+TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x0000000000000000, 0x0000000000000000, 3, 0, uml::FLAG_Z);
+TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x0000000000000000, 0x0000000000000000, 64, 0, uml::FLAG_Z);
 TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x0000000000000000, 0x0000000000000000, 65, 0, uml::FLAG_Z);
 TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x0000000000000000, 0x8000000000000000, 1, 0, uml::FLAG_Z | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x0000000000000000, 0x8000000000000000, 65, 0, uml::FLAG_Z | uml::FLAG_C);
@@ -882,8 +969,11 @@ TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0xfffffffffffffffe, 0x7fffffffffffffff, 65,
 TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0xfffffffffffffffe, 0xffffffffffffffff, 1, 0, uml::FLAG_S | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0xfffffffffffffffe, 0xffffffffffffffff, 65, 0, uml::FLAG_S | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x2468acf121579bdf, 0x1234567890abcdef, 1, uml::FLAG_C, 0);
+TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x34567890abcdef89, 0x1234567890abcdef, 8, uml::FLAG_C, 0);
 TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x2468acf121579bdf, 0x1234567890abcdef, 65, uml::FLAG_C, 0);
 TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x0000000000000001, 0x0000000000000000, 1, uml::FLAG_C, 0);
+TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x0000000000000004, 0x0000000000000000, 3, uml::FLAG_C, 0);
+TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x0000000000000000, 0x0000000000000000, 64, uml::FLAG_C, uml::FLAG_Z | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x0000000000000001, 0x0000000000000000, 65, uml::FLAG_C, 0);
 TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x0000000000000001, 0x8000000000000000, 1, uml::FLAG_C, uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x0000000000000001, 0x8000000000000000, 65, uml::FLAG_C, uml::FLAG_C);
@@ -891,9 +981,9 @@ TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0xffffffffffffffff, 0x7fffffffffffffff, 1, 
 TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0xffffffffffffffff, 0x7fffffffffffffff, 65, uml::FLAG_C, uml::FLAG_S);
 TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0xffffffffffffffff, 0xffffffffffffffff, 1, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0xffffffffffffffff, 0xffffffffffffffff, 65, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
-TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0xffffffffffffffff, 0xffffffffffffffff, 0, uml::FLAG_C, uml::FLAG_S);
-TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0xffffffffffffffff, 0xffffffffffffffff, 64, uml::FLAG_C, uml::FLAG_S);
-TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x1234567890abcdef, 0x1234567890abcdef, 64, uml::FLAG_C, 0);
+TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0xffffffffffffffff, 0xffffffffffffffff, 0, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
+TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0xffffffffffffffff, 0xffffffffffffffff, 64, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
+TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x1234567890abcdef, 0x1234567890abcdef, 64, uml::FLAG_C, uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0xffffffffffffffff, 0xffffffffffffffff, 64, 0, uml::FLAG_S);
 TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x1234567890abcdef, 0x1234567890abcdef, 64, 0, 0);
 
@@ -902,47 +992,117 @@ TEST_ENTRY_3(block, uml::OP_ROLC, 8, 0x1234567890abcdef, 0x1234567890abcdef, 64,
 	{
 
 TEST_ENTRY_3(block, uml::OP_RORC, 4, 0x091a2b3c, 0x12345678, 1, 0, 0);
+TEST_ENTRY_3(block, uml::OP_RORC, 4, 0xf0123456, 0x12345678, 8, 0, uml::FLAG_S);
 TEST_ENTRY_3(block, uml::OP_RORC, 4, 0x091a2b3c, 0x12345678, 65, 0, 0);
 TEST_ENTRY_3(block, uml::OP_RORC, 4, 0x00000000, 0x00000000, 1, 0, uml::FLAG_Z);
+TEST_ENTRY_3(block, uml::OP_RORC, 4, 0x00000000, 0x00000000, 3, 0, uml::FLAG_Z);
+TEST_ENTRY_3(block, uml::OP_RORC, 4, 0x00000000, 0x00000000, 64, 0, uml::FLAG_Z);
 TEST_ENTRY_3(block, uml::OP_RORC, 4, 0x00000000, 0x00000000, 65, 0, uml::FLAG_Z);
 TEST_ENTRY_3(block, uml::OP_RORC, 4, 0x00000000, 0x00000001, 1, 0, uml::FLAG_Z | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 4, 0x00000000, 0x00000001, 65, 0, uml::FLAG_Z | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 4, 0x7fffffff, 0xffffffff, 1, 0, uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 4, 0x7fffffff, 0xffffffff, 65, 0, uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 4, 0x891a2b3c, 0x12345678, 1, uml::FLAG_C, uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_RORC, 4, 0xf1123456, 0x12345678, 8, uml::FLAG_C, uml::FLAG_S);
 TEST_ENTRY_3(block, uml::OP_RORC, 4, 0x891a2b3c, 0x12345678, 65, uml::FLAG_C, uml::FLAG_S);
 TEST_ENTRY_3(block, uml::OP_RORC, 4, 0x80000000, 0x00000000, 1, uml::FLAG_C, uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_RORC, 4, 0x20000000, 0x00000000, 3, uml::FLAG_C, 0);
+TEST_ENTRY_3(block, uml::OP_RORC, 4, 0x00000000, 0x00000000, 64, uml::FLAG_C, uml::FLAG_Z | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 4, 0x80000000, 0x00000000, 65, uml::FLAG_C, uml::FLAG_S);
 TEST_ENTRY_3(block, uml::OP_RORC, 4, 0x80000000, 0x00000001, 1, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 4, 0x80000000, 0x00000001, 65, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 4, 0xffffffff, 0xffffffff, 1, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 4, 0xffffffff, 0xffffffff, 65, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
-TEST_ENTRY_3(block, uml::OP_RORC, 4, 0xffffffff, 0xffffffff, 0, uml::FLAG_C, uml::FLAG_S);
-TEST_ENTRY_3(block, uml::OP_RORC, 4, 0xffffffff, 0xffffffff, 64, uml::FLAG_C, uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_RORC, 4, 0xffffffff, 0xffffffff, 0, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
+TEST_ENTRY_3(block, uml::OP_RORC, 4, 0xffffffff, 0xffffffff, 64, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x091a2b3c4855e6f7, 0x1234567890abcdee, 1, 0, 0);
+TEST_ENTRY_3(block, uml::OP_RORC, 8, 0xdc1234567890abcd, 0x1234567890abcdee, 8, 0, uml::FLAG_S | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x091a2b3c4855e6f7, 0x1234567890abcdee, 65, 0, 0);
 TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x0000000000000000, 0x0000000000000000, 1, 0, uml::FLAG_Z);
+TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x0000000000000000, 0x0000000000000000, 3, 0, uml::FLAG_Z);
+TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x0000000000000000, 0x0000000000000000, 64, 0, uml::FLAG_Z);
 TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x0000000000000000, 0x0000000000000000, 65, 0, uml::FLAG_Z);
 TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x0000000000000000, 0x0000000000000001, 1, 0, uml::FLAG_Z | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x0000000000000000, 0x0000000000000001, 65, 0, uml::FLAG_Z | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x7fffffffffffffff, 0xffffffffffffffff, 1, 0, uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x7fffffffffffffff, 0xffffffffffffffff, 65, 0, uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x891a2b3c4855e6f7, 0x1234567890abcdee, 1, uml::FLAG_C, uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_RORC, 8, 0xdd1234567890abcd, 0x1234567890abcdee, 8, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x891a2b3c4855e6f7, 0x1234567890abcdee, 65, uml::FLAG_C, uml::FLAG_S);
 TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x8000000000000000, 0x0000000000000000, 1, uml::FLAG_C, uml::FLAG_S);
+TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x2000000000000000, 0x0000000000000000, 3, uml::FLAG_C, 0);
+TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x0000000000000000, 0x0000000000000000, 64, uml::FLAG_C, uml::FLAG_Z | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x8000000000000000, 0x0000000000000000, 65, uml::FLAG_C, uml::FLAG_S);
 TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x8000000000000000, 0x0000000000000001, 1, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x8000000000000000, 0x0000000000000001, 65, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 8, 0xffffffffffffffff, 0xffffffffffffffff, 1, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 8, 0xffffffffffffffff, 0xffffffffffffffff, 65, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
-TEST_ENTRY_3(block, uml::OP_RORC, 8, 0xffffffffffffffff, 0xffffffffffffffff, 0, uml::FLAG_C, uml::FLAG_S);
-TEST_ENTRY_3(block, uml::OP_RORC, 8, 0xffffffffffffffff, 0xffffffffffffffff, 64, uml::FLAG_C, uml::FLAG_S);
-TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x1234567890abcdee, 0x1234567890abcdee, 64, uml::FLAG_C, 0);
+TEST_ENTRY_3(block, uml::OP_RORC, 8, 0xffffffffffffffff, 0xffffffffffffffff, 0, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
+TEST_ENTRY_3(block, uml::OP_RORC, 8, 0xffffffffffffffff, 0xffffffffffffffff, 64, uml::FLAG_C, uml::FLAG_S | uml::FLAG_C);
+TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x1234567890abcdee, 0x1234567890abcdee, 64, uml::FLAG_C, uml::FLAG_C);
 TEST_ENTRY_3(block, uml::OP_RORC, 8, 0xffffffffffffffff, 0xffffffffffffffff, 64, 0, uml::FLAG_S);
 TEST_ENTRY_3(block, uml::OP_RORC, 8, 0x1234567890abcdee, 0x1234567890abcdee, 64, 0, 0);
 
 	}
 	else if (step == 44)
+	{
+
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 4, 0x00000078, 0x12345678, 0, 8, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 4, 0x00000045, 0x12345678, 12, 8, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 4, 0x00005678, 0x12345678, 0, 16, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 4, 0x0000d159, 0x12345678, 6, 16, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 4, 0x00000115, 0x12345678, 10, 9, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 4, 0x00000091, 0x12345678, 21, 11, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 4, 0x00000781, 0x12345678, 28, 12, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 4, 0x00000059, 0x12345678, 38, 7, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 4, 0x091a2b3c, 0x12345678, 1, 31, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 4, 0x00000000, 0x12345678, 22, 3, 0, uml::FLAG_Z);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 4, 0x000010ec, 0x87654321, 19, 13, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 8, 0x00000000000000ef, 0x1234567890abcdef, 0, 8, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 8, 0x00000000000000bc, 0x1234567890abcdef, 12, 8, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 8, 0x000000000000cdef, 0x1234567890abcdef, 0, 16, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 8, 0x000000000000890a, 0x1234567890abcdef, 20, 16, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 8, 0x0000000090abcdef, 0x1234567890abcdef, 0, 32, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 8, 0x000000002b3c4855, 0x1234567890abcdef, 17, 32, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 8, 0x0000000000000057, 0x1234567890abcdef, 15, 7, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 8, 0x00000000000091a2, 0x1234567890abcdef, 45, 19, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 8, 0x000000000002f789, 0x1234567890abcdef, 57, 18, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 8, 0x0000005159e242af, 0x1234567890abcdef, 14, 39, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 8, 0x000000000000001b, 0x1234567890abcdef, 71, 6, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 8, 0x091a2b3c4855e6f7, 0x1234567890abcdef, 1, 63, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 8, 0x0000000000000000, 0x1234567890abcdef, 47, 3, 0, uml::FLAG_Z);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXU, 8, 0x00000000007f6e5d, 0xfedcba0987654321, 41, 23, 0, 0);
+
+	}
+	else if (step == 45)
+	{
+
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 4, 0x00000078, 0x12345678, 0, 8, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 4, 0x00000045, 0x12345678, 12, 8, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 4, 0x00005678, 0x12345678, 0, 16, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 4, 0xffffd159, 0x12345678, 6, 16, 0, uml::FLAG_S);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 4, 0xffffff15, 0x12345678, 10, 9, 0, uml::FLAG_S);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 4, 0x00000091, 0x12345678, 21, 11, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 4, 0x00000781, 0x12345678, 28, 12, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 4, 0xffffffd9, 0x12345678, 38, 7, 0, uml::FLAG_S);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 4, 0x091a2b3c, 0x12345678, 1, 31, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 4, 0x00000000, 0x12345678, 22, 3, 0, uml::FLAG_Z);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 4, 0xfffff0ec, 0x87654321, 19, 13, 0, uml::FLAG_S);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 8, 0xffffffffffffffef, 0x1234567890abcdef, 0, 8, 0, uml::FLAG_S);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 8, 0xffffffffffffffbc, 0x1234567890abcdef, 12, 8, 0, uml::FLAG_S);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 8, 0xffffffffffffcdef, 0x1234567890abcdef, 0, 16, 0, uml::FLAG_S);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 8, 0xffffffffffff890a, 0x1234567890abcdef, 20, 16, 0, uml::FLAG_S);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 8, 0xffffffff90abcdef, 0x1234567890abcdef, 0, 32, 0, uml::FLAG_S);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 8, 0x000000002b3c4855, 0x1234567890abcdef, 17, 32, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 8, 0xffffffffffffffd7, 0x1234567890abcdef, 15, 7, 0, uml::FLAG_S);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 8, 0x00000000000091a2, 0x1234567890abcdef, 45, 19, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 8, 0x000000000000001b, 0x1234567890abcdef, 71, 6, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 8, 0x091a2b3c4855e6f7, 0x1234567890abcdef, 1, 63, 0, 0);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 8, 0x0000000000000000, 0x1234567890abcdef, 47, 3, 0, uml::FLAG_Z);
+TEST_ENTRY_4_TRIPLE(block, uml::OP_BFXS, 8, 0xffffffffffff6e5d, 0xfedcba0987654321, 41, 23, 0, uml::FLAG_S);
+
+	}
+	else if (step == 46)
 	{
 
 TEST_ENTRY_4_TRIPLE(block, uml::OP_ROLAND, 4, 0x12345678, 0x12345678, 0, 0xffffffff, 0, 0);
@@ -963,24 +1123,29 @@ TEST_ENTRY_4_TRIPLE(block, uml::OP_ROLAND, 8, 0x0000000000000000, 0x7fffffffffff
 TEST_ENTRY_4_TRIPLE(block, uml::OP_ROLAND, 8, 0x0000000000000000, 0x1234567890abcdef, 32, 0x0000000000000000, 0, uml::FLAG_Z);
 
 	}
-	else if (step == 45)
+	else if (step == 47)
 	{
 
 TEST_ENTRY_4_QUAD(block, uml::OP_ROLINS, 4, 0x12345678, 0xffffffff, 0x12345678, 0, 0xffffffff, 0, 0);
 TEST_ENTRY_4_QUAD(block, uml::OP_ROLINS, 4, 0x1111b3c0, 0x11111234, 0x12345678, 3, 0x0000ffff, 0, 0);
 TEST_ENTRY_4_QUAD(block, uml::OP_ROLINS, 4, 0x00000000, 0x91a21111, 0x00000000, 3, 0xffffffff, 0, uml::FLAG_Z);
-TEST_ENTRY_4_QUAD(block, uml::OP_ROLINS, 4, 0x91a21111, 0x91a21111, 0x12345678, 3, 0xffff0000, 0, uml::FLAG_S);
+TEST_ENTRY_4_QUAD(block, uml::OP_ROLINS, 4, 0x91a21111, 0x11111111, 0x12345678, 3, 0xffff0000, 0, uml::FLAG_S);
+TEST_ENTRY_4_QUAD(block, uml::OP_ROLINS, 4, 0x91a38111, 0x91a21111, 0x12345678, 12, 0x0001f000, 0, uml::FLAG_S);
 TEST_ENTRY_4_QUAD(block, uml::OP_ROLINS, 4, 0x91a21114, 0x91a21111, 0x12345678, 16, 0x0000000f, 0, uml::FLAG_S);
+TEST_ENTRY_4_QUAD(block, uml::OP_ROLINS, 4, 0x89abcdf0, 0x89abcdef, 0x87654321, 5, 0x0000003f, 0, uml::FLAG_S);
+TEST_ENTRY_4_QUAD(block, uml::OP_ROLINS, 4, 0x89abcde1, 0x89abcdef, 0x87654321, 6, 0x0000003f, 0, uml::FLAG_S);
+TEST_ENTRY_4_QUAD(block, uml::OP_ROLINS, 4, 0x89abcdc3, 0x89abcdef, 0x87654321, 7, 0x0000003f, 0, uml::FLAG_S);
 TEST_ENTRY_4_QUAD(block, uml::OP_ROLINS, 4, 0xffffffff, 0xffffffff, 0x12345678, 16, 0x00000000, 0, uml::FLAG_S);
 TEST_ENTRY_4_QUAD(block, uml::OP_ROLINS, 8, 0x1234567890abcdef, 0xffffffffffffffff, 0x1234567890abcdef, 0, 0xffffffffffffffff, 0, 0);
 TEST_ENTRY_4_QUAD(block, uml::OP_ROLINS, 8, 0x11111111855e6f78, 0x11111111ffffffff, 0x1234567890abcdef, 3, 0x00000000ffffffff, 0, 0);
+TEST_ENTRY_4_QUAD(block, uml::OP_ROLINS, 8, 0x11111ef1ffffffff, 0x11111111ffffffff, 0x1234567890abcdef, 36, 0x00000ff000000000, 0, 0);
 TEST_ENTRY_4_QUAD(block, uml::OP_ROLINS, 8, 0x11111111fffffff4, 0x11111111ffffffff, 0x1234567890abcdef, 16, 0x000000000000000f, 0, 0);
 TEST_ENTRY_4_QUAD(block, uml::OP_ROLINS, 8, 0x0000000000000000, 0x91a2b3c411111111, 0x0000000000000000, 3, 0xffffffffffffffff, 0, uml::FLAG_Z);
 TEST_ENTRY_4_QUAD(block, uml::OP_ROLINS, 8, 0x91a2b3c411111111, 0xffffffff11111111, 0x1234567890abcdef, 3, 0xffffffff00000000, 0, uml::FLAG_S);
 TEST_ENTRY_4_QUAD(block, uml::OP_ROLINS, 8, 0xffffffffffffffff, 0xffffffffffffffff, 0x1234567890abcdef, 16, 0x0000000000000000, 0, uml::FLAG_S);
 
 	}
-	else if (step == 46)
+	else if (step == 48)
 	{
 
 TEST_ENTRY_2(block, uml::OP_LZCNT, 4, 32, 0x00000000, 0, 0);
@@ -993,7 +1158,7 @@ TEST_ENTRY_2(block, uml::OP_LZCNT, 8, 0,  0xffffffffffffffff, 0, uml::FLAG_Z);
 TEST_ENTRY_2(block, uml::OP_LZCNT, 8, 32, 0x00000000ffffffff, 0, 0);
 
 	}
-	else if (step == 47)
+	else if (step == 49)
 	{
 
 // Insanity to set Z based on the input
@@ -1007,7 +1172,7 @@ TEST_ENTRY_2(block, uml::OP_TZCNT, 8, 32, 0xffffffff00000000, 0, 0);
 TEST_ENTRY_2(block, uml::OP_TZCNT, 8, 63, 0x8000000000000000, 0, 0);
 
 	}
-	else if (step == 48)
+	else if (step == 50)
 	{
 
 TEST_ENTRY_2(block, uml::OP_BSWAP, 4, 0x00000000, 0x00000000, 0, uml::FLAG_Z);
@@ -1020,7 +1185,7 @@ TEST_ENTRY_2(block, uml::OP_BSWAP, 8, 0x00000000ffffffff, 0xffffffff00000000, 0,
 TEST_ENTRY_2(block, uml::OP_BSWAP, 8, 0xffffffff00000000, 0x00000000ffffffff, 0, uml::FLAG_S);
 
 	}
-	else if (step == 49)
+	else if (step == 51)
 	{
 
 //// Floating point
@@ -1036,7 +1201,7 @@ TEST_ENTRY_FLOAT_2(block, uml::OP_FRNDS, 8, d2u(0.475f), d2u(0.475), 0, FLAGS_UN
 // TEST_ENTRY_FLOAT_2(block, uml::OP_FRNDS, 8, d2u(std::numeric_limits<double>::quiet_NaN()), d2u(-std::numeric_limits<double>::quiet_NaN()), 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
 
 	}
-	else if (step == 50)
+	else if (step == 52)
 	{
 
 TEST_ENTRY_FLOAT_2(block, uml::OP_FNEG, 4, f2u(-123.4891f), f2u(123.4891f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT);
@@ -1061,7 +1226,7 @@ TEST_ENTRY_FLOAT_2(block, uml::OP_FNEG, 8, d2u(std::numeric_limits<double>::infi
 TEST_ENTRY_FLOAT_2(block, uml::OP_FNEG, 8, d2u(-std::numeric_limits<double>::infinity()), d2u(-std::numeric_limits<double>::infinity()), 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
 
 	}
-	else if (step == 51)
+	else if (step == 53)
 	{
 
 TEST_ENTRY_FLOAT_2(block, uml::OP_FABS, 4, f2u(123.4891f), f2u(123.4891f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT);
@@ -1084,7 +1249,7 @@ TEST_ENTRY_FLOAT_2(block, uml::OP_FABS, 8, d2u(std::numeric_limits<double>::infi
 TEST_ENTRY_FLOAT_2(block, uml::OP_FABS, 8, d2u(std::numeric_limits<double>::infinity()), d2u(-std::numeric_limits<double>::infinity()), 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
 
 	}
-	else if (step == 52)
+	else if (step == 54)
 	{
 
 TEST_ENTRY_FLOAT_2(block, uml::OP_FSQRT, 4, 0x3f8e37e3, f2u(1.2345f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT);
@@ -1110,7 +1275,7 @@ TEST_ENTRY_FLOAT_2(block, uml::OP_FSQRT, 8, d2u(std::numeric_limits<double>::qui
 
 
 	}
-	else if (step == 53)
+	else if (step == 55)
 	{
 
 TEST_ENTRY_FLOAT_2(block, uml::OP_FRECIP, 4, f2u(1.0f/1.2345f), f2u(1.2345f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT);
@@ -1131,7 +1296,7 @@ TEST_ENTRY_FLOAT_2(block, uml::OP_FRECIP, 8, d2u(std::numeric_limits<double>::qu
 TEST_ENTRY_FLOAT_2(block, uml::OP_FRECIP, 8, d2u(std::numeric_limits<double>::quiet_NaN()), d2u(-std::numeric_limits<double>::quiet_NaN()), 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
 
 	}
-	else if (step == 54)
+	else if (step == 56)
 	{
 
 TEST_ENTRY_FLOAT_2(block, uml::OP_FRSQRT, 4, 0x3f666806, f2u(1.2345f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT);
@@ -1152,7 +1317,7 @@ TEST_ENTRY_FLOAT_2(block, uml::OP_FRSQRT, 8, d2u(std::numeric_limits<double>::qu
 TEST_ENTRY_FLOAT_2(block, uml::OP_FRSQRT, 8, d2u(std::numeric_limits<double>::quiet_NaN()), d2u(-std::numeric_limits<double>::quiet_NaN()), 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
 
 	}
-	else if (step == 55)
+	else if (step == 57)
 	{
 
 TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 4, f2u(1.0f), f2u(1.0f), 0, uml::FLAG_Z, uml::SIZE_SHORT, uml::SIZE_SHORT);
@@ -1164,9 +1329,9 @@ TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 4, f2u(1.0f), f2u(2.0f), 0, uml::FLAG_
 TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 4, f2u(std::numeric_limits<float>::infinity()), f2u(std::numeric_limits<float>::infinity()), 0, uml::FLAG_Z, uml::SIZE_SHORT, uml::SIZE_SHORT);
 TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 4, f2u(-std::numeric_limits<float>::infinity()), f2u(-std::numeric_limits<float>::infinity()), 0, uml::FLAG_Z, uml::SIZE_SHORT, uml::SIZE_SHORT);
 TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 4, f2u(std::numeric_limits<float>::infinity()), f2u(-std::numeric_limits<float>::infinity()), 0, 0, uml::SIZE_SHORT, uml::SIZE_SHORT);
-TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 4, f2u(std::numeric_limits<float>::quiet_NaN()), f2u(std::numeric_limits<float>::quiet_NaN()), 0, uml::FLAG_U | FLAGS_UNDEFINED_OTHER, uml::SIZE_SHORT, uml::SIZE_SHORT);
-TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 4, f2u(std::numeric_limits<float>::quiet_NaN()), f2u(-std::numeric_limits<float>::quiet_NaN()), 0, uml::FLAG_U | FLAGS_UNDEFINED_OTHER, uml::SIZE_SHORT, uml::SIZE_SHORT);
-TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 4, f2u(-std::numeric_limits<float>::quiet_NaN()), f2u(-std::numeric_limits<float>::quiet_NaN()), 0, uml::FLAG_U | FLAGS_UNDEFINED_OTHER, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 4, f2u(std::numeric_limits<float>::quiet_NaN()), f2u(std::numeric_limits<float>::quiet_NaN()), 0, uml::FLAG_U | FLAGS_UNDEFINED_VS, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 4, f2u(std::numeric_limits<float>::quiet_NaN()), f2u(-std::numeric_limits<float>::quiet_NaN()), 0, uml::FLAG_U | FLAGS_UNDEFINED_VS, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 4, f2u(-std::numeric_limits<float>::quiet_NaN()), f2u(-std::numeric_limits<float>::quiet_NaN()), 0, uml::FLAG_U | FLAGS_UNDEFINED_VS, uml::SIZE_SHORT, uml::SIZE_SHORT);
 TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 8, d2u(1.0), d2u(1.0), 0, uml::FLAG_Z, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
 TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 8, d2u(0.0), d2u(0.0), 0, uml::FLAG_Z, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
 TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 8, d2u(-0.0), d2u(0.0), 0, uml::FLAG_Z, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
@@ -1176,12 +1341,12 @@ TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 8, d2u(1.0), d2u(2.0), 0, uml::FLAG_C,
 TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 8, d2u(std::numeric_limits<double>::infinity()), d2u(-std::numeric_limits<double>::infinity()), 0, 0, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
 TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 8, d2u(-std::numeric_limits<double>::infinity()), d2u(-std::numeric_limits<double>::infinity()), 0, uml::FLAG_Z, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
 TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 8, d2u(std::numeric_limits<double>::infinity()), d2u(std::numeric_limits<double>::infinity()), 0, uml::FLAG_Z, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
-TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 8, d2u(std::numeric_limits<double>::quiet_NaN()), d2u(std::numeric_limits<double>::quiet_NaN()), 0, uml::FLAG_U | FLAGS_UNDEFINED_OTHER, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
-TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 8, d2u(std::numeric_limits<double>::quiet_NaN()), d2u(-std::numeric_limits<double>::quiet_NaN()), 0, uml::FLAG_U | FLAGS_UNDEFINED_OTHER, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
-TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 8, d2u(-std::numeric_limits<double>::quiet_NaN()), d2u(-std::numeric_limits<double>::quiet_NaN()), 0, uml::FLAG_U | FLAGS_UNDEFINED_OTHER, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 8, d2u(std::numeric_limits<double>::quiet_NaN()), d2u(std::numeric_limits<double>::quiet_NaN()), 0, uml::FLAG_U | FLAGS_UNDEFINED_VS, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 8, d2u(std::numeric_limits<double>::quiet_NaN()), d2u(-std::numeric_limits<double>::quiet_NaN()), 0, uml::FLAG_U | FLAGS_UNDEFINED_VS, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_CMP(block, uml::OP_FCMP, 8, d2u(-std::numeric_limits<double>::quiet_NaN()), d2u(-std::numeric_limits<double>::quiet_NaN()), 0, uml::FLAG_U | FLAGS_UNDEFINED_VS, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
 
 	}
-	else if (step == 56)
+	else if (step == 58)
 	{
 
 TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(3.0f), f2u(1.5f), f2u(1.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
@@ -1206,7 +1371,7 @@ TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 8, d2u(std::numeric_limits<double>::quie
 TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 8, d2u(std::numeric_limits<double>::quiet_NaN()), d2u(-std::numeric_limits<double>::quiet_NaN()), d2u(-std::numeric_limits<double>::quiet_NaN()), 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
 
 	}
-	else if (step == 57)
+	else if (step == 59)
 	{
 
 TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(0.0f), f2u(1.5f), f2u(1.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
@@ -1227,7 +1392,7 @@ TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 8, d2u(std::numeric_limits<double>::quie
 TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 8, d2u(std::numeric_limits<double>::quiet_NaN()), d2u(-std::numeric_limits<double>::quiet_NaN()), d2u(std::numeric_limits<double>::quiet_NaN()), 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
 
 	}
-	else if (step == 58)
+	else if (step == 60)
 	{
 
 TEST_ENTRY_FLOAT_3(block, uml::OP_FMUL, 4, f2u(2.25f), f2u(1.5f), f2u(1.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
@@ -1252,7 +1417,7 @@ TEST_ENTRY_FLOAT_3(block, uml::OP_FMUL, 8, d2u(std::numeric_limits<double>::quie
 TEST_ENTRY_FLOAT_3(block, uml::OP_FMUL, 8, d2u(std::numeric_limits<double>::quiet_NaN()), d2u(-std::numeric_limits<double>::quiet_NaN()), d2u(std::numeric_limits<double>::quiet_NaN()), 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
 
 	}
-	else if (step == 59)
+	else if (step == 61)
 	{
 
 TEST_ENTRY_FLOAT_3(block, uml::OP_FDIV, 4, f2u(1.0f), f2u(1.5f), f2u(1.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
@@ -1277,7 +1442,147 @@ TEST_ENTRY_FLOAT_3(block, uml::OP_FDIV, 8, d2u(std::numeric_limits<double>::quie
 TEST_ENTRY_FLOAT_3(block, uml::OP_FDIV, 8, d2u(std::numeric_limits<double>::quiet_NaN()), d2u(-std::numeric_limits<double>::quiet_NaN()), d2u(std::numeric_limits<double>::quiet_NaN()), 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE, uml::SIZE_DOUBLE);
 
 	}
-	else if (step == 60)
+	else if (step == 62)
+	{
+
+UML_SETFMOD(block, uml::ROUND_TRUNC);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.25f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'214.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.75f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_READ(block, uml::I0, 0x1000, SIZE_DWORD, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_READM(block, uml::I0, 0x1000, 0xffffffff, SIZE_DWORD, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_WRITE(block, 0x1000, 0x12345678, SIZE_DWORD, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_WRITEM(block, 0x1000, 0x12345678, 0xffffffff, SIZE_DWORD, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_FSREAD(block, uml::F0, 0x1000, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_FSWRITE(block, 0x1000, uml::F0, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_CALLC(block, cfunc_fe_check, this);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+
+UML_SETFMOD(block, uml::ROUND_ROUND);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.25f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'214.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.75f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_READ(block, uml::I0, 0x1000, SIZE_DWORD, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_READM(block, uml::I0, 0x1000, 0xffffffff, SIZE_DWORD, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_WRITE(block, 0x1000, 0x12345678, SIZE_DWORD, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_WRITEM(block, 0x1000, 0x12345678, 0xffffffff, SIZE_DWORD, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_FSREAD(block, uml::F0, 0x1000, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_FSWRITE(block, 0x1000, uml::F0, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_CALLC(block, cfunc_fe_check, this);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+
+UML_SETFMOD(block, uml::ROUND_CEIL);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'213.0f), f2u(0.25f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'215.0f), f2u(16'777'214.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.75f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_READ(block, uml::I0, 0x1000, SIZE_DWORD, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_READM(block, uml::I0, 0x1000, 0xffffffff, SIZE_DWORD, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_WRITE(block, 0x1000, 0x12345678, SIZE_DWORD, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_WRITEM(block, 0x1000, 0x12345678, 0xffffffff, SIZE_DWORD, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_FSREAD(block, uml::F0, 0x1000, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_FSWRITE(block, 0x1000, uml::F0, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_CALLC(block, cfunc_fe_check, this);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'212.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+
+UML_SETFMOD(block, uml::ROUND_FLOOR);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.25f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'214.0f), f2u(16'777'214.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'213.0f), f2u(-16'777'213.0f), f2u(0.75f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_READ(block, uml::I0, 0x1000, SIZE_DWORD, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'213.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_READM(block, uml::I0, 0x1000, 0xffffffff, SIZE_DWORD, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'213.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_WRITE(block, 0x1000, 0x12345678, SIZE_DWORD, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'213.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_WRITEM(block, 0x1000, 0x12345678, 0xffffffff, SIZE_DWORD, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'213.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_FSREAD(block, uml::F0, 0x1000, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'213.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_FSWRITE(block, 0x1000, uml::F0, SPACE_PROGRAM);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'213.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+UML_CALLC(block, cfunc_fe_check, this);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(16'777'213.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FSUB, 4, f2u(16'777'212.0f), f2u(16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_3(block, uml::OP_FADD, 4, f2u(-16'777'213.0f), f2u(-16'777'213.0f), f2u(0.5f), 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, uml::SIZE_SHORT, uml::SIZE_SHORT);
+
+	}
+	else if (step == 63)
 	{
 
 TEST_ENTRY_MOV(block, uml::OP_MOV, 4, 0x00000000);
@@ -1288,7 +1593,7 @@ TEST_ENTRY_MOV(block, uml::OP_MOV, 8, 0xffffffffffffffff);
 TEST_ENTRY_MOV(block, uml::OP_MOV, 8, 0x1234567890abcdef);
 
 	}
-	else if (step == 61)
+	else if (step == 64)
 	{
 
 TEST_ENTRY_FMOV(block, uml::OP_FMOV, 4, f2u(0.0));
@@ -1312,7 +1617,7 @@ TEST_ENTRY_FMOV(block, uml::OP_FMOV, 8, d2u(std::numeric_limits<double>::signali
 TEST_ENTRY_FMOV(block, uml::OP_FMOV, 8, d2u(-std::numeric_limits<double>::signaling_NaN()));
 
 	}
-	else if (step == 62)
+	else if (step == 65)
 	{
 	// OPINFO1(SET,     "!set",     4|8, true,  NONE, NONE, ALL,  PINFO(OUT, OP, IRM))
 
@@ -1622,7 +1927,7 @@ TEST_ENTRY_FMOV(block, uml::OP_FMOV, 8, d2u(-std::numeric_limits<double>::signal
 			TEST_ENTRY_COND(block, uml::OP_SET, 8, conditions[idx].condition, conditions[idx].result, conditions[idx].flags);
 		}
 	}
-	else if (step == 63)
+	else if (step == 66)
 	{
 
 	// OPINFO4(FTOINT,  "f#toint",  4|8, false, NONE, NONE, ALL,  PINFO(OUT, P3, IRM), PINFO(IN, OP, FANY), PINFO(IN, OP, SIZE), PINFO(IN, OP, ROUND))
@@ -1650,12 +1955,6 @@ TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, -124, f2u(-123.50f), uml::SIZE
 TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 123, f2u(123.50f), uml::SIZE_DWORD, uml::ROUND_FLOOR, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
 TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 999999, f2u(999999.0f), uml::SIZE_DWORD, uml::ROUND_FLOOR, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
 
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 1, f2u(1.60f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 123, f2u(123.20f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, -123, f2u(-123.50f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 123, f2u(123.50f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 999999, f2u(999999.0f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
-
 
 TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 1, f2u(1.60f), uml::SIZE_QWORD, uml::ROUND_TRUNC, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
 TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 123, f2u(123.60f), uml::SIZE_QWORD, uml::ROUND_TRUNC, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
@@ -1680,12 +1979,6 @@ TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 123, f2u(123.20f), uml::SIZE_Q
 TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, -124, f2u(-123.50f), uml::SIZE_QWORD, uml::ROUND_FLOOR, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
 TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 123, f2u(123.50f), uml::SIZE_QWORD, uml::ROUND_FLOOR, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
 TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 999999, f2u(999999.0f), uml::SIZE_QWORD, uml::ROUND_FLOOR, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
-
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 1, f2u(1.60f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 123, f2u(123.20f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, -123, f2u(-123.50f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 123, f2u(123.50f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 999999, f2u(999999.0f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
 
 
 TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 1, d2u(1.60), uml::SIZE_DWORD, uml::ROUND_TRUNC, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
@@ -1712,12 +2005,6 @@ TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, uint32_t(-124), d2u(-123.50), 
 TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 123, d2u(123.50), uml::SIZE_DWORD, uml::ROUND_FLOOR, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
 TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 999999, d2u(999999.0), uml::SIZE_DWORD, uml::ROUND_FLOOR, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
 
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 1, d2u(1.60), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 123, d2u(123.20), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, uint32_t(-123), d2u(-123.50), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 123, d2u(123.50), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 999999, d2u(999999.0), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
-
 
 TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 1, d2u(1.60), uml::SIZE_QWORD, uml::ROUND_TRUNC, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
 TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 123, d2u(123.60), uml::SIZE_QWORD, uml::ROUND_TRUNC, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
@@ -1743,14 +2030,127 @@ TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, -124, d2u(-123.50), uml::SIZE_
 TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 123, d2u(123.50), uml::SIZE_QWORD, uml::ROUND_FLOOR, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
 TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 999999, d2u(999999.0), uml::SIZE_QWORD, uml::ROUND_FLOOR, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
 
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 1, d2u(1.60), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 123, d2u(123.20), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, -123, d2u(-123.50), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 123, d2u(123.50), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
-// TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 999999, d2u(999999.0), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+	}
+	else if (step == 67)
+	{
+	// OPINFO4(FTOINT,  "f#toint",  4|8, false, NONE, NONE, ALL,  PINFO(OUT, P3, IRM), PINFO(IN, OP, FANY), PINFO(IN, OP, SIZE), PINFO(IN, OP, ROUND))
+UML_SETFMOD(block, uml::ROUND_TRUNC);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 1, f2u(1.60f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 123, f2u(123.60f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, -123, f2u(-123.60f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 123, f2u(123.60f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 999999, f2u(999999.60f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+
+UML_SETFMOD(block, uml::ROUND_ROUND);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 2, f2u(1.60f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 123, f2u(123.20f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, -124, f2u(-123.50f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 124, f2u(123.50f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 999999, f2u(999999.0f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+
+UML_SETFMOD(block, uml::ROUND_CEIL);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 2, f2u(1.60f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 124, f2u(123.20f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, -123, f2u(-123.50f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 124, f2u(123.50f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 999999, f2u(999999.0f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+
+UML_SETFMOD(block, uml::ROUND_FLOOR);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 1, f2u(1.60f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 123, f2u(123.20f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, -124, f2u(-123.50f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 123, f2u(123.50f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 999999, f2u(999999.0f), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+
+
+UML_SETFMOD(block, uml::ROUND_TRUNC);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 1, f2u(1.60f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 123, f2u(123.60f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, -123, f2u(-123.60f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 123, f2u(123.60f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 999999, f2u(999999.60f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+
+UML_SETFMOD(block, uml::ROUND_ROUND);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 2, f2u(1.60f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 123, f2u(123.20f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, -124, f2u(-123.50f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 124, f2u(123.50f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 999999, f2u(999999.0f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+
+UML_SETFMOD(block, uml::ROUND_CEIL);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 2, f2u(1.60f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 124, f2u(123.20f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, -123, f2u(-123.50f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 124, f2u(123.50f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 999999, f2u(999999.0f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+
+UML_SETFMOD(block, uml::ROUND_FLOOR);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 1, f2u(1.60f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 123, f2u(123.20f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, -124, f2u(-123.50f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 123, f2u(123.50f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 4, 999999, f2u(999999.0f), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT);
+
+
+UML_SETFMOD(block, uml::ROUND_TRUNC);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 1, d2u(1.60), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 123, d2u(123.60), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, uint32_t(-123), d2u(-123.60), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 123, d2u(123.60), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 999999, d2u(999999.60), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+
+UML_SETFMOD(block, uml::ROUND_ROUND);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 2, d2u(1.60), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 123, d2u(123.20), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, uint32_t(-124), d2u(-123.50), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 124, d2u(123.50), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 999999, d2u(999999.0), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+
+UML_SETFMOD(block, uml::ROUND_CEIL);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 2, d2u(1.60), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 124, d2u(123.20), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, uint32_t(-123), d2u(-123.50), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 124, d2u(123.50), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 999999, d2u(999999.0), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+
+UML_SETFMOD(block, uml::ROUND_FLOOR);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 1, d2u(1.60), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 123, d2u(123.20), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, uint32_t(-124), d2u(-123.50), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 123, d2u(123.50), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 999999, d2u(999999.0), uml::SIZE_DWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+
+
+UML_SETFMOD(block, uml::ROUND_TRUNC);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 1, d2u(1.60), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 123, d2u(123.60), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, -123, d2u(-123.60), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 123, d2u(123.60), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 999999, d2u(999999.60), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+
+UML_SETFMOD(block, uml::ROUND_ROUND);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 2, d2u(1.60), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 123, d2u(123.20), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, -124, d2u(-123.50), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 124, d2u(123.50), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 999999, d2u(999999.0), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+
+UML_SETFMOD(block, uml::ROUND_CEIL);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 2, d2u(1.60), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 124, d2u(123.20), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, -123, d2u(-123.50), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 124, d2u(123.50), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 999999, d2u(999999.0), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+
+UML_SETFMOD(block, uml::ROUND_FLOOR);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 1, d2u(1.60), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 123, d2u(123.20), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, -124, d2u(-123.50), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 123, d2u(123.50), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
+TEST_ENTRY_FLOAT_4_SIZE(block, uml::OP_FTOINT, 8, 999999, d2u(999999.0), uml::SIZE_QWORD, uml::ROUND_DEFAULT, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE);
 
 	}
-	else if (step == 64)
+	else if (step == 68)
 	{
 	// OPINFO3(FFRINT,  "f#frint",  4|8, false, NONE, NONE, ALL,  PINFO(OUT, OP, FRM), PINFO(IN, P3, IANY), PINFO(IN, OP, SIZE))
 TEST_ENTRY_FLOAT_3_SIZE(block, uml::OP_FFRINT, 4, f2u(1.0f), 1, uml::SIZE_DWORD, 0, FLAGS_UNCHANGED, uml::SIZE_SHORT, 0);
@@ -1773,7 +2173,7 @@ TEST_ENTRY_FLOAT_3_SIZE(block, uml::OP_FFRINT, 8, d2u(999999), 999999, uml::SIZE
 TEST_ENTRY_FLOAT_3_SIZE(block, uml::OP_FFRINT, 8, d2u(999999), 999999, uml::SIZE_DOUBLE, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE, 0);
 
 	}
-	else if (step == 65)
+	else if (step == 69)
 	{
 	// OPINFO3(FFRFLT,  "f#frflt",  4|8, false, NONE, NONE, ALL,  PINFO(OUT, OP, FRM), PINFO(IN, P3, FANY), PINFO(IN, OP, SIZE))
 
@@ -1796,21 +2196,22 @@ TEST_ENTRY_FLOAT_3_SIZE(block, uml::OP_FFRFLT, 8, d2u(std::numeric_limits<double
 TEST_ENTRY_FLOAT_3_SIZE(block, uml::OP_FFRFLT, 8, d2u(-std::numeric_limits<double>::infinity()), f2u(-std::numeric_limits<float>::infinity()), uml::SIZE_DWORD, 0, FLAGS_UNCHANGED, uml::SIZE_DOUBLE, uml::SIZE_SHORT);
 
 	}
-	else if (step == 66)
+	else if (step == 70)
 	{
 
 TEST_MAPVAR_CONSTANT(block, uml::M2, 2345);
 
-TEST_MAPVAR_RECOVER(block, uml::M1, 1234, 0);
+TEST_MAPVAR_RECOVER(block, uml::M1, 123, 456, 789);
 
 	}
-	else if (step == 67)
+	else if (step == 71)
 	{
 
-TEST_MAPVAR_RECOVER(block, uml::M1, 1234, 1);
+TEST_MAPVAR_RECOVER(block, uml::M1, 1, 2, 3);
+TEST_MAPVAR_RECOVER(block, uml::M2, 4, 5, 6);
 
 	}
-	else if (step == 68)
+	else if (step == 72)
 	{
 		drcuml_machine_state *output = (drcuml_machine_state*)calloc(1, sizeof(drcuml_machine_state));
 
@@ -1852,7 +2253,7 @@ TEST_MAPVAR_RECOVER(block, uml::M1, 1234, 1);
 
 		UML_CALLC(block, cfunc_dump_machine_state, output);
 	}
-	else if (step == 69)
+	else if (step == 73)
 	{
 		static drcuml_machine_state input = {
 			.r = {
@@ -1894,7 +2295,7 @@ TEST_MAPVAR_RECOVER(block, uml::M1, 1234, 1);
 
 		UML_CALLC(block, cfunc_dump_machine_state, output);
 	}
-	else if (step == 70)
+	else if (step == 74)
 	{
 		// UML_MOV(block, uml::I0, 123);
 		// UML_DADD(block, uml::I0, uml::I0, 4);
@@ -1909,7 +2310,7 @@ TEST_MAPVAR_RECOVER(block, uml::M1, 1234, 1);
 
 		UML_CALLC(block, cfunc_print_val64, &m_state->testval);
 	}
-	else if (step == 71)
+	else if (step == 75)
 	{
 		static uint64_t readdata = 0x8f;
 		static uint32_t datawrite32[5] = {0};
@@ -2066,7 +2467,7 @@ TEST_MAPVAR_RECOVER(block, uml::M1, 1234, 1);
 		UML_DMOV(block, mem(&m_state->testval), uml::I0);
 		UML_CALLC(block, cfunc_print_val64, &m_state->testval);
 	}
-	else if (step == 72)
+	else if (step == 76)
 	{
 
 		static uint64_t fdata = f2u(123.4f);
@@ -2086,7 +2487,7 @@ TEST_MAPVAR_RECOVER(block, uml::M1, 1234, 1);
 		for (int i = 0; i < std::size(fdatawrite); i++)
 			UML_CALLC(block, cfunc_print_val64, &ddatawrite[i]);
 	}
-	else if (step == 73)
+	else if (step == 77)
 	{
 		m_program->write_qword(0, 0x12345678);
 		m_program->write_qword(8, 0x1234567890abcdef);
@@ -2131,7 +2532,7 @@ TEST_MAPVAR_RECOVER(block, uml::M1, 1234, 1);
 		UML_DREAD(block, mem(&m_state->testval), 8, SIZE_QWORD, SPACE_PROGRAM);
 		UML_CALLC(block, cfunc_print_val64, &m_state->testval);
 	}
-	else if (step == 74)
+	else if (step == 78)
 	{
 		m_program->write_qword(0, 0x12345678);
 		m_program->write_qword(8, 0x1234567890abcdef);
@@ -2180,7 +2581,7 @@ TEST_MAPVAR_RECOVER(block, uml::M1, 1234, 1);
 		UML_DREADM(block, mem(&m_state->testval), 8, 0xffffffffffffffff, SIZE_QWORD, SPACE_PROGRAM);
 		UML_CALLC(block, cfunc_print_val64, &m_state->testval);
 	}
-	else if (step == 75)
+	else if (step == 79)
 	{
 		auto f = f2u(123.4f);
 		auto d = d2u(123.4);
@@ -2188,7 +2589,7 @@ TEST_MAPVAR_RECOVER(block, uml::M1, 1234, 1);
 		m_program->write_qword(0, f);
 		m_program->write_qword(8, d);
 
-		printf("f: %08x\nd: %016llx\n", f, d);
+		printf("f: %08x\nd: %016llx\n", f, (unsigned long long)d);
 
 		UML_DMOV(block, mem(&m_state->testval), 0);
 		UML_DMOV(block, uml::I0, 0);
@@ -2230,7 +2631,7 @@ TEST_MAPVAR_RECOVER(block, uml::M1, 1234, 1);
 		UML_FDREAD(block, mem(&m_state->testval), 8, SPACE_PROGRAM);
 		UML_CALLC(block, cfunc_print_val64, &m_state->testval);
 	}
-	else if (step == 76)
+	else if (step == 80)
 	{
 // OPINFO3(WRITE,   "!write",   4|8, false, NONE, NONE, ALL,  PINFO(IN, 4, IANY), PINFO(IN, OP, IANY), PINFO(IN, OP, SPSIZE))
 
@@ -2263,7 +2664,7 @@ TEST_MAPVAR_RECOVER(block, uml::M1, 1234, 1);
 		UML_CALLC(block, cfunc_print_val64, &m_state->testval);
 
 	}
-	else if (step == 77)
+	else if (step == 81)
 	{
 // OPINFO4(WRITEM,  "!writem",  4|8, false, NONE, NONE, ALL,  PINFO(IN, 4, IANY), PINFO(IN, OP, IANY), PINFO(IN, OP, IANY), PINFO(IN, OP, SPSIZE))
 
@@ -2297,7 +2698,7 @@ TEST_MAPVAR_RECOVER(block, uml::M1, 1234, 1);
 		UML_DREAD(block, mem(&m_state->testval), 24, SIZE_QWORD, SPACE_PROGRAM);
 		UML_CALLC(block, cfunc_print_val64, &m_state->testval);
 	}
-	else if (step == 78)
+	else if (step == 82)
 	{
 // OPINFO3(FWRITE,  "f#write",  4|8, false, NONE, NONE, ALL,  PINFO(IN, 4, IANY), PINFO(IN, OP, FANY), PINFO(IN, OP, SPSIZE))
 
@@ -2331,7 +2732,6 @@ TEST_MAPVAR_RECOVER(block, uml::M1, 1234, 1);
 		UML_FDCOPYI(block, uml::F0, uml::I1);
 		UML_FDWRITE(block, uml::I0, uml::F0, SPACE_PROGRAM);
 
-		UML_FDCOPYI(block, uml::F0, d);
 		UML_DMOV(block, uml::I1, d);
 		UML_FDCOPYI(block, uml::F0, uml::I1);
 		UML_FDWRITE(block, 8, uml::F0, SPACE_PROGRAM);
