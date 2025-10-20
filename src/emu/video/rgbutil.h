@@ -23,6 +23,11 @@
 #define MAME_RGB_HIGH_PRECISION
 #include "rgbvmx.h"
 
+#elif defined(__ARM_NEON)
+
+#define MAME_RGB_HIGH_PRECISION
+#include "rgbneon.h"
+
 #else
 
 #include "rgbgen.h"

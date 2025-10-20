@@ -270,6 +270,7 @@ files {
 	MAME_DIR .. "src/emu/video/rgbutil.h",
 	MAME_DIR .. "src/emu/video/rgbgen.cpp",
 	MAME_DIR .. "src/emu/video/rgbgen.h",
+	MAME_DIR .. "src/emu/video/rgbneon.h",
 	MAME_DIR .. "src/emu/video/rgbsse.cpp",
 	MAME_DIR .. "src/emu/video/rgbsse.h",
 	MAME_DIR .. "src/emu/video/rgbvmx.cpp",
