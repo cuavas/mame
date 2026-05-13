@@ -35,7 +35,7 @@
 #include "drivenum.h"
 #include "fileio.h"
 #include "natkeyboard.h"
-#include "render.h"
+#include "render.ipp"
 #include "cheat.h"
 #include "rendfont.h"
 #include "rendlay.h"

@@ -19,7 +19,7 @@ device_rom_interface<AddrWidth, DataWidth, AddrShift, Endian>::device_rom_interf
 template<int AddrWidth, int DataWidth, int AddrShift, endianness_t Endian>
 void device_rom_interface<AddrWidth, DataWidth, AddrShift, Endian>::override_address_width(u8 width)
 {
-	// cach does not need level match, only specific does at this point
+	// cache does not need level match, only specific does at this point
 	//  if(emu::detail::handler_entry_dispatch_level(AddrWidth) != emu::detail::handler_entry_dispatch_level(width))
 	//      emu_fatalerror("%s: Widths %d and %d are incompatible", device().tag(), width, AddrWidth);
 

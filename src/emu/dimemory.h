@@ -19,6 +19,7 @@
 
 #include <type_traits>
 
+
 class device_memory_interface : public device_interface
 {
 	friend class device_scheduler;
@@ -109,8 +110,8 @@ private:
 	std::vector<std::unique_ptr<address_space>> m_addrspace; // reported address spaces
 };
 
+
 // iterator
 typedef device_interface_enumerator<device_memory_interface> memory_interface_enumerator;
-
 
 #endif // MAME_EMU_DIMEMORY_H

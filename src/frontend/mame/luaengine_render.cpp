@@ -14,7 +14,7 @@
 #include "mame.h"
 #include "ui/ui.h"
 
-#include "render.h"
+#include "render.ipp"
 #include "rendlay.h"
 #include "rendutil.h"
 

@@ -353,15 +353,23 @@ function qtdebuggerbuild()
 		"SingleOutputDir",
 	}
 	local version = str_to_version(_OPTIONS["gcc_version"])
-	if _OPTIONS["gcc"]~=nil and (string.find(_OPTIONS["gcc"], "clang") or string.find(_OPTIONS["gcc"], "asmjs")) then
+	if _OPTIONS["gcc"]~=nil then
 		configuration { "gmake or ninja" }
-			buildoptions {
-				"-Wno-error=inconsistent-missing-override",
-			}
-			if _OPTIONS["targetos"]=="windows" then
+			if string.find(_OPTIONS["gcc"], "clang") or string.find(_OPTIONS["gcc"], "asmjs") then
 				buildoptions {
-					"-Wno-ignored-attributes",
+					"-Wno-error=inconsistent-missing-override",
 				}
+				if _OPTIONS["targetos"]=="windows" then
+					buildoptions {
+						"-Wno-ignored-attributes",
+					}
+				end
+			else
+				if version >= 160000 then
+					buildoptions_cpp {
+						"-Wno-error=sfinae-incomplete",
+					}
+				end
 			end
 		configuration { }
 	end

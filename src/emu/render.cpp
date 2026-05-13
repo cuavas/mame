@@ -37,7 +37,7 @@
 ***************************************************************************/
 
 #include "emu.h"
-#include "render.h"
+#include "render.ipp"
 
 #include "corestr.h"
 #include "emuopts.h"

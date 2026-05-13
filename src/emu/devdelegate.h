@@ -21,14 +21,6 @@
 #include <utility>
 
 
-// older versions of libc++ are missing deduction guides that the things using this constructor require
-#if defined(_LIBCPP_VERSION) && (_LIBCPP_VERSION < 10000)
-namespace std { inline namespace __1 {
-template<class R, class... ArgTypes > function( R(*)(ArgTypes...) ) -> function<R(ArgTypes...)>;
-} }
-#endif
-
-
 namespace emu {
 
 //**************************************************************************
@@ -99,7 +91,7 @@ class device_delegate_helper
 public:
 	// accessors
 	char const *finder_tag() const { return m_tag; }
-	std::pair<device_t &, char const *> finder_target() const { return std::make_pair(m_base, m_tag); }
+	std::pair<device_t &, char const *> finder_target() const;
 
 protected:
 	// construct/assign

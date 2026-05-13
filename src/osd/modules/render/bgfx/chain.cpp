@@ -9,7 +9,7 @@
 #include "chain.h"
 
 #include "emu.h"
-#include "render.h"
+#include "render.ipp"
 #include "rendlay.h"
 #include "screen.h"
 

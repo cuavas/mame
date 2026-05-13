@@ -13,7 +13,7 @@
 #include "emuopts.h"
 #include "fileio.h"
 #include "main.h"
-#include "render.h"
+#include "render.ipp"
 #include "rendlay.h"
 #include "rendutil.h"
 #include "screen.h"
